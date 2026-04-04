@@ -1,0 +1,31 @@
+<%- include('../partials/header') %>
+
+<section class="card narrow">
+  <h1>本追加</h1>
+  <form action="/admin/books" method="POST">
+    <label>タイトル *</label>
+    <input name="title" required />
+
+    <label>著者</label>
+    <input name="author" />
+
+    <label>ISBN</label>
+    <input name="isbn" />
+
+    <label>書影URL</label>
+    <input name="coverUrl" />
+
+    <label>説明</label>
+    <textarea name="description" rows="4"></textarea>
+
+    <label>Amazon URL</label>
+    <input name="amazonUrl" />
+
+    <label>楽天 URL</label>
+    <input name="rakutenUrl" />
+
+    <button type="submit">登録する</button>
+  </form>
+</section>
+
+<%- include('../partials/footer') %>

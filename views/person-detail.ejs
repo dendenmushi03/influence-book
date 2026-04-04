@@ -1,0 +1,51 @@
+<%- include('partials/header') %>
+
+<section class="card">
+  <h1><%= person.name %></h1>
+  <p><strong>肩書き:</strong> <%= person.occupation || '未設定' %></p>
+  <p><%= person.bio || '紹介文はまだ登録されていません。' %></p>
+  <% if (person.keywords && person.keywords.length > 0) { %>
+    <div class="keywords">
+      <% person.keywords.forEach((keyword) => { %>
+        <span class="tag"><%= keyword %></span>
+      <% }) %>
+    </div>
+  <% } %>
+</section>
+
+<section>
+  <h2>影響を受けた本</h2>
+  <div class="stack">
+    <% if (influences.length === 0) { %>
+      <p>まだ本が登録されていません。</p>
+    <% } %>
+
+    <% influences.forEach((influence) => { %>
+      <% const book = influence.bookId; %>
+      <article class="card book-card">
+        <% if (book && book.coverUrl) { %>
+          <img src="<%= book.coverUrl %>" alt="<%= book.title %> の書影" class="book-cover" />
+        <% } %>
+        <div>
+          <h3><%= book ? book.title : '本情報なし' %></h3>
+          <p><strong>著者:</strong> <%= book && book.author ? book.author : '未設定' %></p>
+          <p><strong>影響:</strong> <%= influence.impactSummary || '未設定' %></p>
+          <p><strong>出典:</strong> <%= influence.sourceTitle || '未設定' %></p>
+          <% if (influence.sourceUrl) { %>
+            <p><a href="<%= influence.sourceUrl %>" target="_blank" rel="noopener noreferrer">出典リンク</a></p>
+          <% } %>
+          <div class="links">
+            <% if (book && book.amazonUrl) { %>
+              <a href="<%= book.amazonUrl %>" target="_blank" rel="noopener noreferrer">Amazon</a>
+            <% } %>
+            <% if (book && book.rakutenUrl) { %>
+              <a href="<%= book.rakutenUrl %>" target="_blank" rel="noopener noreferrer">楽天</a>
+            <% } %>
+          </div>
+        </div>
+      </article>
+    <% }) %>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

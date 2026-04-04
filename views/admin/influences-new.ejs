@@ -1,0 +1,41 @@
+<%- include('../partials/header') %>
+
+<section class="card narrow">
+  <h1>影響関係追加</h1>
+  <form action="/admin/influences" method="POST">
+    <label>人物 *</label>
+    <select name="personId" required>
+      <option value="">選択してください</option>
+      <% people.forEach((person) => { %>
+        <option value="<%= person._id %>"><%= person.name %></option>
+      <% }) %>
+    </select>
+
+    <label>本 *</label>
+    <select name="bookId" required>
+      <option value="">選択してください</option>
+      <% books.forEach((book) => { %>
+        <option value="<%= book._id %>"><%= book.title %></option>
+      <% }) %>
+    </select>
+
+    <label>影響の要約</label>
+    <textarea name="impactSummary" rows="3"></textarea>
+
+    <label>出典タイトル</label>
+    <input name="sourceTitle" />
+
+    <label>出典URL</label>
+    <input name="sourceUrl" />
+
+    <label>出典タイプ</label>
+    <input name="sourceType" placeholder="interview / article" />
+
+    <label>表示順</label>
+    <input type="number" name="featuredOrder" value="0" />
+
+    <button type="submit">登録する</button>
+  </form>
+</section>
+
+<%- include('../partials/footer') %>
