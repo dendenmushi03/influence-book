@@ -1,0 +1,36 @@
+<%- include('../partials/header') %>
+
+<section class="card narrow">
+  <h1>人物追加</h1>
+  <form action="/admin/people" method="POST">
+    <label>名前 *</label>
+    <input name="name" required />
+
+    <label>slug *（URL用）</label>
+    <input name="slug" required />
+
+    <label>肩書き</label>
+    <input name="occupation" />
+
+    <label>紹介文（短文）</label>
+    <textarea name="intro" rows="2"></textarea>
+
+    <label>プロフィール</label>
+    <textarea name="bio" rows="4"></textarea>
+
+    <label>画像URL</label>
+    <input name="imageUrl" />
+
+    <label>キーワード（カンマ区切り）</label>
+    <input name="keywords" placeholder="経営, テクノロジー" />
+
+    <label>
+      <input type="checkbox" name="featured" />
+      トップページに表示
+    </label>
+
+    <button type="submit">登録する</button>
+  </form>
+</section>
+
+<%- include('../partials/footer') %>

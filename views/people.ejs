@@ -1,0 +1,21 @@
+<%- include('partials/header') %>
+
+<section>
+  <h1>人物一覧</h1>
+  <div class="grid">
+    <% if (people.length === 0) { %>
+      <p>人物データがありません。</p>
+    <% } %>
+
+    <% people.forEach((person) => { %>
+      <article class="card">
+        <h2><%= person.name %></h2>
+        <p><strong>肩書き:</strong> <%= person.occupation || '未設定' %></p>
+        <p><%= person.intro || '' %></p>
+        <a href="/people/<%= person.slug %>">詳細を見る</a>
+      </article>
+    <% }) %>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
