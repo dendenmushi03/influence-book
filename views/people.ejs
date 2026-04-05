@@ -1,18 +1,22 @@
 <%- include('partials/header') %>
 
-<section>
-  <h1>人物一覧</h1>
+<section class="page-section">
+  <header class="section-head">
+    <h1>人物一覧</h1>
+    <p class="section-description">各人物の思想や価値観に影響を与えた本を、一覧で確認できます。</p>
+  </header>
+
   <div class="grid">
     <% if (people.length === 0) { %>
       <p>人物データがありません。</p>
     <% } %>
 
     <% people.forEach((person) => { %>
-      <article class="card">
-        <h2><%= person.name %></h2>
-        <p><strong>肩書き:</strong> <%= person.occupation || '未設定' %></p>
-        <p><%= person.intro || '' %></p>
-        <a href="/people/<%= person.slug %>">詳細を見る</a>
+      <article class="card person-card">
+        <h2 class="person-card-title"><%= person.name %></h2>
+        <p class="person-role"><%= person.occupation || '肩書き未設定' %></p>
+        <p class="person-intro"><%= person.intro || '' %></p>
+        <a class="person-link" href="/people/<%= person.slug %>">詳細を見る</a>
       </article>
     <% }) %>
   </div>
