@@ -60,6 +60,7 @@ a:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
   gap: 24px;
   padding: 22px 0;
 }
@@ -102,6 +103,17 @@ nav a {
 nav a:hover {
   color: var(--text);
   background: #f0ece3;
+}
+
+.header-search {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-left: auto;
+}
+
+.header-search input {
+  width: min(320px, 48vw);
 }
 
 main {
@@ -190,6 +202,18 @@ p {
   max-width: 56ch;
 }
 
+.hero-search {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.hero-search input {
+  width: min(460px, 100%);
+}
+
 .button,
 button {
   display: inline-flex;
@@ -275,6 +299,56 @@ button:hover {
   font-size: 0.92rem;
 }
 
+.person-category {
+  color: #444952;
+  font-size: 0.9rem;
+}
+
+.filter-card {
+  margin-bottom: 24px;
+}
+
+.filter-form {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.filter-form div {
+  min-width: 220px;
+}
+
+.tag-filter-list {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 14px;
+}
+
+.tag-filter-label {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.tag-active {
+  background: #181b21;
+  color: #fff;
+  border-color: #181b21;
+}
+
+.active-filters {
+  margin-top: 12px;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+.error-message {
+  color: #b43b32;
+  margin-bottom: 8px;
+}
+
 .book-card,
 .list-card {
   display: grid;
@@ -285,6 +359,12 @@ button:hover {
 
 .book-card {
   grid-template-columns: auto minmax(0, 1fr);
+}
+
+.book-list-card {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
 }
 
 .book-card-content {
@@ -456,6 +536,15 @@ select {
   nav {
     flex-wrap: wrap;
     gap: 8px;
+  }
+
+  .header-search {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .header-search input {
+    width: 100%;
   }
 
   .hero {

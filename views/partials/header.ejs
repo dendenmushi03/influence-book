@@ -24,8 +24,13 @@
         <a href="/" class="logo">Influence Book</a>
         <nav>
           <a href="/people">人物一覧</a>
+          <a href="/books">本一覧</a>
           <a href="/admin">管理画面</a>
         </nav>
+        <form class="header-search" action="/search" method="GET">
+          <input type="search" name="q" placeholder="人物名・本タイトルで検索" aria-label="人物名・本タイトルで検索" />
+          <button type="submit">検索</button>
+        </form>
       </div>
     </header>
     <main class="container">

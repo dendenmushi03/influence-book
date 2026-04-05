@@ -2,15 +2,18 @@
 
 <section class="card narrow">
   <h1>管理ログイン</h1>
-  <p>この画面は仮実装です（認証機能なし）。</p>
-  <form>
+  <p class="section-description">管理画面はログイン後に利用できます。</p>
+  <% if (errorMessage) { %>
+    <p class="error-message"><%= errorMessage %></p>
+  <% } %>
+  <form action="/admin/login" method="POST">
     <label>メールアドレス</label>
-    <input type="email" placeholder="admin@example.com" />
+    <input type="email" name="email" placeholder="admin@example.com" required />
 
     <label>パスワード</label>
-    <input type="password" placeholder="********" />
+    <input type="password" name="password" placeholder="********" required />
 
-    <button type="button">ログイン（ダミー）</button>
+    <button type="submit">ログイン</button>
   </form>
 </section>
 

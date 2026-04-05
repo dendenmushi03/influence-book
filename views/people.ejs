@@ -6,6 +6,40 @@
     <p class="section-description">各人物の思想や価値観に影響を与えた本を、一覧で確認できます。</p>
   </header>
 
+  <article class="card filter-card">
+    <form class="filter-form" action="/people" method="GET">
+      <div>
+        <label for="category">カテゴリ</label>
+        <select id="category" name="category">
+          <option value="">すべて</option>
+          <% categories.forEach((category) => { %>
+            <option value="<%= category %>" <%= filters.category === category ? 'selected' : '' %>><%= category %></option>
+          <% }) %>
+        </select>
+      </div>
+      <button type="submit">絞り込み</button>
+      <% if (filters.category || filters.tag) { %>
+        <a class="button secondary" href="/people">フィルタ解除</a>
+      <% } %>
+    </form>
+
+    <div class="tag-filter-list">
+      <span class="tag-filter-label">タグ:</span>
+      <% tags.forEach((tag) => { %>
+        <a class="tag <%= filters.tag === tag ? 'tag-active' : '' %>" href="/people?<%= filters.category ? `category=${encodeURIComponent(filters.category)}&` : '' %>tag=<%= encodeURIComponent(tag) %>"><%= tag %></a>
+      <% }) %>
+    </div>
+
+    <% if (filters.category || filters.tag) { %>
+      <p class="active-filters">
+        適用中:
+        <%= filters.category ? `カテゴリ: ${filters.category}` : '' %>
+        <%= filters.category && filters.tag ? ' / ' : '' %>
+        <%= filters.tag ? `タグ: ${filters.tag}` : '' %>
+      </p>
+    <% } %>
+  </article>
+
   <div class="grid">
     <% if (people.length === 0) { %>
       <p>人物データがありません。</p>
@@ -16,6 +50,14 @@
         <h2 class="person-card-title"><%= person.name %></h2>
         <p class="person-role"><%= person.occupation || '肩書き未設定' %></p>
         <p class="person-intro"><%= person.intro || '' %></p>
+        <p class="person-category">カテゴリ: <%= person.category || '未設定' %></p>
+        <% if (person.tags && person.tags.length > 0) { %>
+          <div class="keywords">
+            <% person.tags.forEach((tag) => { %>
+              <span class="tag"><%= tag %></span>
+            <% }) %>
+          </div>
+        <% } %>
         <a class="person-link" href="/people/<%= person.slug %>">詳細を見る</a>
       </article>
     <% }) %>

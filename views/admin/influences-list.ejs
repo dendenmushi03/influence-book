@@ -21,6 +21,12 @@
       </div>
       <div>
         <p><strong>影響要約:</strong> <%= influence.impactSummary || '未設定' %></p>
+        <div class="admin-link-group">
+          <a href="/admin/influences/<%= influence._id %>/edit">編集する</a>
+          <form action="/admin/influences/<%= influence._id %>/delete" method="POST" onsubmit="return confirm('この影響関係を削除しますか？');">
+            <button class="button secondary" type="submit">削除</button>
+          </form>
+        </div>
       </div>
     </article>
   <% }) %>

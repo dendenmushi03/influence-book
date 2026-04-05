@@ -1,0 +1,71 @@
+<%- include('partials/header') %>
+
+<section class="card person-header-card page-section detail-hero">
+  <div class="book-card">
+    <% if (book.coverUrl) { %>
+      <img src="<%= book.coverUrl %>" alt="<%= book.title %> の書影" class="book-cover" />
+    <% } else { %>
+      <div class="book-cover book-cover-placeholder" aria-hidden="true"><span>No Cover</span></div>
+    <% } %>
+
+    <div>
+      <h1><%= book.title %></h1>
+      <p class="book-author"><strong>著者:</strong> <%= book.author || '未設定' %></p>
+      <p><%= book.description || '説明はまだ登録されていません。' %></p>
+      <div class="links purchase-links">
+        <% if (book.amazonUrl) { %>
+          <a class="button-link" href="<%= book.amazonUrl %>" target="_blank" rel="noopener noreferrer">Amazonで見る</a>
+        <% } %>
+        <% if (book.rakutenUrl) { %>
+          <a class="button-link" href="<%= book.rakutenUrl %>" target="_blank" rel="noopener noreferrer">楽天で見る</a>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="page-section">
+  <header class="section-head">
+    <h2>この本に影響を受けた人物</h2>
+  </header>
+
+  <div class="grid">
+    <% if (influencedPeople.length === 0) { %>
+      <p>この本に紐づく人物はまだ登録されていません。</p>
+    <% } %>
+
+    <% influencedPeople.forEach((person) => { %>
+      <article class="card person-card">
+        <h3 class="person-card-title"><%= person.name %></h3>
+        <p class="person-role"><%= person.occupation || '肩書き未設定' %></p>
+        <p class="person-intro"><%= person.intro || '' %></p>
+        <a class="person-link" href="/people/<%= person.slug %>">人物詳細へ</a>
+      </article>
+    <% }) %>
+  </div>
+</section>
+
+<section class="page-section">
+  <header class="section-head">
+    <h2>関連人物</h2>
+    <p class="section-description">タグ・カテゴリ・関連情報をもとに表示しています。</p>
+  </header>
+
+  <div class="grid">
+    <% if (relatedPeople.length === 0) { %>
+      <p>関連人物はまだ見つかりません。</p>
+    <% } %>
+
+    <% relatedPeople.forEach((person) => { %>
+      <article class="card person-card">
+        <h3 class="person-card-title"><%= person.name %></h3>
+        <p class="person-role"><%= person.occupation || '肩書き未設定' %></p>
+        <p class="person-intro"><%= person.intro || '' %></p>
+        <p class="person-category">カテゴリ: <%= person.category || '未設定' %></p>
+        <a class="person-link" href="/people/<%= person.slug %>">人物詳細へ</a>
+      </article>
+    <% }) %>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
