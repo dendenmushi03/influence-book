@@ -307,6 +307,19 @@ button:hover {
   border: 1px solid var(--border);
 }
 
+.book-cover-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(155deg, #f2eee6 0%, #eae3d7 100%);
+  color: #5f646d;
+  font-family: 'Manrope', 'Noto Sans JP', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .links {
   display: flex;
   gap: 10px;

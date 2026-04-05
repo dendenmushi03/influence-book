@@ -40,6 +40,10 @@
       <article class="card book-card influence-card">
         <% if (book && book.coverUrl) { %>
           <img src="<%= book.coverUrl %>" alt="<%= book.title %> の書影" class="book-cover" />
+        <% } else { %>
+          <div class="book-cover book-cover-placeholder" aria-hidden="true">
+            <span>No Cover</span>
+          </div>
         <% } %>
 
         <div class="book-card-content">

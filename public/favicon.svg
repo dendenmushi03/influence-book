@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Influence Book icon">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a1d23" />
+      <stop offset="100%" stop-color="#2b303a" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#bg)" />
+  <rect x="14" y="15" width="28" height="34" rx="5" fill="#f7f5f1" opacity="0.95" />
+  <path d="M24 23h11M24 29h11M24 35h8" stroke="#1f2430" stroke-width="2.5" stroke-linecap="round" />
+  <circle cx="46" cy="42" r="6" fill="#f0e8d7" />
+</svg>
