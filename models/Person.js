@@ -9,6 +9,7 @@ const personSchema = new mongoose.Schema(
     imageUrl: { type: String },
     keywords: [{ type: String }],
     category: { type: String },
+    popularity: { type: Number, default: 0 },
     tags: [{ type: String }],
     intro: { type: String },
     featured: { type: Boolean, default: false }
