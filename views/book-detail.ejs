@@ -37,6 +37,15 @@
     <% influencedPeople.forEach((person) => { %>
       <% const displayName = person.displayNameJa || person.name; %>
       <article class="card person-card">
+        <div class="person-visual-wrap">
+          <% if (person.imageUrl) { %>
+            <img src="<%= person.imageUrl %>" alt="<%= displayName %> の写真" class="person-visual" loading="lazy" />
+          <% } else { %>
+            <div class="person-visual person-visual-placeholder" aria-hidden="true">
+              <span><%= displayName.slice(0, 1) %></span>
+            </div>
+          <% } %>
+        </div>
         <h3 class="person-card-title"><%= displayName %></h3>
         <p class="person-role"><%= person.occupation || '肩書き未設定' %></p>
         <p class="person-intro"><%= person.intro || '' %></p>
@@ -60,6 +69,15 @@
     <% relatedPeople.forEach((person) => { %>
       <% const displayName = person.displayNameJa || person.name; %>
       <article class="card person-card">
+        <div class="person-visual-wrap">
+          <% if (person.imageUrl) { %>
+            <img src="<%= person.imageUrl %>" alt="<%= displayName %> の写真" class="person-visual" loading="lazy" />
+          <% } else { %>
+            <div class="person-visual person-visual-placeholder" aria-hidden="true">
+              <span><%= displayName.slice(0, 1) %></span>
+            </div>
+          <% } %>
+        </div>
         <h3 class="person-card-title"><%= displayName %></h3>
         <p class="person-role"><%= person.occupation || '肩書き未設定' %></p>
         <p class="person-intro"><%= person.intro || '' %></p>
