@@ -2,8 +2,19 @@
 
 <section class="card person-header-card page-section detail-hero">
   <% const displayName = person.displayNameJa || person.name; %>
-  <h1><%= displayName %></h1>
-  <p class="section-description"><%= person.occupation || '肩書き未設定' %></p>
+  <div class="person-detail-header">
+    <% if (person.imageUrl) { %>
+      <img src="<%= person.imageUrl %>" alt="<%= displayName %> の写真" class="person-detail-image" />
+    <% } else { %>
+      <div class="person-detail-image person-detail-image-placeholder" aria-hidden="true">
+        <span><%= displayName.slice(0, 1).toUpperCase() %></span>
+      </div>
+    <% } %>
+    <div class="person-detail-headings">
+      <h1><%= displayName %></h1>
+      <p class="section-description"><%= person.occupation || '肩書き未設定' %></p>
+    </div>
+  </div>
   <p class="person-category">カテゴリ: <%= person.category || '未設定' %></p>
 
   <% if (person.tags && person.tags.length > 0) { %>
