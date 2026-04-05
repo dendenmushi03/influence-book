@@ -6,7 +6,7 @@
     <p class="section-description">人物と本の両方を同時に検索できます。</p>
   </header>
 
-  <article class="card">
+  <article class="card filter-card">
     <form class="filter-form" action="/search" method="GET">
       <input type="search" name="q" value="<%= keyword %>" placeholder="人物名・肩書き・本タイトルなど" aria-label="検索キーワード" />
       <button type="submit">検索する</button>
@@ -17,16 +17,16 @@
   </article>
 </section>
 
-<section class="page-section">
+<section class="page-section section-separator">
   <header class="section-head">
     <h2>人物の検索結果</h2>
   </header>
 
   <div class="grid">
     <% if (!keyword) { %>
-      <p>キーワードを入力して検索してください。</p>
+      <p class="empty-state">キーワードを入力して検索してください。</p>
     <% } else if (peopleResults.length === 0) { %>
-      <p>該当する人物は見つかりませんでした。</p>
+      <p class="empty-state">該当する人物は見つかりませんでした。</p>
     <% } %>
 
     <% peopleResults.forEach((person) => { %>
@@ -48,16 +48,16 @@
   </div>
 </section>
 
-<section class="page-section">
+<section class="page-section section-separator">
   <header class="section-head">
     <h2>本の検索結果</h2>
   </header>
 
   <div class="stack">
     <% if (!keyword) { %>
-      <p>キーワードを入力して検索してください。</p>
+      <p class="empty-state">キーワードを入力して検索してください。</p>
     <% } else if (bookResults.length === 0) { %>
-      <p>該当する本は見つかりませんでした。</p>
+      <p class="empty-state">該当する本は見つかりませんでした。</p>
     <% } %>
 
     <% bookResults.forEach((book) => { %>
