@@ -792,6 +792,71 @@ button.quiet {
   margin-top: 10px;
 }
 
+.person-core-message {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-left: 4px solid #3f557f;
+  background: #f5f7fb;
+  color: #202633;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+.thought-traits-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 14px 0 0;
+  display: grid;
+  gap: 8px;
+}
+
+.thought-traits-list li {
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-soft);
+  font-weight: 600;
+  color: #293041;
+}
+
+.career-timeline {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 2px 0 0 18px;
+  border-left: 2px solid #d8cfbf;
+  display: grid;
+  gap: 12px;
+}
+
+.career-timeline li {
+  position: relative;
+}
+
+.career-timeline li::before {
+  content: '';
+  position: absolute;
+  left: -24px;
+  top: 0.62em;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #68779a;
+  border: 2px solid #f4efe6;
+}
+
+.featured-order {
+  display: inline-flex;
+  width: fit-content;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid #ddd4c6;
+  background: #f6f2eb;
+  color: #555e6d;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+
 .influence-section {
   margin-top: 10px;
 }

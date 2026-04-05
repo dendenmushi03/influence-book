@@ -17,6 +17,10 @@
   </div>
   <p class="person-category">カテゴリ: <%= person.category || '未設定' %></p>
 
+  <% if (person.coreMessage) { %>
+    <p class="person-core-message">"<%= person.coreMessage %>"</p>
+  <% } %>
+
   <% if (person.tags && person.tags.length > 0) { %>
     <div class="keywords person-tags">
       <% person.tags.forEach((tag) => { %>
@@ -26,18 +30,47 @@
   <% } %>
 
   <div class="person-detail-meta">
+    <div class="card-subsection detail-block thought-traits-block">
+      <h2>思考の特徴</h2>
+      <p class="section-description">意思決定の軸として繰り返し現れる、思考の柱を整理しています。</p>
+      <% if (person.thoughtTraits && person.thoughtTraits.length > 0) { %>
+        <ul class="thought-traits-list">
+          <% person.thoughtTraits.forEach((trait) => { %>
+            <li><%= trait %></li>
+          <% }) %>
+        </ul>
+      <% } else { %>
+        <p class="text-muted">思考の特徴はまだ登録されていません。</p>
+      <% } %>
+    </div>
+
     <div class="card-subsection detail-block text-block summary-block">
-      <h2>思考の要約</h2>
+      <h2>思考と意思決定の要約</h2>
+      <p class="section-description">この人物が何を優先し、どのように判断するかを先に把握できます。</p>
       <p class="person-longtext"><%= person.summary || '思考の要約はまだ登録されていません。' %></p>
     </div>
 
-    <div class="card-subsection detail-block text-block">
-      <h2>経歴</h2>
-      <p class="person-longtext"><%= person.career || '経歴はまだ登録されていません。' %></p>
+    <div class="card-subsection detail-block text-block career-block">
+      <h2>経歴（タイムライン）</h2>
+      <p class="section-description">主要な転機を時系列で確認できます。</p>
+      <% const careerLines = person.career ? person.career.split('\n').map((line) => line.trim()).filter(Boolean) : []; %>
+      <% const shouldShowTimeline = careerLines.length > 1; %>
+      <% if (shouldShowTimeline) { %>
+        <ul class="career-timeline">
+          <% careerLines.forEach((line) => { %>
+            <li><span><%= line %></span></li>
+          <% }) %>
+        </ul>
+      <% } else if (careerLines.length === 1) { %>
+        <p class="person-longtext"><%= careerLines[0] %></p>
+      <% } else { %>
+        <p class="person-longtext">経歴はまだ登録されていません。</p>
+      <% } %>
     </div>
 
     <div class="card-subsection detail-block text-block">
-      <h2>プロフィール</h2>
+      <h2>人物理解の補足</h2>
+      <p class="section-description">経歴だけでは見えない背景や人物像を補うセクションです。</p>
       <p class="person-longtext"><%= person.bio || '紹介文はまだ登録されていません。' %></p>
     </div>
 
@@ -59,7 +92,7 @@
 <section class="page-section influence-section section-separator">
   <header class="section-head">
     <h2>影響を受けた本</h2>
-    <p class="section-description">思考の背景となった書籍と、どの点に強く影響を受けたかをまとめています。</p>
+    <p class="section-description">単なる書籍要約ではなく、<%= displayName %> のどの思考軸につながるかが分かるように整理しています。</p>
   </header>
   <div class="stack">
     <% if (influenceBooks.length === 0) { %>
@@ -82,6 +115,9 @@
         <div class="book-card-content">
           <header class="book-meta book-meta-with-label">
             <div class="book-section-label">Influence</div>
+            <% if (influence.featuredOrder !== undefined && influence.featuredOrder !== null) { %>
+              <div class="featured-order">重要度 <%= influence.featuredOrder %></div>
+            <% } %>
             <h3><%= book ? book.title : '本情報なし' %></h3>
             <p class="book-author"><strong>著者:</strong> <%= book && book.author ? book.author : '未設定' %></p>
             <% if (book && book.slug) { %>
@@ -90,7 +126,7 @@
           </header>
 
           <div class="card-subsection detail-block">
-            <h4>影響の要約</h4>
+            <h4><%= displayName %>との接点・重要性</h4>
             <p class="person-longtext"><%= influence.impactSummary || '未設定' %></p>
           </div>
 
@@ -119,7 +155,7 @@
 <section class="page-section influence-section section-separator">
   <header class="section-head">
     <h2>この人を知る本</h2>
-    <p class="section-description">思想だけでなく、生い立ちや意思決定の流れまで立体的に理解するための書籍です。</p>
+    <p class="section-description">影響源の本とは別に、<%= displayName %> という人物そのものを理解するための書籍をまとめています。</p>
   </header>
   <div class="stack">
     <% if (aboutBooks.length === 0) { %>
@@ -150,7 +186,7 @@
           </header>
 
           <div class="card-subsection detail-block">
-            <h4>紹介の要約</h4>
+            <h4>人物理解のポイント</h4>
             <p class="person-longtext"><%= influence.impactSummary || '未設定' %></p>
           </div>
 
@@ -178,8 +214,8 @@
 
 <section class="page-section section-separator">
   <header class="section-head">
-    <h2>関連人物</h2>
-    <p class="section-description">思考やカテゴリ、関連書籍の近い人物を表示しています。</p>
+    <h2>次に読む人物</h2>
+    <p class="section-description">思考軸やテーマが近い人物です。続けて読むと比較しながら理解を深められます。</p>
   </header>
 
   <% if (relatedPeople.length === 0) { %>

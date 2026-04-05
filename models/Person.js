@@ -6,6 +6,7 @@ const personSchema = new mongoose.Schema(
     displayNameJa: { type: String },
     slug: { type: String, required: true, unique: true },
     summary: { type: String },
+    coreMessage: { type: String },
     career: { type: String },
     bio: { type: String },
     occupation: { type: String },
@@ -14,6 +15,7 @@ const personSchema = new mongoose.Schema(
     category: { type: String },
     popularity: { type: Number, default: 0 },
     tags: [{ type: String }],
+    thoughtTraits: [{ type: String }],
     intro: { type: String },
     featured: { type: Boolean, default: false }
   },
