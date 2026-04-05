@@ -6,6 +6,9 @@
     <label>名前 *</label>
     <input name="name" required value="<%= person.name %>" />
 
+    <label>表示名（日本語表記）</label>
+    <input name="displayNameJa" value="<%= person.displayNameJa || '' %>" />
+
     <label>slug *（URL用）</label>
     <input name="slug" required value="<%= person.slug %>" />
 
@@ -23,6 +26,12 @@
 
     <label>紹介文（短文）</label>
     <textarea name="intro" rows="2"><%= person.intro || '' %></textarea>
+
+    <label>思考の要約（3〜5行）</label>
+    <textarea name="summary" rows="4"><%= person.summary || '' %></textarea>
+
+    <label>経歴</label>
+    <textarea name="career" rows="5"><%= person.career || '' %></textarea>
 
     <label>プロフィール</label>
     <textarea name="bio" rows="4"><%= person.bio || '' %></textarea>

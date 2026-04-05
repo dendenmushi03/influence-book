@@ -1,7 +1,8 @@
 <%- include('partials/header') %>
 
 <section class="card person-header-card page-section detail-hero">
-  <h1><%= person.name %></h1>
+  <% const displayName = person.displayNameJa || person.name; %>
+  <h1><%= displayName %></h1>
   <p class="section-description"><%= person.occupation || '肩書き未設定' %></p>
   <p class="person-category">カテゴリ: <%= person.category || '未設定' %></p>
 
@@ -14,6 +15,16 @@
   <% } %>
 
   <div class="person-detail-meta">
+    <div class="card-subsection detail-block">
+      <h2>思考の要約</h2>
+      <p><%= person.summary || '思考の要約はまだ登録されていません。' %></p>
+    </div>
+
+    <div class="card-subsection detail-block">
+      <h2>経歴</h2>
+      <p><%= person.career || '経歴はまだ登録されていません。' %></p>
+    </div>
+
     <div class="card-subsection detail-block">
       <h2>プロフィール</h2>
       <p><%= person.bio || '紹介文はまだ登録されていません。' %></p>

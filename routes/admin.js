@@ -158,7 +158,10 @@ router.post('/people', async (req, res) => {
 
     await Person.create({
       name: req.body.name,
+      displayNameJa: req.body.displayNameJa,
       slug: req.body.slug,
+      summary: req.body.summary,
+      career: req.body.career,
       bio: req.body.bio,
       occupation: req.body.occupation,
       imageUrl: req.body.imageUrl,
@@ -197,7 +200,10 @@ router.post('/people/:id', async (req, res) => {
 
     await Person.findByIdAndUpdate(req.params.id, {
       name: req.body.name,
+      displayNameJa: req.body.displayNameJa,
       slug: req.body.slug,
+      summary: req.body.summary,
+      career: req.body.career,
       bio: req.body.bio,
       occupation: req.body.occupation,
       imageUrl: req.body.imageUrl,
