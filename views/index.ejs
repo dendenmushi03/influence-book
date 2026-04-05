@@ -55,17 +55,18 @@
     <% } %>
 
     <% featuredPeople.forEach((person) => { %>
+      <% const displayName = person.displayNameJa || person.name; %>
       <article class="card person-card">
         <div class="person-visual-wrap">
           <% if (person.imageUrl) { %>
-            <img src="<%= person.imageUrl %>" alt="<%= person.name %> の写真" class="person-visual" loading="lazy" />
+            <img src="<%= person.imageUrl %>" alt="<%= displayName %> の写真" class="person-visual" loading="lazy" />
           <% } else { %>
             <div class="person-visual person-visual-placeholder" aria-hidden="true">
-              <span><%= person.name.slice(0, 1).toUpperCase() %></span>
+              <span><%= displayName.slice(0, 1).toUpperCase() %></span>
             </div>
           <% } %>
         </div>
-        <h3 class="person-card-title"><%= person.name %></h3>
+        <h3 class="person-card-title"><%= displayName %></h3>
         <p class="person-role"><%= person.occupation || '肩書き未設定' %></p>
         <p class="person-intro"><%= person.intro || '' %></p>
         <a class="person-link" href="/people/<%= person.slug %>">詳細を見る</a>

@@ -159,8 +159,11 @@ router.get('/search', async (req, res) => {
       Person.find({
         $or: [
           { name: regex },
+          { displayNameJa: regex },
           { occupation: regex },
           { intro: regex },
+          { summary: regex },
+          { career: regex },
           { bio: regex },
           { category: regex },
           { tags: regex }
