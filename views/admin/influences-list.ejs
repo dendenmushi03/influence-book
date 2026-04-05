@@ -1,0 +1,29 @@
+<%- include('../partials/header') %>
+
+<section class="page-section">
+  <h1>影響関係一覧（管理）</h1>
+  <p class="section-description">人物名・本タイトル・表示順を確認できます。</p>
+</section>
+
+<section class="stack">
+  <% if (influences.length === 0) { %>
+    <article class="card">
+      <p>影響関係データがありません。</p>
+    </article>
+  <% } %>
+
+  <% influences.forEach((influence) => { %>
+    <article class="card list-card">
+      <div>
+        <h2><%= influence.personId ? influence.personId.name : '人物不明' %></h2>
+        <p><strong>本:</strong> <%= influence.bookId ? influence.bookId.title : '本情報なし' %></p>
+        <p><strong>featuredOrder:</strong> <%= influence.featuredOrder %></p>
+      </div>
+      <div>
+        <p><strong>影響要約:</strong> <%= influence.impactSummary || '未設定' %></p>
+      </div>
+    </article>
+  <% }) %>
+</section>
+
+<%- include('../partials/footer') %>

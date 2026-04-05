@@ -1,0 +1,27 @@
+<%- include('../partials/header') %>
+
+<section class="page-section">
+  <h1>人物一覧（管理）</h1>
+  <p class="section-description">登録済みの人物データです。</p>
+</section>
+
+<section class="stack">
+  <% if (people.length === 0) { %>
+    <article class="card">
+      <p>人物データがありません。</p>
+    </article>
+  <% } %>
+
+  <% people.forEach((person) => { %>
+    <article class="card list-card">
+      <div>
+        <h2><%= person.name %></h2>
+        <p><strong>スラッグ:</strong> <%= person.slug %></p>
+        <p><strong>肩書き:</strong> <%= person.occupation || '未設定' %></p>
+      </div>
+      <a href="/people/<%= person.slug %>">公開ページを見る</a>
+    </article>
+  <% }) %>
+</section>
+
+<%- include('../partials/footer') %>
