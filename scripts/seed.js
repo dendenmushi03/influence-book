@@ -32,10 +32,15 @@ const personSeedData = [
     occupation: 'Founder, Amazon',
     category: '起業家',
     popularity: 100,
-    tags: ['経営', '長期思考', 'EC'],
-    intro: 'Amazon創業者。長期視点の経営で知られる。',
-    bio: 'AmazonとBlue Originを率いた起業家。',
-    keywords: ['EC', '長期思考', '経営'],
+    tags: ['経営', '長期思考', '顧客中心', 'EC', 'テクノロジー'],
+    intro: 'Amazon創業者。長期視点と顧客起点の経営で知られる。',
+    summary:
+      'ジェフ・ベゾスは、短期的な収益よりも長期的な成長と顧客価値を優先する思考で知られる経営者です。既存産業をインターネットで再設計し、書店から始まったAmazonを巨大なテクノロジー企業へ育てました。彼の特徴は、顧客から逆算して考える姿勢、仕組み化への執着、そして小さな実験を積み重ねる文化づくりにあります。事業を単なる小売で終わらせず、物流、クラウド、デバイスへと広げた点にも、その長期思考が表れています。',
+    career:
+      'プリンストン大学を卒業後、ウォール街の金融業界でキャリアを積み、ヘッジファンド D. E. Shaw でも勤務しました。その後、インターネット利用者数の急拡大に着目し、安定したキャリアを離れて1994年にAmazonを創業しました。当初はオンライン書店としてスタートしましたが、そこから総合EC、物流網、Kindle、AWSなどへ事業を拡大。「Day 1」の思想を掲げながら、長期視点で企業を成長させた代表的な起業家の一人です。',
+    bio:
+      'Amazon創業者であり、Blue Originの創業者としても知られる起業家。顧客中心主義、長期思考、仕組み化、実験文化といったキーワードで語られることが多く、現代の経営者の中でも特に再現性のある思考法を持つ人物として注目されている。',
+    keywords: ['長期思考', '顧客起点', '仕組み化', '破壊的イノベーション', '実験文化'],
     featured: true
   },
   {
@@ -71,6 +76,22 @@ const bookSeedData = [
     rakutenUrl: 'https://books.rakuten.co.jp/'
   },
   {
+    title: 'Sam Walton: Made in America',
+    slug: 'sam-walton-made-in-america',
+    author: 'Sam Walton',
+    description: '顧客志向とオペレーション重視の経営観を学べる一冊。',
+    amazonUrl: 'https://www.amazon.com/',
+    rakutenUrl: 'https://books.rakuten.co.jp/'
+  },
+  {
+    title: 'The Remains of the Day',
+    slug: 'the-remains-of-the-day',
+    author: 'Kazuo Ishiguro',
+    description: '責任感・献身・選択の重みを描く小説。',
+    amazonUrl: 'https://www.amazon.com/',
+    rakutenUrl: 'https://books.rakuten.co.jp/'
+  },
+  {
     title: '人を動かす',
     slug: 'hito-wo-ugokasu',
     author: 'デール・カーネギー',
@@ -87,10 +108,18 @@ const bookSeedData = [
     rakutenUrl: 'https://books.rakuten.co.jp/'
   },
   {
-    title: 'ジェフ・ベゾスの長期思考',
-    slug: 'about-jeff-bezos-dummy',
-    author: 'ダミー著者B',
-    description: 'Jeff Bezos の経営観を深掘りするためのダミー書籍。',
+    title: 'The Everything Store: Jeff Bezos and the Age of Amazon',
+    slug: 'the-everything-store',
+    author: 'Brad Stone',
+    description: 'Amazon創業から拡大までの意思決定と組織文化を追う評伝。',
+    amazonUrl: 'https://www.amazon.com/',
+    rakutenUrl: 'https://books.rakuten.co.jp/'
+  },
+  {
+    title: 'Invent and Wander: The Collected Writings of Jeff Bezos',
+    slug: 'invent-and-wander',
+    author: 'Jeff Bezos, edited by Walter Isaacson',
+    description: '株主書簡やスピーチを通じてベゾスの思考をたどる書籍。',
     amazonUrl: 'https://www.amazon.com/',
     rakutenUrl: 'https://books.rakuten.co.jp/'
   },
@@ -116,7 +145,17 @@ async function seed() {
     ]);
 
     const [bill, jeff, fujita] = await Person.create(personSeedData);
-    const [book1, book2, book3, aboutBillBook, aboutJeffBook, aboutFujitaBook] = await Book.create(bookSeedData);
+    const [
+      book1,
+      book2,
+      jeffInfluenceBook2,
+      jeffInfluenceBook3,
+      book3,
+      aboutBillBook,
+      aboutJeffBook1,
+      aboutJeffBook2,
+      aboutFujitaBook
+    ] = await Book.create(bookSeedData);
 
     // 3) Influence/About relation data
     await Influence.create([
@@ -132,11 +171,32 @@ async function seed() {
       {
         personId: jeff._id,
         bookId: book2._id,
-        impactSummary: '破壊的イノベーションへの理解を深めた。',
-        sourceTitle: 'Jeff Bezos book recommendation',
-        sourceUrl: 'https://www.amazon.com/',
+        impactSummary:
+          '既存事業の成功が次の破壊的変化への対応を遅らせる、という視点を学ぶうえで重要な一冊。Amazonが自ら既存のやり方を壊しながら新規事業へ進んでいく姿勢とも相性が良い。',
+        sourceTitle: 'Jeff Bezos on Clayton Christensen and disruption',
+        sourceUrl: 'https://www.youtube.com/watch?v=EJ4fRfp4jbo',
         sourceType: 'interview',
         featuredOrder: 1
+      },
+      {
+        personId: jeff._id,
+        bookId: jeffInfluenceBook2._id,
+        impactSummary:
+          '顧客志向、低価格、オペレーションの強さ、現場感覚といった考え方に通じる内容として知られる。ベゾスの顧客中心主義や、地道な改善の積み重ねとつながる文脈で参照されることが多い。',
+        sourceTitle: 'Jeff Bezos discusses Sam Walton',
+        sourceUrl: 'https://www.youtube.com/watch?v=rxDMiP8Xgak',
+        sourceType: 'interview',
+        featuredOrder: 2
+      },
+      {
+        personId: jeff._id,
+        bookId: jeffInfluenceBook3._id,
+        impactSummary:
+          'ベゾスが小説から学ぶことの象徴として語られる一冊。責任感、基準の高さ、役割への献身、選択の重みなど、経営以外の側面から思考に影響した本として位置づけられる。',
+        sourceTitle: 'Jeff Bezos on books and The Remains of the Day',
+        sourceUrl: 'https://www.newsweek.com/what-jeff-bezos-reads-84149',
+        sourceType: 'article',
+        featuredOrder: 3
       },
       {
         personId: fujita._id,
@@ -159,13 +219,25 @@ async function seed() {
       },
       {
         personId: jeff._id,
-        bookId: aboutJeffBook._id,
+        bookId: aboutJeffBook1._id,
         kind: 'about',
-        impactSummary: 'Amazon創業前後の意思決定プロセスを追える。',
-        sourceTitle: 'Jeff Bezos 関連書籍（ダミー）',
-        sourceUrl: 'https://example.com/about-jeff',
+        impactSummary:
+          '創業初期からAmazon拡大までの意思決定、組織文化、競争戦略を追うのに向いている。ベゾスの強みと苛烈さの両面を理解する入口になる。',
+        sourceTitle: 'The Everything Store by Brad Stone',
+        sourceUrl: 'https://www.goodreads.com/book/show/17660462-the-everything-store',
         sourceType: 'book-guide',
         featuredOrder: 1
+      },
+      {
+        personId: jeff._id,
+        bookId: aboutJeffBook2._id,
+        kind: 'about',
+        impactSummary:
+          '株主への手紙やスピーチを通して、ベゾス自身の言葉で思想を追える本。Day 1、長期思考、顧客起点など、本人の思考を一次資料に近い形で理解しやすい。',
+        sourceTitle: 'Invent and Wander',
+        sourceUrl: 'https://www.simonandschuster.com/books/Invent-and-Wander/Jeff-Bezos/9781982132616',
+        sourceType: 'book-guide',
+        featuredOrder: 2
       },
       {
         personId: fujita._id,
