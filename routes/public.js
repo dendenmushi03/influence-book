@@ -9,6 +9,139 @@ function escapeRegex(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function toIdString(value) {
+  return value ? String(value) : '';
+}
+
+function normalizeTags(tags) {
+  if (!Array.isArray(tags)) {
+    return [];
+  }
+
+  return tags
+    .map((tag) => (typeof tag === 'string' ? tag.trim() : ''))
+    .filter(Boolean);
+}
+
+function compareRelatedPeople(a, b) {
+  if (b.score !== a.score) {
+    return b.score - a.score;
+  }
+
+  if ((b.person.popularity || 0) !== (a.person.popularity || 0)) {
+    return (b.person.popularity || 0) - (a.person.popularity || 0);
+  }
+
+  const aCreatedAt = a.person.createdAt ? new Date(a.person.createdAt).getTime() : 0;
+  const bCreatedAt = b.person.createdAt ? new Date(b.person.createdAt).getTime() : 0;
+  return bCreatedAt - aCreatedAt;
+}
+
+async function buildRelatedPeople(person, influences, maxPeople = 4) {
+  const currentPersonId = toIdString(person._id);
+  const relatedCandidateMap = new Map();
+
+  const addCandidate = (candidate, score) => {
+    if (!candidate) {
+      return;
+    }
+
+    const candidateId = toIdString(candidate._id);
+    if (!candidateId || candidateId === currentPersonId) {
+      return;
+    }
+
+    const existing = relatedCandidateMap.get(candidateId);
+    if (existing) {
+      existing.score += score;
+      return;
+    }
+
+    relatedCandidateMap.set(candidateId, { person: candidate, score });
+  };
+
+  const baseTags = normalizeTags(person.tags);
+  const baseTagSet = new Set(baseTags);
+
+  if (baseTags.length > 0) {
+    const tagMatchedPeople = await Person.find({
+      _id: { $ne: person._id },
+      tags: { $in: baseTags }
+    });
+
+    tagMatchedPeople.forEach((candidate) => {
+      const overlapCount = normalizeTags(candidate.tags).filter((tag) => baseTagSet.has(tag)).length;
+      if (overlapCount > 0) {
+        addCandidate(candidate, overlapCount * 100);
+      }
+    });
+  }
+
+  if (person.category) {
+    const sameCategoryPeople = await Person.find({
+      _id: { $ne: person._id },
+      category: person.category
+    });
+
+    sameCategoryPeople.forEach((candidate) => addCandidate(candidate, 30));
+  }
+
+  const currentBookIds = [
+    ...new Set(
+      influences
+        .map((influence) => toIdString(influence.bookId && influence.bookId._id ? influence.bookId._id : influence.bookId))
+        .filter(Boolean)
+    )
+  ];
+
+  if (currentBookIds.length > 0) {
+    const sameBookInfluences = await Influence.find({
+      personId: { $ne: person._id },
+      bookId: { $in: currentBookIds }
+    }).populate('personId');
+
+    const sharedBookCountMap = new Map();
+    const personMap = new Map();
+    sameBookInfluences.forEach((record) => {
+      const candidate = record.personId;
+      const candidateId = toIdString(candidate && candidate._id ? candidate._id : candidate);
+      if (!candidateId) {
+        return;
+      }
+
+      sharedBookCountMap.set(candidateId, (sharedBookCountMap.get(candidateId) || 0) + 1);
+      if (!personMap.has(candidateId)) {
+        personMap.set(candidateId, candidate);
+      }
+    });
+
+    personMap.forEach((candidate, candidateId) => {
+      const sharedBookCount = sharedBookCountMap.get(candidateId) || 0;
+      if (sharedBookCount > 1) {
+        addCandidate(candidate, sharedBookCount * 20);
+      } else if (sharedBookCount === 1) {
+        addCandidate(candidate, 20);
+      }
+    });
+  }
+
+  const relatedPeople = [...relatedCandidateMap.values()].sort(compareRelatedPeople).map((entry) => entry.person);
+
+  if (relatedPeople.length < maxPeople) {
+    const pickedIds = new Set([currentPersonId, ...relatedPeople.map((candidate) => toIdString(candidate._id))]);
+    const featuredPeople = await Person.find({
+      featured: true,
+      _id: { $nin: [...pickedIds] }
+    })
+      .sort({ popularity: -1, createdAt: -1 })
+      .limit(maxPeople - relatedPeople.length);
+
+    relatedPeople.push(...featuredPeople);
+  }
+
+  return relatedPeople.slice(0, maxPeople);
+}
+
 router.get('/', async (req, res) => {
   try {
     const featuredPeople = await Person.find({ featured: true }).sort({ createdAt: -1 }).limit(3);
@@ -76,8 +209,9 @@ router.get('/people/:slug', async (req, res) => {
 
     const influenceBooks = influences.filter((influence) => influence.kind !== 'about');
     const aboutBooks = influences.filter((influence) => influence.kind === 'about');
+    const relatedPeople = await buildRelatedPeople(person, influences, 4);
 
-    res.render('person-detail', { person, influenceBooks, aboutBooks });
+    res.render('person-detail', { person, influenceBooks, aboutBooks, relatedPeople });
   } catch (error) {
     console.error('Failed to load person detail page:', error.message);
     res.status(500).send('Internal Server Error');
