@@ -58,7 +58,7 @@ async function seed() {
       }
     ]);
 
-    const [book1, book2, book3] = await Book.create([
+    const [book1, book2, book3, aboutBillBook, aboutJeffBook, aboutFujitaBook] = await Book.create([
       {
         title: 'Business Adventures',
         slug: 'business-adventures',
@@ -80,6 +80,30 @@ async function seed() {
         slug: 'hito-wo-ugokasu',
         author: 'デール・カーネギー',
         description: '人間関係の原則を学べる定番書。',
+        amazonUrl: 'https://www.amazon.co.jp/',
+        rakutenUrl: 'https://books.rakuten.co.jp/'
+      },
+      {
+        title: 'ビル・ゲイツ: 巨大ソフトウェア帝国を築いた思想',
+        slug: 'about-bill-gates-dummy',
+        author: 'ダミー著者A',
+        description: 'Bill Gates の思想とキャリアをたどるためのダミー書籍。',
+        amazonUrl: 'https://www.amazon.com/',
+        rakutenUrl: 'https://books.rakuten.co.jp/'
+      },
+      {
+        title: 'ジェフ・ベゾスの長期思考',
+        slug: 'about-jeff-bezos-dummy',
+        author: 'ダミー著者B',
+        description: 'Jeff Bezos の経営観を深掘りするためのダミー書籍。',
+        amazonUrl: 'https://www.amazon.com/',
+        rakutenUrl: 'https://books.rakuten.co.jp/'
+      },
+      {
+        title: '藤田晋の経営哲学',
+        slug: 'about-susumu-fujita-dummy',
+        author: 'ダミー著者C',
+        description: '藤田晋の歩みを知るためのダミー書籍。',
         amazonUrl: 'https://www.amazon.co.jp/',
         rakutenUrl: 'https://books.rakuten.co.jp/'
       }
@@ -111,6 +135,36 @@ async function seed() {
         sourceTitle: 'インタビュー記事',
         sourceUrl: 'https://www.cyberagent.co.jp/',
         sourceType: 'article',
+        featuredOrder: 1
+      },
+      {
+        personId: bill._id,
+        bookId: aboutBillBook._id,
+        kind: 'about',
+        impactSummary: '生い立ちから慈善活動まで、人物像を広く把握できる。',
+        sourceTitle: 'Bill Gates 関連書籍（ダミー）',
+        sourceUrl: 'https://example.com/about-bill',
+        sourceType: 'book-guide',
+        featuredOrder: 1
+      },
+      {
+        personId: jeff._id,
+        bookId: aboutJeffBook._id,
+        kind: 'about',
+        impactSummary: 'Amazon創業前後の意思決定プロセスを追える。',
+        sourceTitle: 'Jeff Bezos 関連書籍（ダミー）',
+        sourceUrl: 'https://example.com/about-jeff',
+        sourceType: 'book-guide',
+        featuredOrder: 1
+      },
+      {
+        personId: fujita._id,
+        bookId: aboutFujitaBook._id,
+        kind: 'about',
+        impactSummary: '起業から事業拡大までの実践的な視点を学べる。',
+        sourceTitle: '藤田晋 関連書籍（ダミー）',
+        sourceUrl: 'https://example.com/about-fujita',
+        sourceType: 'book-guide',
         featuredOrder: 1
       }
     ]);

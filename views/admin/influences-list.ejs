@@ -2,7 +2,7 @@
 
 <section class="page-section">
   <h1>影響関係一覧（管理）</h1>
-  <p class="section-description">人物名・本タイトル・表示順を確認できます。</p>
+  <p class="section-description">人物名・本タイトル・種類・表示順を確認できます。</p>
 </section>
 
 <section class="stack">
@@ -17,6 +17,7 @@
       <div>
         <h2><%= influence.personId ? influence.personId.name : '人物不明' %></h2>
         <p><strong>本:</strong> <%= influence.bookId ? influence.bookId.title : '本情報なし' %></p>
+        <p><strong>種類:</strong> <%= influence.kind === 'about' ? 'about（この人を知る本）' : 'influence（影響を受けた本）' %></p>
         <p><strong>featuredOrder:</strong> <%= influence.featuredOrder %></p>
       </div>
       <div>
