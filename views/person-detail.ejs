@@ -1,17 +1,17 @@
 <%- include('partials/header') %>
 
-<section class="card person-header-card page-section">
+<section class="card person-header-card page-section detail-hero">
   <h1><%= person.name %></h1>
   <p class="section-description"><%= person.occupation || '肩書き未設定' %></p>
 
   <div class="person-detail-meta">
-    <div class="card-subsection">
+    <div class="card-subsection detail-block">
       <h2>プロフィール</h2>
       <p><%= person.bio || '紹介文はまだ登録されていません。' %></p>
     </div>
 
     <% if (person.keywords && person.keywords.length > 0) { %>
-      <div class="card-subsection">
+      <div class="card-subsection detail-block">
         <h2>キーワード</h2>
         <div class="keywords">
           <% person.keywords.forEach((keyword) => { %>
@@ -23,8 +23,11 @@
   </div>
 </section>
 
-<section class="page-section">
-  <h2>影響を受けた本</h2>
+<section class="page-section influence-section">
+  <header class="section-head">
+    <h2>影響を受けた本</h2>
+    <p class="section-description">思考の背景となった書籍と、影響の根拠をまとめています。</p>
+  </header>
   <div class="stack">
     <% if (influences.length === 0) { %>
       <article class="card">
@@ -34,31 +37,35 @@
 
     <% influences.forEach((influence) => { %>
       <% const book = influence.bookId; %>
-      <article class="card book-card">
+      <article class="card book-card influence-card">
         <% if (book && book.coverUrl) { %>
           <img src="<%= book.coverUrl %>" alt="<%= book.title %> の書影" class="book-cover" />
+        <% } else { %>
+          <div class="book-cover book-cover-placeholder" aria-hidden="true">
+            <span>No Cover</span>
+          </div>
         <% } %>
 
         <div class="book-card-content">
-          <header>
+          <header class="book-meta">
             <h3><%= book ? book.title : '本情報なし' %></h3>
-            <p><strong>著者:</strong> <%= book && book.author ? book.author : '未設定' %></p>
+            <p class="book-author"><strong>著者:</strong> <%= book && book.author ? book.author : '未設定' %></p>
           </header>
 
-          <div class="card-subsection">
+          <div class="card-subsection detail-block">
             <h4>影響の要約</h4>
             <p><%= influence.impactSummary || '未設定' %></p>
           </div>
 
-          <div class="card-subsection">
+          <div class="card-subsection detail-block source-block">
             <h4>出典</h4>
-            <p><%= influence.sourceTitle || '未設定' %></p>
+            <p class="source-title"><%= influence.sourceTitle || '未設定' %></p>
             <% if (influence.sourceUrl) { %>
-              <a href="<%= influence.sourceUrl %>" target="_blank" rel="noopener noreferrer">出典を見る</a>
+              <a class="source-link" href="<%= influence.sourceUrl %>" target="_blank" rel="noopener noreferrer">出典を見る</a>
             <% } %>
           </div>
 
-          <div class="links">
+          <div class="links purchase-links">
             <% if (book && book.amazonUrl) { %>
               <a class="button-link" href="<%= book.amazonUrl %>" target="_blank" rel="noopener noreferrer">Amazonで見る</a>
             <% } %>

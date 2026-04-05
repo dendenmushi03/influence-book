@@ -1,24 +1,45 @@
 <%- include('partials/header') %>
+<%
+  const heroCopyOptions = [
+    {
+      title: '憧れの人の思考を、読書体験から辿る。',
+      lead: 'Influence Book は、信頼できる人物の読書履歴や影響を受けた本から、思考の背景を見つけるためのサービスです。'
+    },
+    {
+      title: 'その人の思想は、どの一冊から始まったのか。',
+      lead: '憧れの人物が影響を受けた本を辿り、価値観や意思決定の源流を静かに読み解きます。'
+    },
+    {
+      title: '本棚を辿れば、思考の地図が見えてくる。',
+      lead: 'Influence Book は、人物と書籍の関係を丁寧に整理し、学びの出発点を見つけるためのサービスです。'
+    }
+  ];
+  const heroCopy = heroCopyOptions[0];
+%>
 
 <section class="hero card">
-  <h1>Influence Book</h1>
-  <p class="lead">憧れの人は、何を読んで今の思考になったのか。</p>
+  <h1><%= heroCopy.title %></h1>
+  <p class="lead"><%= heroCopy.lead %></p>
   <a class="button" href="/people">人物一覧を見る</a>
 </section>
 
-<section>
-  <h2>注目の人物</h2>
+<section class="page-section">
+  <header class="section-head">
+    <h2>注目の人物</h2>
+    <p class="section-description">思考の源泉を知りたい人物を、厳選して掲載しています。</p>
+  </header>
+
   <div class="grid">
     <% if (featuredPeople.length === 0) { %>
       <p>注目の人物はまだ登録されていません。</p>
     <% } %>
 
     <% featuredPeople.forEach((person) => { %>
-      <article class="card">
-        <h3><%= person.name %></h3>
-        <p><%= person.occupation || '肩書き未設定' %></p>
-        <p><%= person.intro || '' %></p>
-        <a href="/people/<%= person.slug %>">詳細を見る</a>
+      <article class="card person-card">
+        <h3 class="person-card-title"><%= person.name %></h3>
+        <p class="person-role"><%= person.occupation || '肩書き未設定' %></p>
+        <p class="person-intro"><%= person.intro || '' %></p>
+        <a class="person-link" href="/people/<%= person.slug %>">詳細を見る</a>
       </article>
     <% }) %>
   </div>
