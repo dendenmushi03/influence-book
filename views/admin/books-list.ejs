@@ -16,10 +16,18 @@
     <article class="card list-card">
       <div>
         <h2><%= book.title %></h2>
+        <p><strong>スラッグ:</strong> <%= book.slug || '未設定' %></p>
         <p><strong>著者:</strong> <%= book.author || '未設定' %></p>
         <p><strong>ISBN:</strong> <%= book.isbn || '未設定' %></p>
       </div>
       <div class="links">
+        <% if (book.slug) { %>
+          <a class="button-link" href="/books/<%= book.slug %>">公開ページ</a>
+        <% } %>
+        <a class="button-link" href="/admin/books/<%= book._id %>/edit">編集</a>
+        <form action="/admin/books/<%= book._id %>/delete" method="POST" onsubmit="return confirm('この本を削除しますか？');">
+          <button class="button secondary" type="submit">削除</button>
+        </form>
         <% if (book.amazonUrl) { %>
           <a class="button-link" href="<%= book.amazonUrl %>" target="_blank" rel="noopener noreferrer">Amazon</a>
         <% } %>

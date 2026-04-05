@@ -3,6 +3,15 @@
 <section class="card person-header-card page-section detail-hero">
   <h1><%= person.name %></h1>
   <p class="section-description"><%= person.occupation || '肩書き未設定' %></p>
+  <p class="person-category">カテゴリ: <%= person.category || '未設定' %></p>
+
+  <% if (person.tags && person.tags.length > 0) { %>
+    <div class="keywords">
+      <% person.tags.forEach((tag) => { %>
+        <span class="tag"><%= tag %></span>
+      <% }) %>
+    </div>
+  <% } %>
 
   <div class="person-detail-meta">
     <div class="card-subsection detail-block">
@@ -50,6 +59,9 @@
           <header class="book-meta">
             <h3><%= book ? book.title : '本情報なし' %></h3>
             <p class="book-author"><strong>著者:</strong> <%= book && book.author ? book.author : '未設定' %></p>
+            <% if (book && book.slug) { %>
+              <a class="person-link" href="/books/<%= book.slug %>">本の詳細を見る</a>
+            <% } %>
           </header>
 
           <div class="card-subsection detail-block">

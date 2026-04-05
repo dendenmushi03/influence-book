@@ -24,6 +24,8 @@ async function seed() {
         name: 'Bill Gates',
         slug: 'bill-gates',
         occupation: 'Co-chair, Bill & Melinda Gates Foundation',
+        category: '起業家',
+        tags: ['テクノロジー', '長期思考', '経営'],
         intro: '世界的な起業家・慈善活動家。',
         bio: 'Microsoft共同創業者。読書家としても知られる。',
         keywords: ['テクノロジー', '慈善活動', '読書'],
@@ -33,6 +35,8 @@ async function seed() {
         name: 'Jeff Bezos',
         slug: 'jeff-bezos',
         occupation: 'Founder, Amazon',
+        category: '経営者',
+        tags: ['経営', '長期思考', 'EC'],
         intro: 'Amazon創業者。長期視点の経営で知られる。',
         bio: 'AmazonとBlue Originを率いた起業家。',
         keywords: ['EC', '長期思考', '経営'],
@@ -42,6 +46,8 @@ async function seed() {
         name: '藤田晋',
         slug: 'susumu-fujita',
         occupation: '株式会社サイバーエージェント 代表取締役',
+        category: '起業家',
+        tags: ['起業', 'インターネット', '経営'],
         intro: 'インターネット産業を牽引する経営者。',
         bio: 'Ameba事業などを展開するサイバーエージェント創業者。',
         keywords: ['起業', 'インターネット', '経営'],
@@ -52,6 +58,7 @@ async function seed() {
     const [book1, book2, book3] = await Book.create([
       {
         title: 'Business Adventures',
+        slug: 'business-adventures',
         author: 'John Brooks',
         description: 'ビジネス史から学べる名著。',
         amazonUrl: 'https://www.amazon.com/',
@@ -59,6 +66,7 @@ async function seed() {
       },
       {
         title: 'The Innovator\'s Dilemma',
+        slug: 'the-innovators-dilemma',
         author: 'Clayton M. Christensen',
         description: 'イノベーションのジレンマを解説。',
         amazonUrl: 'https://www.amazon.com/',
@@ -66,6 +74,7 @@ async function seed() {
       },
       {
         title: '人を動かす',
+        slug: 'hito-wo-ugokasu',
         author: 'デール・カーネギー',
         description: '人間関係の原則を学べる定番書。',
         amazonUrl: 'https://www.amazon.co.jp/',

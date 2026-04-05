@@ -1,0 +1,32 @@
+<%- include('partials/header') %>
+
+<section class="page-section">
+  <header class="section-head">
+    <h1>本一覧</h1>
+    <p class="section-description">Influence Book に登録されている書籍を一覧で確認できます。</p>
+  </header>
+
+  <div class="grid">
+    <% if (books.length === 0) { %>
+      <p>本データがありません。</p>
+    <% } %>
+
+    <% books.forEach((book) => { %>
+      <article class="card book-list-card">
+        <% if (book.coverUrl) { %>
+          <img src="<%= book.coverUrl %>" alt="<%= book.title %> の書影" class="book-cover" />
+        <% } else { %>
+          <div class="book-cover book-cover-placeholder" aria-hidden="true"><span>No Cover</span></div>
+        <% } %>
+
+        <div>
+          <h2><%= book.title %></h2>
+          <p class="book-author"><strong>著者:</strong> <%= book.author || '未設定' %></p>
+          <a class="person-link" href="/books/<%= book.slug %>">詳細を見る</a>
+        </div>
+      </article>
+    <% }) %>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

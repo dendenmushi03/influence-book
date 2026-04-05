@@ -8,6 +8,8 @@ const personSchema = new mongoose.Schema(
     occupation: { type: String },
     imageUrl: { type: String },
     keywords: [{ type: String }],
+    category: { type: String },
+    tags: [{ type: String }],
     intro: { type: String },
     featured: { type: Boolean, default: false }
   },

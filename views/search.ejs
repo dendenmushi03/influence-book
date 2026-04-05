@@ -1,0 +1,84 @@
+<%- include('partials/header') %>
+
+<section class="page-section">
+  <header class="section-head">
+    <h1>検索</h1>
+    <p class="section-description">人物と本の両方を同時に検索できます。</p>
+  </header>
+
+  <article class="card">
+    <form class="filter-form" action="/search" method="GET">
+      <input type="search" name="q" value="<%= keyword %>" placeholder="人物名・肩書き・本タイトルなど" aria-label="検索キーワード" />
+      <button type="submit">検索する</button>
+    </form>
+    <% if (keyword) { %>
+      <p class="active-filters">検索キーワード: 「<%= keyword %>」</p>
+    <% } %>
+  </article>
+</section>
+
+<section class="page-section">
+  <header class="section-head">
+    <h2>人物の検索結果</h2>
+  </header>
+
+  <div class="grid">
+    <% if (!keyword) { %>
+      <p>キーワードを入力して検索してください。</p>
+    <% } else if (peopleResults.length === 0) { %>
+      <p>該当する人物は見つかりませんでした。</p>
+    <% } %>
+
+    <% peopleResults.forEach((person) => { %>
+      <article class="card person-card">
+        <h3 class="person-card-title"><%= person.name %></h3>
+        <p class="person-role"><%= person.occupation || '肩書き未設定' %></p>
+        <p class="person-intro"><%= person.intro || '' %></p>
+        <p class="person-category">カテゴリ: <%= person.category || '未設定' %></p>
+        <% if (person.tags && person.tags.length > 0) { %>
+          <div class="keywords">
+            <% person.tags.forEach((tag) => { %>
+              <span class="tag"><%= tag %></span>
+            <% }) %>
+          </div>
+        <% } %>
+        <a class="person-link" href="/people/<%= person.slug %>">詳細を見る</a>
+      </article>
+    <% }) %>
+  </div>
+</section>
+
+<section class="page-section">
+  <header class="section-head">
+    <h2>本の検索結果</h2>
+  </header>
+
+  <div class="stack">
+    <% if (!keyword) { %>
+      <p>キーワードを入力して検索してください。</p>
+    <% } else if (bookResults.length === 0) { %>
+      <p>該当する本は見つかりませんでした。</p>
+    <% } %>
+
+    <% bookResults.forEach((book) => { %>
+      <article class="card book-card">
+        <% if (book.coverUrl) { %>
+          <img src="<%= book.coverUrl %>" alt="<%= book.title %> の書影" class="book-cover" />
+        <% } else { %>
+          <div class="book-cover book-cover-placeholder" aria-hidden="true"><span>No Cover</span></div>
+        <% } %>
+
+        <div class="book-card-content">
+          <h3><%= book.title %></h3>
+          <p class="book-author"><strong>著者:</strong> <%= book.author || '未設定' %></p>
+          <p><%= book.description || '説明は未設定です。' %></p>
+          <div class="links">
+            <a class="person-link" href="/books/<%= book.slug %>">本の詳細を見る</a>
+          </div>
+        </div>
+      </article>
+    <% }) %>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

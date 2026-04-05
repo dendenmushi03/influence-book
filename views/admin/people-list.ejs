@@ -18,8 +18,15 @@
         <h2><%= person.name %></h2>
         <p><strong>スラッグ:</strong> <%= person.slug %></p>
         <p><strong>肩書き:</strong> <%= person.occupation || '未設定' %></p>
+        <p><strong>カテゴリ:</strong> <%= person.category || '未設定' %></p>
       </div>
-      <a href="/people/<%= person.slug %>">公開ページを見る</a>
+      <div class="admin-link-group">
+        <a href="/people/<%= person.slug %>">公開ページを見る</a>
+        <a href="/admin/people/<%= person._id %>/edit">編集する</a>
+        <form action="/admin/people/<%= person._id %>/delete" method="POST" onsubmit="return confirm('この人物を削除しますか？');">
+          <button class="button secondary" type="submit">削除</button>
+        </form>
+      </div>
     </article>
   <% }) %>
 </section>
