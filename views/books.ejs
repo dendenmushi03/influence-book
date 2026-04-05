@@ -6,9 +6,9 @@
     <p class="section-description">Influence Book に登録されている書籍を一覧で確認できます。</p>
   </header>
 
-  <div class="grid">
+  <div class="grid book-grid">
     <% if (books.length === 0) { %>
-      <p>本データがありません。</p>
+      <p class="empty-state">本データがありません。</p>
     <% } %>
 
     <% books.forEach((book) => { %>

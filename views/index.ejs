@@ -24,10 +24,13 @@
     <input type="search" name="q" placeholder="例: Bill Gates / 長期思考 / Innovator" aria-label="検索キーワード" />
     <button type="submit">検索する</button>
   </form>
-  <a class="button" href="/people">人物一覧を見る</a>
+  <div class="hero-actions">
+    <a class="button" href="/people">人物一覧を見る</a>
+    <a class="button secondary" href="/books">本一覧を見る</a>
+  </div>
 </section>
 
-<section class="page-section">
+<section class="page-section section-separator">
   <header class="section-head">
     <h2>注目の人物</h2>
     <p class="section-description">思考の源泉を知りたい人物を、厳選して掲載しています。</p>
@@ -35,7 +38,7 @@
 
   <div class="grid">
     <% if (featuredPeople.length === 0) { %>
-      <p>注目の人物はまだ登録されていません。</p>
+      <p class="empty-state">注目の人物はまだ登録されていません。</p>
     <% } %>
 
     <% featuredPeople.forEach((person) => { %>
