@@ -710,6 +710,39 @@ button.quiet {
   padding: clamp(24px, 3.8vw, 38px);
 }
 
+.person-detail-header {
+  display: flex;
+  align-items: center;
+  gap: clamp(14px, 2.2vw, 22px);
+  margin-bottom: 10px;
+}
+
+.person-detail-headings {
+  min-width: 0;
+}
+
+.person-detail-image {
+  width: clamp(80px, 10vw, 112px);
+  aspect-ratio: 1 / 1;
+  border-radius: 24px;
+  object-fit: cover;
+  flex-shrink: 0;
+  display: block;
+  border: 1px solid #e5ddd0;
+  background: #f1ebdf;
+}
+
+.person-detail-image-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Manrope', 'Noto Sans JP', sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.7rem, 3.8vw, 2.3rem);
+  color: #2f3541;
+  background: linear-gradient(150deg, #f3eee4 0%, #e9dfce 47%, #d9cfbd 100%);
+}
+
 .detail-hero h1 {
   margin-bottom: 4px;
 }
@@ -964,6 +997,14 @@ select:focus {
 
   .person-header-card {
     padding: 20px;
+  }
+
+  .person-detail-header {
+    align-items: flex-start;
+  }
+
+  .person-detail-image {
+    border-radius: 20px;
   }
 
   .person-longtext {

@@ -32,6 +32,8 @@ const personSeedData = [
     occupation: 'Founder, Amazon',
     category: '起業家',
     popularity: 100,
+    imageUrl:
+      'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=800&q=80',
     tags: ['経営', '長期思考', '顧客中心', 'EC', 'テクノロジー'],
     intro: 'Amazon創業者。長期視点と顧客起点の経営で知られる。',
     summary:

@@ -37,7 +37,7 @@
     <textarea name="bio" rows="4" placeholder="人物像の補足や背景情報（summary / career に入らない要素）"><%= person.bio || '' %></textarea>
 
     <label>画像URL</label>
-    <input name="imageUrl" value="<%= person.imageUrl || '' %>" />
+    <input name="imageUrl" value="<%= person.imageUrl || '' %>" placeholder="https://example.com/image.jpg" />
 
     <label>キーワード（カンマ区切り）</label>
     <input name="keywords" value="<%= (person.keywords || []).join(', ') %>" />
