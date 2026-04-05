@@ -24,6 +24,8 @@ router.get('/people', async (req, res) => {
     const query = {};
     const selectedCategory = req.query.category ? req.query.category.trim() : '';
     const selectedTag = req.query.tag ? req.query.tag.trim() : '';
+    const requestedSort = req.query.sort ? req.query.sort.trim() : '';
+    const selectedSort = requestedSort === 'new' ? 'new' : 'popular';
 
     if (selectedCategory) {
       query.category = selectedCategory;
@@ -33,8 +35,13 @@ router.get('/people', async (req, res) => {
       query.tags = selectedTag;
     }
 
+    const sortOption =
+      selectedSort === 'new'
+        ? { createdAt: -1 }
+        : { popularity: -1, createdAt: -1 };
+
     const [people, categories, tags] = await Promise.all([
-      Person.find(query).sort({ createdAt: -1 }),
+      Person.find(query).sort(sortOption),
       Person.distinct('category', { category: { $exists: true, $nin: ['', null] } }),
       Person.distinct('tags', { tags: { $exists: true, $ne: [] } })
     ]);
@@ -45,7 +52,8 @@ router.get('/people', async (req, res) => {
       tags: tags.filter(Boolean).sort(),
       filters: {
         category: selectedCategory,
-        tag: selectedTag
+        tag: selectedTag,
+        sort: selectedSort
       }
     });
   } catch (error) {

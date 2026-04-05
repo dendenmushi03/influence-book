@@ -7,35 +7,55 @@
   </header>
 
   <article class="card filter-card">
-    <form class="filter-form" action="/people" method="GET">
-      <div>
-        <label for="category">カテゴリ</label>
-        <select id="category" name="category">
-          <option value="">すべて</option>
-          <% categories.forEach((category) => { %>
-            <option value="<%= category %>" <%= filters.category === category ? 'selected' : '' %>><%= category %></option>
-          <% }) %>
-        </select>
+    <div class="filter-group">
+      <p class="filter-group-label">カテゴリ</p>
+      <div class="filter-chip-list">
+        <a
+          class="filter-chip <%= !filters.category ? 'filter-chip-active' : '' %>"
+          href="/people?<%= filters.sort ? `sort=${encodeURIComponent(filters.sort)}${filters.tag ? '&' : ''}` : '' %><%= filters.tag ? `tag=${encodeURIComponent(filters.tag)}` : '' %>"
+        >すべて</a>
+        <% categories.forEach((category) => { %>
+          <a
+            class="filter-chip <%= filters.category === category ? 'filter-chip-active' : '' %>"
+            href="/people?category=<%= encodeURIComponent(category) %><%= filters.sort ? `&sort=${encodeURIComponent(filters.sort)}` : '' %><%= filters.tag ? `&tag=${encodeURIComponent(filters.tag)}` : '' %>"
+          ><%= category %></a>
+        <% }) %>
       </div>
-      <button type="submit">絞り込み</button>
-      <% if (filters.category || filters.tag) { %>
-        <a class="button quiet" href="/people">フィルタ解除</a>
-      <% } %>
-    </form>
+    </div>
+
+    <div class="filter-group">
+      <p class="filter-group-label">並び順</p>
+      <div class="filter-chip-list">
+        <a
+          class="filter-chip <%= filters.sort !== 'new' ? 'filter-chip-active' : '' %>"
+          href="/people?<%= filters.category ? `category=${encodeURIComponent(filters.category)}&` : '' %>sort=popular<%= filters.tag ? `&tag=${encodeURIComponent(filters.tag)}` : '' %>"
+        >人気順</a>
+        <a
+          class="filter-chip <%= filters.sort === 'new' ? 'filter-chip-active' : '' %>"
+          href="/people?<%= filters.category ? `category=${encodeURIComponent(filters.category)}&` : '' %>sort=new<%= filters.tag ? `&tag=${encodeURIComponent(filters.tag)}` : '' %>"
+        >新着順</a>
+      </div>
+    </div>
 
     <div class="tag-filter-list">
       <span class="tag-filter-label">タグ:</span>
+      <a class="tag <%= !filters.tag ? 'tag-active' : '' %>" href="/people?<%= filters.category ? `category=${encodeURIComponent(filters.category)}&` : '' %><%= filters.sort ? `sort=${encodeURIComponent(filters.sort)}` : '' %>">すべて</a>
       <% tags.forEach((tag) => { %>
-        <a class="tag <%= filters.tag === tag ? 'tag-active' : '' %>" href="/people?<%= filters.category ? `category=${encodeURIComponent(filters.category)}&` : '' %>tag=<%= encodeURIComponent(tag) %>"><%= tag %></a>
+        <a class="tag <%= filters.tag === tag ? 'tag-active' : '' %>" href="/people?<%= filters.category ? `category=${encodeURIComponent(filters.category)}&` : '' %><%= filters.sort ? `sort=${encodeURIComponent(filters.sort)}&` : '' %>tag=<%= encodeURIComponent(tag) %>"><%= tag %></a>
       <% }) %>
     </div>
 
-    <% if (filters.category || filters.tag) { %>
+    <% if (filters.category || filters.tag || filters.sort) { %>
       <p class="active-filters">
         適用中:
         <%= filters.category ? `カテゴリ: ${filters.category}` : '' %>
-        <%= filters.category && filters.tag ? ' / ' : '' %>
+        <%= filters.category && (filters.tag || filters.sort) ? ' / ' : '' %>
         <%= filters.tag ? `タグ: ${filters.tag}` : '' %>
+        <%= filters.tag && filters.sort ? ' / ' : '' %>
+        <%= filters.sort === 'new' ? '並び順: 新着順' : '並び順: 人気順' %>
+        <% if (filters.category || filters.tag || filters.sort) { %>
+          <a class="button quiet filter-clear-link" href="/people">解除</a>
+        <% } %>
       </p>
     <% } %>
   </article>

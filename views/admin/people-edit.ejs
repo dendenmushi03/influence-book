@@ -15,6 +15,9 @@
     <label>カテゴリ</label>
     <input name="category" value="<%= person.category || '' %>" />
 
+    <label>人気度（手動設定）</label>
+    <input type="number" name="popularity" min="0" step="1" value="<%= person.popularity || 0 %>" />
+
     <label>タグ（カンマ区切り）</label>
     <input name="tags" value="<%= (person.tags || []).join(', ') %>" />
 

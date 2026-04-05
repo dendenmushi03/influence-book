@@ -40,6 +40,11 @@ function slugify(value) {
     .replace(/-{2,}/g, '-');
 }
 
+function toPopularity(value) {
+  const popularity = Number(value);
+  return Number.isFinite(popularity) ? popularity : 0;
+}
+
 function requireAdminAuth(req, res, next) {
   if (req.session && req.session.adminAuthenticated) {
     return next();
@@ -159,6 +164,7 @@ router.post('/people', async (req, res) => {
       imageUrl: req.body.imageUrl,
       keywords,
       category: req.body.category,
+      popularity: toPopularity(req.body.popularity),
       tags,
       intro: req.body.intro,
       featured: req.body.featured === 'on'
@@ -197,6 +203,7 @@ router.post('/people/:id', async (req, res) => {
       imageUrl: req.body.imageUrl,
       keywords,
       category: req.body.category,
+      popularity: toPopularity(req.body.popularity),
       tags,
       intro: req.body.intro,
       featured: req.body.featured === 'on'

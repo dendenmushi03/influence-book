@@ -19,6 +19,7 @@
         <p><strong>スラッグ:</strong> <%= person.slug %></p>
         <p><strong>肩書き:</strong> <%= person.occupation || '未設定' %></p>
         <p><strong>カテゴリ:</strong> <%= person.category || '未設定' %></p>
+        <p><strong>人気度:</strong> <%= person.popularity || 0 %></p>
       </div>
       <div class="admin-link-group">
         <a href="/people/<%= person.slug %>">公開ページを見る</a>
