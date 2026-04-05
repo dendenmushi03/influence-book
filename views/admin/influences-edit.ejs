@@ -1,0 +1,41 @@
+<%- include('../partials/header') %>
+
+<section class="card narrow">
+  <h1>影響関係編集</h1>
+  <form action="/admin/influences/<%= influence._id %>" method="POST">
+    <label>人物 *</label>
+    <select name="personId" required>
+      <option value="">選択してください</option>
+      <% people.forEach((person) => { %>
+        <option value="<%= person._id %>" <%= String(influence.personId) === String(person._id) ? 'selected' : '' %>><%= person.name %></option>
+      <% }) %>
+    </select>
+
+    <label>本 *</label>
+    <select name="bookId" required>
+      <option value="">選択してください</option>
+      <% books.forEach((book) => { %>
+        <option value="<%= book._id %>" <%= String(influence.bookId) === String(book._id) ? 'selected' : '' %>><%= book.title %></option>
+      <% }) %>
+    </select>
+
+    <label>影響の要約</label>
+    <textarea name="impactSummary" rows="3"><%= influence.impactSummary || '' %></textarea>
+
+    <label>出典タイトル</label>
+    <input name="sourceTitle" value="<%= influence.sourceTitle || '' %>" />
+
+    <label>出典URL</label>
+    <input name="sourceUrl" value="<%= influence.sourceUrl || '' %>" />
+
+    <label>出典タイプ</label>
+    <input name="sourceType" value="<%= influence.sourceType || '' %>" placeholder="interview / article" />
+
+    <label>表示順</label>
+    <input type="number" name="featuredOrder" value="<%= influence.featuredOrder %>" />
+
+    <button type="submit">更新する</button>
+  </form>
+</section>
+
+<%- include('../partials/footer') %>

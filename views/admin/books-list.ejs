@@ -19,7 +19,12 @@
         <p><strong>著者:</strong> <%= book.author || '未設定' %></p>
         <p><strong>ISBN:</strong> <%= book.isbn || '未設定' %></p>
       </div>
-      <div class="links">
+
+      <div class="admin-link-group">
+        <a class="button secondary" href="/admin/books/<%= book._id %>/edit">編集</a>
+        <form action="/admin/books/<%= book._id %>/delete" method="POST" class="inline-form" onsubmit="return confirm('この本を削除しますか？')">
+          <button type="submit" class="button danger">削除</button>
+        </form>
         <% if (book.amazonUrl) { %>
           <a class="button-link" href="<%= book.amazonUrl %>" target="_blank" rel="noopener noreferrer">Amazon</a>
         <% } %>

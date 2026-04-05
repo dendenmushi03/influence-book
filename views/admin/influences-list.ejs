@@ -18,9 +18,14 @@
         <h2><%= influence.personId ? influence.personId.name : '人物不明' %></h2>
         <p><strong>本:</strong> <%= influence.bookId ? influence.bookId.title : '本情報なし' %></p>
         <p><strong>featuredOrder:</strong> <%= influence.featuredOrder %></p>
-      </div>
-      <div>
         <p><strong>影響要約:</strong> <%= influence.impactSummary || '未設定' %></p>
+      </div>
+
+      <div class="admin-link-group">
+        <a class="button secondary" href="/admin/influences/<%= influence._id %>/edit">編集</a>
+        <form action="/admin/influences/<%= influence._id %>/delete" method="POST" class="inline-form" onsubmit="return confirm('この影響関係を削除しますか？')">
+          <button type="submit" class="button danger">削除</button>
+        </form>
       </div>
     </article>
   <% }) %>

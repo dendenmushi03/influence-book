@@ -19,7 +19,14 @@
         <p><strong>スラッグ:</strong> <%= person.slug %></p>
         <p><strong>肩書き:</strong> <%= person.occupation || '未設定' %></p>
       </div>
-      <a href="/people/<%= person.slug %>">公開ページを見る</a>
+
+      <div class="admin-link-group">
+        <a class="button secondary" href="/admin/people/<%= person._id %>/edit">編集</a>
+        <form action="/admin/people/<%= person._id %>/delete" method="POST" class="inline-form" onsubmit="return confirm('この人物を削除しますか？')">
+          <button type="submit" class="button danger">削除</button>
+        </form>
+        <a href="/people/<%= person.slug %>">公開ページを見る</a>
+      </div>
     </article>
   <% }) %>
 </section>
