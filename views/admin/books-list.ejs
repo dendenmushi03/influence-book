@@ -1,0 +1,34 @@
+<%- include('../partials/header') %>
+
+<section class="page-section">
+  <h1>本一覧（管理）</h1>
+  <p class="section-description">登録済みの本データです。</p>
+</section>
+
+<section class="stack">
+  <% if (books.length === 0) { %>
+    <article class="card">
+      <p>本データがありません。</p>
+    </article>
+  <% } %>
+
+  <% books.forEach((book) => { %>
+    <article class="card list-card">
+      <div>
+        <h2><%= book.title %></h2>
+        <p><strong>著者:</strong> <%= book.author || '未設定' %></p>
+        <p><strong>ISBN:</strong> <%= book.isbn || '未設定' %></p>
+      </div>
+      <div class="links">
+        <% if (book.amazonUrl) { %>
+          <a class="button-link" href="<%= book.amazonUrl %>" target="_blank" rel="noopener noreferrer">Amazon</a>
+        <% } %>
+        <% if (book.rakutenUrl) { %>
+          <a class="button-link" href="<%= book.rakutenUrl %>" target="_blank" rel="noopener noreferrer">楽天</a>
+        <% } %>
+      </div>
+    </article>
+  <% }) %>
+</section>
+
+<%- include('../partials/footer') %>

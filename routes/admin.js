@@ -13,6 +13,40 @@ router.get('/', (req, res) => {
   res.render('admin/dashboard');
 });
 
+router.get('/people', async (req, res) => {
+  try {
+    const people = await Person.find({}).sort({ createdAt: -1 });
+    res.render('admin/people-list', { people });
+  } catch (error) {
+    console.error('Failed to load people list:', error.message);
+    res.status(500).send('Failed to load people list');
+  }
+});
+
+router.get('/books', async (req, res) => {
+  try {
+    const books = await Book.find({}).sort({ createdAt: -1 });
+    res.render('admin/books-list', { books });
+  } catch (error) {
+    console.error('Failed to load books list:', error.message);
+    res.status(500).send('Failed to load books list');
+  }
+});
+
+router.get('/influences', async (req, res) => {
+  try {
+    const influences = await Influence.find({})
+      .sort({ featuredOrder: 1, createdAt: -1 })
+      .populate('personId')
+      .populate('bookId');
+
+    res.render('admin/influences-list', { influences });
+  } catch (error) {
+    console.error('Failed to load influences list:', error.message);
+    res.status(500).send('Failed to load influences list');
+  }
+});
+
 router.get('/people/new', (req, res) => {
   res.render('admin/people-new');
 });
