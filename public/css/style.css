@@ -188,6 +188,10 @@ p {
   max-width: 68ch;
 }
 
+.text-muted {
+  color: var(--text-muted);
+}
+
 .section-separator {
   border-top: 1px solid var(--border);
   padding-top: 44px;
@@ -589,6 +593,32 @@ button.quiet {
   margin-bottom: 6px;
 }
 
+.book-meta-with-label {
+  display: grid;
+  gap: 4px;
+}
+
+.book-section-label {
+  display: inline-flex;
+  align-self: start;
+  width: fit-content;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #eef2fc;
+  border: 1px solid #d3ddf3;
+  color: #2d3f6d;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.book-section-label-about {
+  background: #edf7f2;
+  border-color: #d2e6dc;
+  color: #2f5848;
+}
+
 .book-author {
   color: var(--text-muted);
 }
@@ -686,21 +716,45 @@ button.quiet {
 
 .detail-hero .section-description {
   font-size: 1.02rem;
+  margin-bottom: 8px;
 }
 
 .person-detail-meta {
   display: grid;
-  gap: 8px;
+  gap: 12px;
+  margin-top: 8px;
 }
 
 .detail-block {
   border-top: 1px solid var(--border);
-  padding-top: 18px;
+  padding-top: 20px;
 }
 
 .detail-block h2,
 .detail-block h4 {
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+}
+
+.detail-block h2 {
+  font-size: clamp(1.18rem, 2.2vw, 1.45rem);
+}
+
+.text-block {
+  max-width: 74ch;
+}
+
+.summary-block {
+  margin-top: 2px;
+}
+
+.person-longtext {
+  color: #2a303c;
+  line-height: 1.9;
+  white-space: pre-line;
+}
+
+.person-tags {
+  margin-top: 10px;
 }
 
 .influence-section {
@@ -910,5 +964,13 @@ select:focus {
 
   .person-header-card {
     padding: 20px;
+  }
+
+  .person-longtext {
+    line-height: 1.82;
+  }
+
+  .detail-block h2 {
+    font-size: 1.12rem;
   }
 }
