@@ -1,0 +1,36 @@
+<%- include('../partials/header') %>
+
+<section class="card narrow">
+  <h1>人物編集</h1>
+  <form action="/admin/people/<%= person._id %>" method="POST">
+    <label>名前 *</label>
+    <input name="name" value="<%= person.name %>" required />
+
+    <label>slug *（URL用）</label>
+    <input name="slug" value="<%= person.slug %>" required />
+
+    <label>肩書き</label>
+    <input name="occupation" value="<%= person.occupation || '' %>" />
+
+    <label>紹介文（短文）</label>
+    <textarea name="intro" rows="2"><%= person.intro || '' %></textarea>
+
+    <label>プロフィール</label>
+    <textarea name="bio" rows="4"><%= person.bio || '' %></textarea>
+
+    <label>画像URL</label>
+    <input name="imageUrl" value="<%= person.imageUrl || '' %>" />
+
+    <label>キーワード（カンマ区切り）</label>
+    <input name="keywords" value="<%= person.keywords ? person.keywords.join(', ') : '' %>" placeholder="経営, テクノロジー" />
+
+    <label>
+      <input type="checkbox" name="featured" <%= person.featured ? 'checked' : '' %> />
+      トップページに表示
+    </label>
+
+    <button type="submit">更新する</button>
+  </form>
+</section>
+
+<%- include('../partials/footer') %>

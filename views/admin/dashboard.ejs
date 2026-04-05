@@ -1,13 +1,34 @@
 <%- include('../partials/header') %>
 
-<section class="card">
+<section class="page-section">
   <h1>管理ダッシュボード</h1>
-  <p>登録メニュー</p>
-  <ul>
-    <li><a href="/admin/people/new">人物を追加する</a></li>
-    <li><a href="/admin/books/new">本を追加する</a></li>
-    <li><a href="/admin/influences/new">影響関係を追加する</a></li>
-  </ul>
+  <p class="section-description">新規登録と登録済みデータの確認をここから行えます。</p>
+</section>
+
+<section class="admin-actions-grid">
+  <article class="card">
+    <h2>人物</h2>
+    <div class="admin-link-group">
+      <a class="button" href="/admin/people/new">新規追加</a>
+      <a class="button secondary" href="/admin/people">一覧を見る</a>
+    </div>
+  </article>
+
+  <article class="card">
+    <h2>本</h2>
+    <div class="admin-link-group">
+      <a class="button" href="/admin/books/new">新規追加</a>
+      <a class="button secondary" href="/admin/books">一覧を見る</a>
+    </div>
+  </article>
+
+  <article class="card">
+    <h2>影響関係</h2>
+    <div class="admin-link-group">
+      <a class="button" href="/admin/influences/new">新規追加</a>
+      <a class="button secondary" href="/admin/influences">一覧を見る</a>
+    </div>
+  </article>
 </section>
 
 <%- include('../partials/footer') %>
