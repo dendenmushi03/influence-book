@@ -7,7 +7,7 @@
   <p class="person-category">カテゴリ: <%= person.category || '未設定' %></p>
 
   <% if (person.tags && person.tags.length > 0) { %>
-    <div class="keywords">
+    <div class="keywords person-tags">
       <% person.tags.forEach((tag) => { %>
         <span class="tag"><%= tag %></span>
       <% }) %>
@@ -15,38 +15,40 @@
   <% } %>
 
   <div class="person-detail-meta">
-    <div class="card-subsection detail-block">
+    <div class="card-subsection detail-block text-block summary-block">
       <h2>思考の要約</h2>
-      <p><%= person.summary || '思考の要約はまだ登録されていません。' %></p>
+      <p class="person-longtext"><%= person.summary || '思考の要約はまだ登録されていません。' %></p>
     </div>
 
-    <div class="card-subsection detail-block">
+    <div class="card-subsection detail-block text-block">
       <h2>経歴</h2>
-      <p><%= person.career || '経歴はまだ登録されていません。' %></p>
+      <p class="person-longtext"><%= person.career || '経歴はまだ登録されていません。' %></p>
+    </div>
+
+    <div class="card-subsection detail-block text-block">
+      <h2>プロフィール</h2>
+      <p class="person-longtext"><%= person.bio || '紹介文はまだ登録されていません。' %></p>
     </div>
 
     <div class="card-subsection detail-block">
-      <h2>プロフィール</h2>
-      <p><%= person.bio || '紹介文はまだ登録されていません。' %></p>
-    </div>
-
-    <% if (person.keywords && person.keywords.length > 0) { %>
-      <div class="card-subsection detail-block">
-        <h2>キーワード</h2>
+      <h2>キーワード</h2>
+      <% if (person.keywords && person.keywords.length > 0) { %>
         <div class="keywords">
           <% person.keywords.forEach((keyword) => { %>
             <span class="tag"><%= keyword %></span>
           <% }) %>
         </div>
-      </div>
-    <% } %>
+      <% } else { %>
+        <p class="text-muted">キーワードはまだ登録されていません。</p>
+      <% } %>
+    </div>
   </div>
 </section>
 
 <section class="page-section influence-section section-separator">
   <header class="section-head">
     <h2>影響を受けた本</h2>
-    <p class="section-description">思考の背景となった書籍と、影響の根拠をまとめています。</p>
+    <p class="section-description">思考の背景となった書籍と、どの点に強く影響を受けたかをまとめています。</p>
   </header>
   <div class="stack">
     <% if (influenceBooks.length === 0) { %>
@@ -67,7 +69,8 @@
         <% } %>
 
         <div class="book-card-content">
-          <header class="book-meta">
+          <header class="book-meta book-meta-with-label">
+            <div class="book-section-label">Influence</div>
             <h3><%= book ? book.title : '本情報なし' %></h3>
             <p class="book-author"><strong>著者:</strong> <%= book && book.author ? book.author : '未設定' %></p>
             <% if (book && book.slug) { %>
@@ -77,7 +80,7 @@
 
           <div class="card-subsection detail-block">
             <h4>影響の要約</h4>
-            <p><%= influence.impactSummary || '未設定' %></p>
+            <p class="person-longtext"><%= influence.impactSummary || '未設定' %></p>
           </div>
 
           <div class="card-subsection detail-block source-block">
@@ -105,7 +108,7 @@
 <section class="page-section influence-section section-separator">
   <header class="section-head">
     <h2>この人を知る本</h2>
-    <p class="section-description">この人物の思想や歩みを、より深く知るための書籍です。</p>
+    <p class="section-description">思想だけでなく、生い立ちや意思決定の流れまで立体的に理解するための書籍です。</p>
   </header>
   <div class="stack">
     <% if (aboutBooks.length === 0) { %>
@@ -126,7 +129,8 @@
         <% } %>
 
         <div class="book-card-content">
-          <header class="book-meta">
+          <header class="book-meta book-meta-with-label">
+            <div class="book-section-label book-section-label-about">About</div>
             <h3><%= book ? book.title : '本情報なし' %></h3>
             <p class="book-author"><strong>著者:</strong> <%= book && book.author ? book.author : '未設定' %></p>
             <% if (book && book.slug) { %>
@@ -136,7 +140,7 @@
 
           <div class="card-subsection detail-block">
             <h4>紹介の要約</h4>
-            <p><%= influence.impactSummary || '未設定' %></p>
+            <p class="person-longtext"><%= influence.impactSummary || '未設定' %></p>
           </div>
 
           <div class="card-subsection detail-block source-block">

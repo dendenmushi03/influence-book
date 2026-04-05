@@ -8,6 +8,102 @@ dotenv.config();
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/influence-book';
 
+// ------------------------------
+// Seed source data
+// ------------------------------
+// 1) Person data
+const personSeedData = [
+  {
+    name: 'Bill Gates',
+    slug: 'bill-gates',
+    occupation: 'Co-chair, Bill & Melinda Gates Foundation',
+    category: '起業家',
+    popularity: 95,
+    tags: ['テクノロジー', '長期思考', '経営'],
+    intro: '世界的な起業家・慈善活動家。',
+    bio: 'Microsoft共同創業者。読書家としても知られる。',
+    keywords: ['テクノロジー', '慈善活動', '読書'],
+    featured: true
+  },
+  {
+    name: 'Jeff Bezos',
+    displayNameJa: 'ジェフ・ベゾス',
+    slug: 'jeff-bezos',
+    occupation: 'Founder, Amazon',
+    category: '起業家',
+    popularity: 100,
+    tags: ['経営', '長期思考', 'EC'],
+    intro: 'Amazon創業者。長期視点の経営で知られる。',
+    bio: 'AmazonとBlue Originを率いた起業家。',
+    keywords: ['EC', '長期思考', '経営'],
+    featured: true
+  },
+  {
+    name: '藤田晋',
+    slug: 'susumu-fujita',
+    occupation: '株式会社サイバーエージェント 代表取締役',
+    category: '経営者',
+    popularity: 85,
+    tags: ['起業', 'インターネット', '経営'],
+    intro: 'インターネット産業を牽引する経営者。',
+    bio: 'Ameba事業などを展開するサイバーエージェント創業者。',
+    keywords: ['起業', 'インターネット', '経営'],
+    featured: true
+  }
+];
+
+// 2) Book data
+const bookSeedData = [
+  {
+    title: 'Business Adventures',
+    slug: 'business-adventures',
+    author: 'John Brooks',
+    description: 'ビジネス史から学べる名著。',
+    amazonUrl: 'https://www.amazon.com/',
+    rakutenUrl: 'https://books.rakuten.co.jp/'
+  },
+  {
+    title: 'The Innovator\'s Dilemma',
+    slug: 'the-innovators-dilemma',
+    author: 'Clayton M. Christensen',
+    description: 'イノベーションのジレンマを解説。',
+    amazonUrl: 'https://www.amazon.com/',
+    rakutenUrl: 'https://books.rakuten.co.jp/'
+  },
+  {
+    title: '人を動かす',
+    slug: 'hito-wo-ugokasu',
+    author: 'デール・カーネギー',
+    description: '人間関係の原則を学べる定番書。',
+    amazonUrl: 'https://www.amazon.co.jp/',
+    rakutenUrl: 'https://books.rakuten.co.jp/'
+  },
+  {
+    title: 'ビル・ゲイツ: 巨大ソフトウェア帝国を築いた思想',
+    slug: 'about-bill-gates-dummy',
+    author: 'ダミー著者A',
+    description: 'Bill Gates の思想とキャリアをたどるためのダミー書籍。',
+    amazonUrl: 'https://www.amazon.com/',
+    rakutenUrl: 'https://books.rakuten.co.jp/'
+  },
+  {
+    title: 'ジェフ・ベゾスの長期思考',
+    slug: 'about-jeff-bezos-dummy',
+    author: 'ダミー著者B',
+    description: 'Jeff Bezos の経営観を深掘りするためのダミー書籍。',
+    amazonUrl: 'https://www.amazon.com/',
+    rakutenUrl: 'https://books.rakuten.co.jp/'
+  },
+  {
+    title: '藤田晋の経営哲学',
+    slug: 'about-susumu-fujita-dummy',
+    author: 'ダミー著者C',
+    description: '藤田晋の歩みを知るためのダミー書籍。',
+    amazonUrl: 'https://www.amazon.co.jp/',
+    rakutenUrl: 'https://books.rakuten.co.jp/'
+  }
+];
+
 async function seed() {
   try {
     await mongoose.connect(MONGODB_URI);
@@ -19,96 +115,10 @@ async function seed() {
       Book.deleteMany({})
     ]);
 
-    const [bill, jeff, fujita] = await Person.create([
-      {
-        name: 'Bill Gates',
-        slug: 'bill-gates',
-        occupation: 'Co-chair, Bill & Melinda Gates Foundation',
-        category: '起業家',
-        popularity: 95,
-        tags: ['テクノロジー', '長期思考', '経営'],
-        intro: '世界的な起業家・慈善活動家。',
-        bio: 'Microsoft共同創業者。読書家としても知られる。',
-        keywords: ['テクノロジー', '慈善活動', '読書'],
-        featured: true
-      },
-      {
-        name: 'Jeff Bezos',
-        slug: 'jeff-bezos',
-        occupation: 'Founder, Amazon',
-        category: '起業家',
-        popularity: 100,
-        tags: ['経営', '長期思考', 'EC'],
-        intro: 'Amazon創業者。長期視点の経営で知られる。',
-        bio: 'AmazonとBlue Originを率いた起業家。',
-        keywords: ['EC', '長期思考', '経営'],
-        featured: true
-      },
-      {
-        name: '藤田晋',
-        slug: 'susumu-fujita',
-        occupation: '株式会社サイバーエージェント 代表取締役',
-        category: '経営者',
-        popularity: 85,
-        tags: ['起業', 'インターネット', '経営'],
-        intro: 'インターネット産業を牽引する経営者。',
-        bio: 'Ameba事業などを展開するサイバーエージェント創業者。',
-        keywords: ['起業', 'インターネット', '経営'],
-        featured: true
-      }
-    ]);
+    const [bill, jeff, fujita] = await Person.create(personSeedData);
+    const [book1, book2, book3, aboutBillBook, aboutJeffBook, aboutFujitaBook] = await Book.create(bookSeedData);
 
-    const [book1, book2, book3, aboutBillBook, aboutJeffBook, aboutFujitaBook] = await Book.create([
-      {
-        title: 'Business Adventures',
-        slug: 'business-adventures',
-        author: 'John Brooks',
-        description: 'ビジネス史から学べる名著。',
-        amazonUrl: 'https://www.amazon.com/',
-        rakutenUrl: 'https://books.rakuten.co.jp/'
-      },
-      {
-        title: 'The Innovator\'s Dilemma',
-        slug: 'the-innovators-dilemma',
-        author: 'Clayton M. Christensen',
-        description: 'イノベーションのジレンマを解説。',
-        amazonUrl: 'https://www.amazon.com/',
-        rakutenUrl: 'https://books.rakuten.co.jp/'
-      },
-      {
-        title: '人を動かす',
-        slug: 'hito-wo-ugokasu',
-        author: 'デール・カーネギー',
-        description: '人間関係の原則を学べる定番書。',
-        amazonUrl: 'https://www.amazon.co.jp/',
-        rakutenUrl: 'https://books.rakuten.co.jp/'
-      },
-      {
-        title: 'ビル・ゲイツ: 巨大ソフトウェア帝国を築いた思想',
-        slug: 'about-bill-gates-dummy',
-        author: 'ダミー著者A',
-        description: 'Bill Gates の思想とキャリアをたどるためのダミー書籍。',
-        amazonUrl: 'https://www.amazon.com/',
-        rakutenUrl: 'https://books.rakuten.co.jp/'
-      },
-      {
-        title: 'ジェフ・ベゾスの長期思考',
-        slug: 'about-jeff-bezos-dummy',
-        author: 'ダミー著者B',
-        description: 'Jeff Bezos の経営観を深掘りするためのダミー書籍。',
-        amazonUrl: 'https://www.amazon.com/',
-        rakutenUrl: 'https://books.rakuten.co.jp/'
-      },
-      {
-        title: '藤田晋の経営哲学',
-        slug: 'about-susumu-fujita-dummy',
-        author: 'ダミー著者C',
-        description: '藤田晋の歩みを知るためのダミー書籍。',
-        amazonUrl: 'https://www.amazon.co.jp/',
-        rakutenUrl: 'https://books.rakuten.co.jp/'
-      }
-    ]);
-
+    // 3) Influence/About relation data
     await Influence.create([
       {
         personId: bill._id,

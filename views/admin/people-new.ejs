@@ -6,8 +6,8 @@
     <label>名前 *</label>
     <input name="name" required />
 
-    <label>表示名（日本語表記）</label>
-    <input name="displayNameJa" placeholder="ビル・ゲイツ" />
+    <label>表示名（日本語・公開ページ優先表示）</label>
+    <input name="displayNameJa" placeholder="例: ジェフ・ベゾス（未入力なら name を表示）" />
 
     <label>slug *（URL用）</label>
     <input name="slug" required />
@@ -27,14 +27,14 @@
     <label>紹介文（短文）</label>
     <textarea name="intro" rows="2"></textarea>
 
-    <label>思考の要約（3〜5行）</label>
-    <textarea name="summary" rows="4"></textarea>
+    <label>summary（思考の要約）</label>
+    <textarea name="summary" rows="4" placeholder="この人物の思考の特徴を3〜5行で要約"></textarea>
 
-    <label>経歴</label>
-    <textarea name="career" rows="5"></textarea>
+    <label>career（経歴）</label>
+    <textarea name="career" rows="5" placeholder="学歴、初期キャリア、転機、創業・現在の立場など"></textarea>
 
-    <label>プロフィール</label>
-    <textarea name="bio" rows="4"></textarea>
+    <label>bio（プロフィール補足）</label>
+    <textarea name="bio" rows="4" placeholder="人物像の補足や背景情報（summary / career に入らない要素）"></textarea>
 
     <label>画像URL</label>
     <input name="imageUrl" />
