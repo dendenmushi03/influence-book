@@ -74,7 +74,10 @@ router.get('/people/:slug', async (req, res) => {
       .sort({ featuredOrder: 1, createdAt: 1 })
       .populate('bookId');
 
-    res.render('person-detail', { person, influences });
+    const influenceBooks = influences.filter((influence) => influence.kind !== 'about');
+    const aboutBooks = influences.filter((influence) => influence.kind === 'about');
+
+    res.render('person-detail', { person, influenceBooks, aboutBooks });
   } catch (error) {
     console.error('Failed to load person detail page:', error.message);
     res.status(500).send('Internal Server Error');
@@ -99,9 +102,11 @@ router.get('/books/:slug', async (req, res) => {
       return res.status(404).send('Book not found');
     }
 
-    const influences = await Influence.find({ bookId: book._id })
+    const influenceRecords = await Influence.find({ bookId: book._id })
       .sort({ featuredOrder: 1, createdAt: 1 })
       .populate('personId');
+
+    const influences = influenceRecords.filter((influence) => influence.kind !== 'about');
 
     const influencedPeople = influences
       .map((influence) => influence.personId)

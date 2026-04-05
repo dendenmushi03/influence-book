@@ -4,6 +4,7 @@ const influenceSchema = new mongoose.Schema(
   {
     personId: { type: mongoose.Schema.Types.ObjectId, ref: 'Person', required: true },
     bookId: { type: mongoose.Schema.Types.ObjectId, ref: 'Book', required: true },
+    kind: { type: String, enum: ['influence', 'about'], default: 'influence' },
     impactSummary: { type: String },
     sourceTitle: { type: String },
     sourceUrl: { type: String },

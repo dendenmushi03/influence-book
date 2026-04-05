@@ -45,6 +45,10 @@ function toPopularity(value) {
   return Number.isFinite(popularity) ? popularity : 0;
 }
 
+function toInfluenceKind(value) {
+  return value === 'about' ? 'about' : 'influence';
+}
+
 function requireAdminAuth(req, res, next) {
   if (req.session && req.session.adminAuthenticated) {
     return next();
@@ -322,6 +326,7 @@ router.post('/influences', async (req, res) => {
     await Influence.create({
       personId: req.body.personId,
       bookId: req.body.bookId,
+      kind: toInfluenceKind(req.body.kind),
       impactSummary: req.body.impactSummary,
       sourceTitle: req.body.sourceTitle,
       sourceUrl: req.body.sourceUrl,
@@ -360,6 +365,7 @@ router.post('/influences/:id', async (req, res) => {
     await Influence.findByIdAndUpdate(req.params.id, {
       personId: req.body.personId,
       bookId: req.body.bookId,
+      kind: toInfluenceKind(req.body.kind),
       impactSummary: req.body.impactSummary,
       sourceTitle: req.body.sourceTitle,
       sourceUrl: req.body.sourceUrl,
