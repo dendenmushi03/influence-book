@@ -414,6 +414,7 @@ button.quiet {
   width: 100%;
   aspect-ratio: 16 / 10;
   object-fit: cover;
+  object-position: center top;
   display: block;
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   border-bottom: 1px solid #e5ddd0;
@@ -726,6 +727,7 @@ button.quiet {
   aspect-ratio: 1 / 1;
   border-radius: 24px;
   object-fit: cover;
+  object-position: center top;
   flex-shrink: 0;
   display: block;
   border: 1px solid #e5ddd0;
