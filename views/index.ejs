@@ -15,22 +15,35 @@
     }
   ];
   const heroCopy = heroCopyOptions[0];
+  const heroVisual = {
+    src: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=1200&q=80',
+    alt: '静かな書斎で本を読む人物のイメージ'
+  };
 %>
 
-<section class="hero card">
-  <h1><%= heroCopy.title %></h1>
-  <p class="lead"><%= heroCopy.lead %></p>
-  <form class="hero-search" action="/search" method="GET">
-    <input type="search" name="q" placeholder="例: Bill Gates / 長期思考 / Innovator" aria-label="検索キーワード" />
-    <button type="submit">検索する</button>
-  </form>
-  <div class="hero-actions">
-    <a class="button" href="/people">人物一覧を見る</a>
-    <a class="button secondary" href="/books">本一覧を見る</a>
+<section class="hero card reveal-fade">
+  <div class="hero-layout">
+    <div class="hero-content">
+      <h1><%= heroCopy.title %></h1>
+      <p class="lead"><%= heroCopy.lead %></p>
+      <form class="hero-search" action="/search" method="GET">
+        <input type="search" name="q" placeholder="例: Bill Gates / 長期思考 / Innovator" aria-label="検索キーワード" />
+        <button type="submit">検索する</button>
+      </form>
+      <div class="hero-actions">
+        <a class="button" href="/people">人物一覧を見る</a>
+        <a class="button secondary" href="/books">本一覧を見る</a>
+      </div>
+    </div>
+
+    <div class="hero-visual" aria-label="思考と読書を象徴するビジュアル">
+      <img src="<%= heroVisual.src %>" alt="<%= heroVisual.alt %>" loading="lazy" />
+      <span class="hero-visual-badge">Curated Reading Intelligence</span>
+    </div>
   </div>
 </section>
 
-<section class="page-section section-separator">
+<section class="page-section section-separator decorated-section reveal-fade">
   <header class="section-head">
     <h2>注目の人物</h2>
     <p class="section-description">思考の源泉を知りたい人物を、厳選して掲載しています。</p>
@@ -43,6 +56,15 @@
 
     <% featuredPeople.forEach((person) => { %>
       <article class="card person-card">
+        <div class="person-visual-wrap">
+          <% if (person.imageUrl) { %>
+            <img src="<%= person.imageUrl %>" alt="<%= person.name %> の写真" class="person-visual" loading="lazy" />
+          <% } else { %>
+            <div class="person-visual person-visual-placeholder" aria-hidden="true">
+              <span><%= person.name.slice(0, 1).toUpperCase() %></span>
+            </div>
+          <% } %>
+        </div>
         <h3 class="person-card-title"><%= person.name %></h3>
         <p class="person-role"><%= person.occupation || '肩書き未設定' %></p>
         <p class="person-intro"><%= person.intro || '' %></p>
