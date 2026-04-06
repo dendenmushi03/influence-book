@@ -132,6 +132,22 @@ const bookSeedData = [
     rakutenUrl: 'https://books.rakuten.co.jp/'
   },
   {
+    title: 'Amazon Unbound: Jeff Bezos and the Invention of a Global Empire',
+    slug: 'amazon-unbound',
+    author: 'Brad Stone',
+    description: 'Amazon巨大化フェーズでの戦略と組織の変化を追う評伝。',
+    amazonUrl: 'https://www.amazon.com/',
+    rakutenUrl: 'https://books.rakuten.co.jp/'
+  },
+  {
+    title: 'The Bezos Letters: 14 Principles to Grow Your Business Like Amazon',
+    slug: 'the-bezos-letters',
+    author: 'Steve Anderson with Karen Anderson',
+    description: '株主書簡を14原則で整理し、ベゾスの経営思想を読み解く。',
+    amazonUrl: 'https://www.amazon.com/',
+    rakutenUrl: 'https://books.rakuten.co.jp/'
+  },
+  {
     title: '藤田晋の経営哲学',
     slug: 'about-susumu-fujita-dummy',
     author: 'ダミー著者C',
@@ -162,6 +178,8 @@ async function seed() {
       aboutBillBook,
       aboutJeffBook1,
       aboutJeffBook2,
+      aboutJeffBook3,
+      aboutJeffBook4,
       aboutFujitaBook
     ] = await Book.create(bookSeedData);
 
@@ -239,13 +257,35 @@ async function seed() {
       {
         personId: jeff._id,
         bookId: aboutJeffBook2._id,
-        kind: 'about',
+        kind: 'authored',
         impactSummary:
           '株主への手紙やスピーチを通して、ベゾス自身の言葉で思想を追える本。Day 1、長期思考、顧客起点など、本人の思考を一次資料に近い形で理解しやすい。',
         sourceTitle: 'Invent and Wander',
         sourceUrl: 'https://www.simonandschuster.com/books/Invent-and-Wander/Jeff-Bezos/9781982132616',
         sourceType: 'book-guide',
+        featuredOrder: 1
+      },
+      {
+        personId: jeff._id,
+        bookId: aboutJeffBook3._id,
+        kind: 'about',
+        impactSummary:
+          'Amazonの巨大化フェーズでの意思決定、AWS・Prime・物流拡大、文化の変化を追える続編。The Everything Storeの続きとして人物像の立体感が増す。',
+        sourceTitle: 'Amazon Unbound by Brad Stone',
+        sourceUrl: 'https://www.goodreads.com/book/show/56426485-amazon-unbound',
+        sourceType: 'book-guide',
         featuredOrder: 2
+      },
+      {
+        personId: jeff._id,
+        bookId: aboutJeffBook4._id,
+        kind: 'about',
+        impactSummary:
+          '株主書簡の要点を14原則として整理しており、ベゾスの思考を外部から構造的に理解しやすい。Invent and Wanderの補助線として有効。',
+        sourceTitle: 'The Bezos Letters by Steve Anderson',
+        sourceUrl: 'https://www.steveanderson.com/the-bezos-letters',
+        sourceType: 'book-guide',
+        featuredOrder: 3
       },
       {
         personId: fujita._id,
