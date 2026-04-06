@@ -49,6 +49,100 @@ function toInfluenceKind(value) {
   return value === 'about' ? 'about' : 'influence';
 }
 
+function normalizeIsbn(rawValue) {
+  const value = String(rawValue || '')
+    .replace(/[\s-]/g, '')
+    .toUpperCase();
+  if (!value) {
+    return '';
+  }
+
+  const isbn10Pattern = /^\d{9}[\dX]$/;
+  const isbn13Pattern = /^\d{13}$/;
+  if (isbn10Pattern.test(value) || isbn13Pattern.test(value)) {
+    return value;
+  }
+
+  return '';
+}
+
+function selectCoverUrl(imageLinks) {
+  if (!imageLinks) {
+    return '';
+  }
+
+  const priorityKeys = ['extraLarge', 'large', 'medium', 'small', 'thumbnail', 'smallThumbnail'];
+  for (const key of priorityKeys) {
+    if (imageLinks[key]) {
+      return String(imageLinks[key]).replace(/^http:\/\//, 'https://');
+    }
+  }
+
+  return '';
+}
+
+function extractIsbnFromIdentifiers(identifiers) {
+  const result = { isbn10: '', isbn13: '' };
+  if (!Array.isArray(identifiers)) {
+    return result;
+  }
+
+  identifiers.forEach((identifier) => {
+    if (!identifier || !identifier.type || !identifier.identifier) {
+      return;
+    }
+    if (identifier.type === 'ISBN_10') {
+      result.isbn10 = String(identifier.identifier).replace(/[\s-]/g, '').toUpperCase();
+    }
+    if (identifier.type === 'ISBN_13') {
+      result.isbn13 = String(identifier.identifier).replace(/[\s-]/g, '');
+    }
+  });
+
+  return result;
+}
+
+async function searchGoogleBooks(query) {
+  const normalizedQuery = String(query || '').trim();
+  const isbn = normalizeIsbn(normalizedQuery);
+  const apiQuery = isbn ? `isbn:${isbn}` : normalizedQuery;
+  const params = new URLSearchParams({
+    q: apiQuery,
+    maxResults: '5',
+    printType: 'books',
+    orderBy: 'relevance'
+  });
+  if (process.env.GOOGLE_BOOKS_API_KEY) {
+    params.set('key', process.env.GOOGLE_BOOKS_API_KEY);
+  }
+
+  const response = await fetch(`https://www.googleapis.com/books/v1/volumes?${params.toString()}`);
+  if (!response.ok) {
+    throw new Error(`Google Books API request failed with status ${response.status}`);
+  }
+
+  const payload = await response.json();
+  if (!payload.items || payload.items.length === 0) {
+    return null;
+  }
+
+  const bestItem = payload.items[0];
+  const volumeInfo = bestItem.volumeInfo || {};
+  const { isbn10, isbn13 } = extractIsbnFromIdentifiers(volumeInfo.industryIdentifiers);
+  const coverUrl = selectCoverUrl(volumeInfo.imageLinks);
+
+  return {
+    title: volumeInfo.title || '',
+    authors: Array.isArray(volumeInfo.authors) ? volumeInfo.authors.join(', ') : '',
+    description: volumeInfo.description || '',
+    coverUrl,
+    googleBooksId: bestItem.id || '',
+    isbn10,
+    isbn13,
+    coverImages: volumeInfo.imageLinks || {}
+  };
+}
+
 function requireAdminAuth(req, res, next) {
   if (req.session && req.session.adminAuthenticated) {
     return next();
@@ -251,6 +345,25 @@ router.get('/books/new', (req, res) => {
   res.render('admin/books-new');
 });
 
+router.get('/books/google-books', async (req, res) => {
+  try {
+    const query = req.query.query ? req.query.query.trim() : '';
+    if (!query) {
+      return res.status(400).json({ error: 'query is required' });
+    }
+
+    const bookCandidate = await searchGoogleBooks(query);
+    if (!bookCandidate) {
+      return res.status(404).json({ error: 'not found' });
+    }
+
+    return res.json({ book: bookCandidate });
+  } catch (error) {
+    console.error('Failed to fetch Google Books candidate:', error.message);
+    return res.status(500).json({ error: 'google_books_fetch_failed' });
+  }
+});
+
 router.post('/books', async (req, res) => {
   try {
     const slug = req.body.slug ? req.body.slug.trim() : slugify(req.body.title);
@@ -259,6 +372,9 @@ router.post('/books', async (req, res) => {
       slug,
       author: req.body.author,
       isbn: req.body.isbn,
+      googleBooksId: req.body.googleBooksId,
+      isbn10: req.body.isbn10,
+      isbn13: req.body.isbn13,
       coverUrl: req.body.coverUrl,
       description: req.body.description,
       amazonUrl: req.body.amazonUrl,
@@ -293,6 +409,9 @@ router.post('/books/:id', async (req, res) => {
       slug,
       author: req.body.author,
       isbn: req.body.isbn,
+      googleBooksId: req.body.googleBooksId,
+      isbn10: req.body.isbn10,
+      isbn13: req.body.isbn13,
       coverUrl: req.body.coverUrl,
       description: req.body.description,
       amazonUrl: req.body.amazonUrl,
