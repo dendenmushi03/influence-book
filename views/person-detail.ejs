@@ -4,7 +4,7 @@
   <% const displayName = person.displayNameJa || person.name; %>
   <% const displayOccupation = person.occupationJa || person.occupation || person.occupationEn || '肩書き未設定'; %>
   <% const displayCountry = person.countryJa || person.countryEn || person.countryCode || ''; %>
-  <% const mergedSummary = [person.summary, person.bio].filter(Boolean).join('\n\n'); %>
+  <% const mergedSummary = [person.bio, person.summary].filter(Boolean).join('\n\n'); %>
   <div class="person-detail-header">
     <% if (person.imageUrl) { %>
       <img src="<%= person.imageUrl %>" alt="<%= displayName %> の写真" class="person-detail-image" />
@@ -38,13 +38,11 @@
   <div class="person-detail-meta">
     <div class="card-subsection detail-block text-block summary-block">
       <h2><%= displayName %>について</h2>
-      <p class="section-description">この人物が何を優先し、どのように判断するかを先に把握できます。</p>
       <p class="person-longtext"><%= mergedSummary || 'この人物の紹介はまだ登録されていません。' %></p>
     </div>
 
     <div class="card-subsection detail-block text-block career-block">
       <h2>経歴（タイムライン）</h2>
-      <p class="section-description">主要な転機を時系列で確認できます。</p>
       <% const careerLines = person.career ? person.career.split('\n').map((line) => line.trim()).filter(Boolean) : []; %>
       <% const shouldShowTimeline = careerLines.length > 1; %>
       <% if (shouldShowTimeline) { %>
@@ -77,8 +75,7 @@
 
 <section class="page-section influence-section section-separator">
   <header class="section-head">
-    <h2>影響を受けた本</h2>
-    <p class="section-description">単なる書籍要約ではなく、<%= displayName %> のどの思考軸につながるかが分かるように整理しています。</p>
+    <h2><%= displayName %>が影響を受けた本</h2>
   </header>
   <div class="stack">
     <% if (influenceBooks.length === 0) { %>
@@ -140,8 +137,7 @@
 
 <section class="page-section influence-section section-separator">
   <header class="section-head">
-    <h2>この人を知る本</h2>
-    <p class="section-description">影響源の本とは別に、<%= displayName %> という人物そのものを理解するための書籍をまとめています。</p>
+    <h2><%= displayName %>を知る本</h2>
   </header>
   <div class="stack">
     <% if (aboutBooks.length === 0) { %>
