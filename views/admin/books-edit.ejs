@@ -2,24 +2,40 @@
 
 <section class="card narrow">
   <h1>本編集</h1>
-  <form action="/admin/books/<%= book._id %>" method="POST">
+  <form action="/admin/books/<%= book._id %>" method="POST" data-book-form>
+    <label>Google Books 検索（タイトル or ISBN）</label>
+    <div class="inline-field">
+      <input name="googleBooksQuery" data-google-books-query placeholder="例: 影響力の武器 / 9784799327511" />
+      <button type="button" class="secondary" data-google-books-fetch>Google Books から取得</button>
+    </div>
+    <small class="text-muted" data-google-books-status></small>
+
     <label>タイトル *</label>
-    <input name="title" required value="<%= book.title %>" />
+    <input name="title" required value="<%= book.title %>" data-book-title />
 
     <label>slug *（URL用 / 未入力ならタイトルから生成）</label>
     <input name="slug" value="<%= book.slug || '' %>" />
 
     <label>著者</label>
-    <input name="author" value="<%= book.author || '' %>" />
+    <input name="author" value="<%= book.author || '' %>" data-book-author />
 
     <label>ISBN</label>
     <input name="isbn" value="<%= book.isbn || '' %>" />
 
+    <label>Google Books ID</label>
+    <input name="googleBooksId" value="<%= book.googleBooksId || '' %>" data-book-google-id />
+
+    <label>ISBN-10</label>
+    <input name="isbn10" value="<%= book.isbn10 || '' %>" data-book-isbn10 />
+
+    <label>ISBN-13</label>
+    <input name="isbn13" value="<%= book.isbn13 || '' %>" data-book-isbn13 />
+
     <label>書影URL</label>
-    <input name="coverUrl" value="<%= book.coverUrl || '' %>" />
+    <input name="coverUrl" value="<%= book.coverUrl || '' %>" data-book-cover-url />
 
     <label>説明</label>
-    <textarea name="description" rows="4"><%= book.description || '' %></textarea>
+    <textarea name="description" rows="4" data-book-description><%= book.description || '' %></textarea>
 
     <label>Amazon URL</label>
     <input name="amazonUrl" value="<%= book.amazonUrl || '' %>" />
@@ -31,4 +47,5 @@
   </form>
 </section>
 
+<script src="/js/admin-book-form.js"></script>
 <%- include('../partials/footer') %>

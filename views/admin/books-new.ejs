@@ -2,24 +2,40 @@
 
 <section class="card narrow">
   <h1>本追加</h1>
-  <form action="/admin/books" method="POST">
+  <form action="/admin/books" method="POST" data-book-form>
+    <label>Google Books 検索（タイトル or ISBN）</label>
+    <div class="inline-field">
+      <input name="googleBooksQuery" data-google-books-query placeholder="例: 影響力の武器 / 9784799327511" />
+      <button type="button" class="secondary" data-google-books-fetch>Google Books から取得</button>
+    </div>
+    <small class="text-muted" data-google-books-status></small>
+
     <label>タイトル *</label>
-    <input name="title" required />
+    <input name="title" required data-book-title />
 
     <label>slug（URL用 / 未入力ならタイトルから生成）</label>
     <input name="slug" />
 
     <label>著者</label>
-    <input name="author" />
+    <input name="author" data-book-author />
 
     <label>ISBN</label>
     <input name="isbn" />
 
+    <label>Google Books ID</label>
+    <input name="googleBooksId" data-book-google-id />
+
+    <label>ISBN-10</label>
+    <input name="isbn10" data-book-isbn10 />
+
+    <label>ISBN-13</label>
+    <input name="isbn13" data-book-isbn13 />
+
     <label>書影URL</label>
-    <input name="coverUrl" />
+    <input name="coverUrl" data-book-cover-url />
 
     <label>説明</label>
-    <textarea name="description" rows="4"></textarea>
+    <textarea name="description" rows="4" data-book-description></textarea>
 
     <label>Amazon URL</label>
     <input name="amazonUrl" />
@@ -31,4 +47,5 @@
   </form>
 </section>
 
+<script src="/js/admin-book-form.js"></script>
 <%- include('../partials/footer') %>
