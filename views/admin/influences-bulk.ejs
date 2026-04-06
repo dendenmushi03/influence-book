@@ -1,0 +1,113 @@
+<%- include('../partials/header') %>
+
+<section class="card">
+  <h1>影響関係一括登録</h1>
+  <p class="text-muted">人物と種類を選び、本を1行ずつ入力してプレビュー→一括適用します。</p>
+
+  <% const values = formValues || {}; %>
+  <% if (errorMessage) { %>
+    <div class="notice warning">
+      <p><strong>入力エラー:</strong> <%= errorMessage %></p>
+    </div>
+  <% } %>
+
+  <form action="/admin/influences/bulk/preview" method="POST">
+    <label>人物 *</label>
+    <select name="personId" required>
+      <option value="">選択してください</option>
+      <% people.forEach((person) => { %>
+        <option value="<%= person._id %>" <%= String(values.personId || '') === String(person._id) ? 'selected' : '' %>><%= person.name %></option>
+      <% }) %>
+    </select>
+
+    <label>種類 *</label>
+    <select name="kind" required>
+      <option value="influence" <%= values.kind !== 'about' ? 'selected' : '' %>>influence（影響を受けた本）</option>
+      <option value="about" <%= values.kind === 'about' ? 'selected' : '' %>>about（この人を知る本）</option>
+    </select>
+
+    <label>本リスト（1行に1冊）*</label>
+    <textarea name="multilineBookInput" rows="10" placeholder="The Innovator's Dilemma&#10;Business Adventures&#10;9780316219282" required><%= values.multilineBookInput || '' %></textarea>
+
+    <details>
+      <summary>共通メタ情報（任意）</summary>
+      <label>影響の要約</label>
+      <textarea name="impactSummary" rows="2"><%= values.impactSummary || '' %></textarea>
+
+      <label>出典タイトル</label>
+      <input name="sourceTitle" value="<%= values.sourceTitle || '' %>" />
+
+      <label>出典URL</label>
+      <input name="sourceUrl" value="<%= values.sourceUrl || '' %>" />
+
+      <label>出典タイプ</label>
+      <input name="sourceType" value="<%= values.sourceType || '' %>" placeholder="interview / article" />
+
+      <label>表示順</label>
+      <input type="number" name="featuredOrder" value="<%= values.featuredOrder || 0 %>" />
+    </details>
+
+    <button type="submit">プレビューを作成</button>
+  </form>
+</section>
+
+<% if (previewResult) { %>
+  <section class="card">
+    <h2>プレビュー結果</h2>
+    <p class="text-muted">DB更新はまだ行っていません。内容確認後に一括適用してください。</p>
+
+    <div class="stack">
+      <% previewResult.rows.forEach((row) => { %>
+        <article class="card list-card">
+          <div>
+            <p><strong><%= row.lineNumber %>行目:</strong> <%= row.rawInput %></p>
+            <p><strong>判定:</strong> <%= row.statusLabel %></p>
+            <p><strong>理由:</strong> <%= row.reasonText %></p>
+          </div>
+          <div>
+            <p><strong>本タイトル:</strong> <%= row.resolvedTitle || '—' %></p>
+            <p><strong>著者:</strong> <%= row.resolvedAuthor || '—' %></p>
+            <% if (row.resolvedBookId) { %>
+              <a href="/admin/books/<%= row.resolvedBookId %>/edit">Book編集へ</a>
+            <% } %>
+          </div>
+        </article>
+      <% }) %>
+    </div>
+
+    <form action="/admin/influences/bulk/apply" method="POST">
+      <input type="hidden" name="personId" value="<%= values.personId || '' %>" />
+      <input type="hidden" name="kind" value="<%= values.kind || 'influence' %>" />
+      <textarea name="multilineBookInput" style="display: none;" aria-hidden="true" tabindex="-1"><%= values.multilineBookInput || '' %></textarea>
+      <textarea name="impactSummary" style="display: none;" aria-hidden="true" tabindex="-1"><%= values.impactSummary || '' %></textarea>
+      <input type="hidden" name="sourceTitle" value="<%= values.sourceTitle || '' %>" />
+      <input type="hidden" name="sourceUrl" value="<%= values.sourceUrl || '' %>" />
+      <input type="hidden" name="sourceType" value="<%= values.sourceType || '' %>" />
+      <input type="hidden" name="featuredOrder" value="<%= values.featuredOrder || 0 %>" />
+      <button type="submit">一括適用を実行</button>
+    </form>
+  </section>
+<% } %>
+
+<% if (applyResult) { %>
+  <section class="card">
+    <h2>一括適用結果</h2>
+    <div class="stack">
+      <% applyResult.rows.forEach((row) => { %>
+        <article class="card list-card">
+          <div>
+            <p><strong><%= row.lineNumber %>行目:</strong> <%= row.rawInput %></p>
+            <p><strong>結果:</strong> <%= row.status %></p>
+            <p><strong>理由:</strong> <%= row.reasonText %></p>
+          </div>
+          <div>
+            <p><strong>本タイトル:</strong> <%= row.resolvedTitle || '—' %></p>
+            <p><strong>著者:</strong> <%= row.resolvedAuthor || '—' %></p>
+          </div>
+        </article>
+      <% }) %>
+    </div>
+  </section>
+<% } %>
+
+<%- include('../partials/footer') %>

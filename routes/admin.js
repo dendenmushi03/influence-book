@@ -5,6 +5,8 @@ const Person = require('../models/Person');
 const { searchGoogleBooks, buildBookAutofillPatch } = require('../lib/google-books');
 const { bookFieldsFromInput, findDuplicateBookMatches, buildFillBlankPatch } = require('../lib/book-dedup');
 const { resolveBookForInfluence, normalizeInput } = require('../lib/resolve-book-for-influence');
+const { previewBulkInfluences } = require('../lib/preview-bulk-influences');
+const { applyBulkInfluences } = require('../lib/apply-bulk-influences');
 
 const router = express.Router();
 
@@ -63,6 +65,51 @@ async function renderInfluenceNewPage(res, data = {}) {
     books,
     formValues: data.formValues || {},
     resolvePreview: data.resolvePreview || null,
+    errorMessage: data.errorMessage || ''
+  });
+}
+
+function mapResolveReason(reason) {
+  const labels = {
+    googleBooksId: 'googleBooksId一致',
+    isbn13: 'isbn13一致',
+    isbn10: 'isbn10一致',
+    slug: 'slug一致',
+    title_author: 'title+author近似',
+    google_books_candidate: 'Google Books候補',
+    existing_influence: '既存Influence重複',
+    google_books_not_found: 'Google Books候補なし',
+    unexpected: '予期せぬエラー'
+  };
+  return labels[reason] || reason || '-';
+}
+
+async function renderInfluenceBulkPage(res, data = {}) {
+  const people = await Person.find({}).sort({ name: 1 });
+  const previewResult = data.previewResult
+    ? {
+        ...data.previewResult,
+        rows: (data.previewResult.rows || []).map((row) => ({
+          ...row,
+          reasonText: row.reasonLabel || mapResolveReason(row.reason)
+        }))
+      }
+    : null;
+  const applyResult = data.applyResult
+    ? {
+        ...data.applyResult,
+        rows: (data.applyResult.rows || []).map((row) => ({
+          ...row,
+          reasonText: row.reasonLabel || mapResolveReason(row.reason)
+        }))
+      }
+    : null;
+
+  return res.render('admin/influences-bulk', {
+    people,
+    formValues: data.formValues || {},
+    previewResult,
+    applyResult,
     errorMessage: data.errorMessage || ''
   });
 }
@@ -394,6 +441,122 @@ router.get('/influences/new', async (req, res) => {
   } catch (error) {
     console.error('Failed to load influence form:', error.message);
     res.status(500).send('Failed to load influence form');
+  }
+});
+
+router.get('/influences/bulk', async (req, res) => {
+  try {
+    await renderInfluenceBulkPage(res);
+  } catch (error) {
+    console.error('Failed to load influence bulk form:', error.message);
+    res.status(500).send('Failed to load influence bulk form');
+  }
+});
+
+router.post('/influences/bulk/preview', async (req, res) => {
+  try {
+    const personId = String(req.body.personId || '').trim();
+    const kind = toInfluenceKind(req.body.kind);
+    const multilineBookInput = String(req.body.multilineBookInput || '');
+    const formValues = {
+      personId,
+      kind,
+      multilineBookInput,
+      impactSummary: req.body.impactSummary || '',
+      sourceTitle: req.body.sourceTitle || '',
+      sourceUrl: req.body.sourceUrl || '',
+      sourceType: req.body.sourceType || '',
+      featuredOrder: req.body.featuredOrder || 0
+    };
+
+    if (!personId || !multilineBookInput.trim()) {
+      return renderInfluenceBulkPage(res, {
+        formValues,
+        errorMessage: '人物と本リストは必須です。'
+      });
+    }
+
+    const personExists = await Person.exists({ _id: personId });
+    if (!personExists) {
+      return renderInfluenceBulkPage(res, {
+        formValues,
+        errorMessage: '指定された人物が見つかりません。'
+      });
+    }
+
+    const previewResult = await previewBulkInfluences({
+      Book,
+      Influence,
+      personId,
+      kind,
+      multilineBookInput,
+      slugify
+    });
+
+    return renderInfluenceBulkPage(res, {
+      formValues,
+      previewResult
+    });
+  } catch (error) {
+    console.error('Failed to preview bulk influences:', error.message);
+    return res.status(500).send('Failed to preview bulk influences');
+  }
+});
+
+router.post('/influences/bulk/apply', async (req, res) => {
+  try {
+    const personId = String(req.body.personId || '').trim();
+    const kind = toInfluenceKind(req.body.kind);
+    const multilineBookInput = String(req.body.multilineBookInput || '');
+    const formValues = {
+      personId,
+      kind,
+      multilineBookInput,
+      impactSummary: req.body.impactSummary || '',
+      sourceTitle: req.body.sourceTitle || '',
+      sourceUrl: req.body.sourceUrl || '',
+      sourceType: req.body.sourceType || '',
+      featuredOrder: req.body.featuredOrder || 0
+    };
+
+    if (!personId || !multilineBookInput.trim()) {
+      return renderInfluenceBulkPage(res, {
+        formValues,
+        errorMessage: '人物と本リストは必須です。'
+      });
+    }
+
+    const personExists = await Person.exists({ _id: personId });
+    if (!personExists) {
+      return renderInfluenceBulkPage(res, {
+        formValues,
+        errorMessage: '指定された人物が見つかりません。'
+      });
+    }
+
+    const applyResult = await applyBulkInfluences({
+      Book,
+      Influence,
+      personId,
+      kind,
+      multilineBookInput,
+      slugify,
+      commonFields: {
+        impactSummary: req.body.impactSummary,
+        sourceTitle: req.body.sourceTitle,
+        sourceUrl: req.body.sourceUrl,
+        sourceType: req.body.sourceType,
+        featuredOrder: req.body.featuredOrder
+      }
+    });
+
+    return renderInfluenceBulkPage(res, {
+      formValues,
+      applyResult
+    });
+  } catch (error) {
+    console.error('Failed to apply bulk influences:', error.message);
+    return res.status(500).send('Failed to apply bulk influences');
   }
 });
 
