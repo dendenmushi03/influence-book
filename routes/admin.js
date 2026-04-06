@@ -2,6 +2,7 @@ const express = require('express');
 const Book = require('../models/Book');
 const Influence = require('../models/Influence');
 const Person = require('../models/Person');
+const { searchGoogleBooks, buildBookAutofillPatch } = require('../lib/google-books');
 
 const router = express.Router();
 
@@ -47,100 +48,6 @@ function toPopularity(value) {
 
 function toInfluenceKind(value) {
   return value === 'about' ? 'about' : 'influence';
-}
-
-function normalizeIsbn(rawValue) {
-  const value = String(rawValue || '')
-    .replace(/[\s-]/g, '')
-    .toUpperCase();
-  if (!value) {
-    return '';
-  }
-
-  const isbn10Pattern = /^\d{9}[\dX]$/;
-  const isbn13Pattern = /^\d{13}$/;
-  if (isbn10Pattern.test(value) || isbn13Pattern.test(value)) {
-    return value;
-  }
-
-  return '';
-}
-
-function selectCoverUrl(imageLinks) {
-  if (!imageLinks) {
-    return '';
-  }
-
-  const priorityKeys = ['extraLarge', 'large', 'medium', 'small', 'thumbnail', 'smallThumbnail'];
-  for (const key of priorityKeys) {
-    if (imageLinks[key]) {
-      return String(imageLinks[key]).replace(/^http:\/\//, 'https://');
-    }
-  }
-
-  return '';
-}
-
-function extractIsbnFromIdentifiers(identifiers) {
-  const result = { isbn10: '', isbn13: '' };
-  if (!Array.isArray(identifiers)) {
-    return result;
-  }
-
-  identifiers.forEach((identifier) => {
-    if (!identifier || !identifier.type || !identifier.identifier) {
-      return;
-    }
-    if (identifier.type === 'ISBN_10') {
-      result.isbn10 = String(identifier.identifier).replace(/[\s-]/g, '').toUpperCase();
-    }
-    if (identifier.type === 'ISBN_13') {
-      result.isbn13 = String(identifier.identifier).replace(/[\s-]/g, '');
-    }
-  });
-
-  return result;
-}
-
-async function searchGoogleBooks(query) {
-  const normalizedQuery = String(query || '').trim();
-  const isbn = normalizeIsbn(normalizedQuery);
-  const apiQuery = isbn ? `isbn:${isbn}` : normalizedQuery;
-  const params = new URLSearchParams({
-    q: apiQuery,
-    maxResults: '5',
-    printType: 'books',
-    orderBy: 'relevance'
-  });
-  if (process.env.GOOGLE_BOOKS_API_KEY) {
-    params.set('key', process.env.GOOGLE_BOOKS_API_KEY);
-  }
-
-  const response = await fetch(`https://www.googleapis.com/books/v1/volumes?${params.toString()}`);
-  if (!response.ok) {
-    throw new Error(`Google Books API request failed with status ${response.status}`);
-  }
-
-  const payload = await response.json();
-  if (!payload.items || payload.items.length === 0) {
-    return null;
-  }
-
-  const bestItem = payload.items[0];
-  const volumeInfo = bestItem.volumeInfo || {};
-  const { isbn10, isbn13 } = extractIsbnFromIdentifiers(volumeInfo.industryIdentifiers);
-  const coverUrl = selectCoverUrl(volumeInfo.imageLinks);
-
-  return {
-    title: volumeInfo.title || '',
-    authors: Array.isArray(volumeInfo.authors) ? volumeInfo.authors.join(', ') : '',
-    description: volumeInfo.description || '',
-    coverUrl,
-    googleBooksId: bestItem.id || '',
-    isbn10,
-    isbn13,
-    coverImages: volumeInfo.imageLinks || {}
-  };
 }
 
 function requireAdminAuth(req, res, next) {
@@ -367,7 +274,7 @@ router.get('/books/google-books', async (req, res) => {
 router.post('/books', async (req, res) => {
   try {
     const slug = req.body.slug ? req.body.slug.trim() : slugify(req.body.title);
-    await Book.create({
+    const bookData = {
       title: req.body.title,
       slug,
       author: req.body.author,
@@ -379,7 +286,16 @@ router.post('/books', async (req, res) => {
       description: req.body.description,
       amazonUrl: req.body.amazonUrl,
       rakutenUrl: req.body.rakutenUrl
-    });
+    };
+
+    try {
+      const { patch } = await buildBookAutofillPatch(bookData, { respectExistingGoogleBooksId: true });
+      Object.assign(bookData, patch);
+    } catch (googleBooksError) {
+      console.warn('Google Books auto-fill skipped:', googleBooksError.message);
+    }
+
+    await Book.create(bookData);
 
     res.redirect('/admin');
   } catch (error) {
