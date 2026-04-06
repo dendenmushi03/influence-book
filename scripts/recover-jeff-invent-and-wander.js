@@ -355,7 +355,7 @@ async function main() {
         metadataPatched: Object.keys(metadataPatch),
         influenceUnify,
         deletedBookIds,
-        ensureJeffAbout,
+        ensureAbout,
         finalBookCount: finalEntries.length,
         finalBooks: finalEntries.map(toPrintableBookRow),
         everythingStoreUnaffected: Boolean(everythingStoreBook) && Boolean(everythingStoreInfluence)
