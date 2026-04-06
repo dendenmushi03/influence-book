@@ -15,6 +15,8 @@
   const googleBooksIdInput = form.querySelector('[data-book-google-id]');
   const isbn10Input = form.querySelector('[data-book-isbn10]');
   const isbn13Input = form.querySelector('[data-book-isbn13]');
+  const duplicateWarning = form.querySelector('[data-duplicate-warning]');
+  const duplicateList = form.querySelector('[data-duplicate-list]');
 
   function updateStatus(message, isError) {
     if (!statusElement) {
@@ -58,6 +60,73 @@
     }
   }
 
+  function reasonLabel(reason) {
+    const labels = {
+      googleBooksId: 'Google Books ID 一致',
+      isbn13: 'ISBN-13 一致',
+      isbn10: 'ISBN-10 一致',
+      slug: 'slug 一致',
+      title_author: 'タイトル・著者が近い'
+    };
+    return labels[reason] || '重複候補';
+  }
+
+  function updateDuplicateWarning(candidates) {
+    if (!duplicateWarning || !duplicateList) {
+      return;
+    }
+
+    if (!Array.isArray(candidates) || candidates.length === 0) {
+      duplicateWarning.hidden = true;
+      duplicateList.innerHTML = '';
+      return;
+    }
+
+    duplicateList.innerHTML = candidates
+      .map((candidate) => {
+        const title = candidate.title || '(タイトル未設定)';
+        const author = candidate.author || '著者未設定';
+        const influenceBadge = candidate.influenceCount > 0 ? ` / Influence紐づき ${candidate.influenceCount}件` : '';
+        return `<li><a href=\"/admin/books/${candidate.id}/edit\">${title}（${author}）</a> - ${reasonLabel(candidate.reason)}${influenceBadge}</li>`;
+      })
+      .join('');
+    duplicateWarning.hidden = false;
+  }
+
+  let duplicateCheckTimer = null;
+  async function checkDuplicateCandidates() {
+    if (!titleInput || !titleInput.value.trim()) {
+      updateDuplicateWarning([]);
+      return;
+    }
+
+    const params = new URLSearchParams({
+      title: titleInput ? titleInput.value : '',
+      author: authorInput ? authorInput.value : '',
+      googleBooksId: googleBooksIdInput ? googleBooksIdInput.value : '',
+      isbn10: isbn10Input ? isbn10Input.value : '',
+      isbn13: isbn13Input ? isbn13Input.value : ''
+    });
+
+    try {
+      const response = await fetch(`/admin/books/duplicate-candidates?${params.toString()}`);
+      if (!response.ok) {
+        return;
+      }
+      const payload = await response.json();
+      updateDuplicateWarning(payload.candidates || []);
+    } catch (error) {
+      console.warn('Failed to check duplicate candidates:', error);
+    }
+  }
+
+  function scheduleDuplicateCheck() {
+    if (duplicateCheckTimer) {
+      clearTimeout(duplicateCheckTimer);
+    }
+    duplicateCheckTimer = setTimeout(checkDuplicateCandidates, 250);
+  }
+
   async function fetchGoogleBooksCandidate() {
     const query = queryInput ? queryInput.value.trim() : '';
     if (!query) {
@@ -93,6 +162,7 @@
 
       applyBookCandidate(payload.book);
       updateStatus('候補をフォームに反映しました。必要に応じて修正して保存してください。', false);
+      scheduleDuplicateCheck();
     } catch (error) {
       console.error('Failed to fetch Google Books candidate:', error);
       updateStatus('候補を取得できませんでした。時間をおいて再試行してください。', true);
@@ -104,4 +174,12 @@
   if (fetchButton) {
     fetchButton.addEventListener('click', fetchGoogleBooksCandidate);
   }
+
+  [titleInput, authorInput, googleBooksIdInput, isbn10Input, isbn13Input].forEach((input) => {
+    if (!input) {
+      return;
+    }
+    input.addEventListener('input', scheduleDuplicateCheck);
+    input.addEventListener('blur', checkDuplicateCandidates);
+  });
 })();

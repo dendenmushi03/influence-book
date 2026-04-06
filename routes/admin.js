@@ -3,6 +3,7 @@ const Book = require('../models/Book');
 const Influence = require('../models/Influence');
 const Person = require('../models/Person');
 const { searchGoogleBooks, buildBookAutofillPatch } = require('../lib/google-books');
+const { bookFieldsFromInput, findDuplicateBookMatches, buildFillBlankPatch } = require('../lib/book-dedup');
 
 const router = express.Router();
 
@@ -249,7 +250,7 @@ router.post('/people/:id/delete', async (req, res) => {
 });
 
 router.get('/books/new', (req, res) => {
-  res.render('admin/books-new');
+  res.render('admin/books-new', { duplicateCandidates: [] });
 });
 
 router.get('/books/google-books', async (req, res) => {
@@ -273,20 +274,7 @@ router.get('/books/google-books', async (req, res) => {
 
 router.post('/books', async (req, res) => {
   try {
-    const slug = req.body.slug ? req.body.slug.trim() : slugify(req.body.title);
-    const bookData = {
-      title: req.body.title,
-      slug,
-      author: req.body.author,
-      isbn: req.body.isbn,
-      googleBooksId: req.body.googleBooksId,
-      isbn10: req.body.isbn10,
-      isbn13: req.body.isbn13,
-      coverUrl: req.body.coverUrl,
-      description: req.body.description,
-      amazonUrl: req.body.amazonUrl,
-      rakutenUrl: req.body.rakutenUrl
-    };
+    const bookData = bookFieldsFromInput(req.body, slugify);
 
     try {
       const { patch } = await buildBookAutofillPatch(bookData, { respectExistingGoogleBooksId: true });
@@ -295,12 +283,44 @@ router.post('/books', async (req, res) => {
       console.warn('Google Books auto-fill skipped:', googleBooksError.message);
     }
 
+    const duplicateMatches = await findDuplicateBookMatches(Book, bookData, { Influence });
+    const duplicate = duplicateMatches[0];
+
+    if (duplicate) {
+      const patch = buildFillBlankPatch(duplicate.book.toObject(), bookData);
+      if (Object.keys(patch).length > 0) {
+        await Book.updateOne({ _id: duplicate.book._id }, { $set: patch });
+      }
+      return res.redirect(`/admin/books/${duplicate.book._id}/edit`);
+    }
+
     await Book.create(bookData);
 
     res.redirect('/admin');
   } catch (error) {
     console.error('Failed to create book:', error.message);
     res.status(500).send('Failed to create book');
+  }
+});
+
+router.get('/books/duplicate-candidates', async (req, res) => {
+  try {
+    const bookData = bookFieldsFromInput(req.query, slugify);
+    const duplicateMatches = await findDuplicateBookMatches(Book, bookData, { Influence });
+
+    return res.json({
+      candidates: duplicateMatches.slice(0, 5).map((match) => ({
+        id: match.book._id,
+        title: match.book.title,
+        slug: match.book.slug,
+        author: match.book.author,
+        reason: match.reason,
+        influenceCount: match.influenceCount
+      }))
+    });
+  } catch (error) {
+    console.error('Failed to check duplicate candidates:', error.message);
+    return res.status(500).json({ error: 'duplicate_check_failed' });
   }
 });
 
