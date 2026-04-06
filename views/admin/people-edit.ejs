@@ -15,6 +15,21 @@
     <label>肩書き</label>
     <input name="occupation" value="<%= person.occupation || '' %>" />
 
+    <label>肩書き（日本語表示優先）</label>
+    <input name="occupationJa" value="<%= person.occupationJa || '' %>" placeholder="例: アマゾン創業者" />
+
+    <label>肩書き（英語）</label>
+    <input name="occupationEn" value="<%= person.occupationEn || '' %>" placeholder="例: Founder, Amazon" />
+
+    <label>国コード（検索用・任意）</label>
+    <input name="countryCode" value="<%= person.countryCode || '' %>" placeholder="例: US / JP" />
+
+    <label>国名（日本語）</label>
+    <input name="countryJa" value="<%= person.countryJa || '' %>" placeholder="例: アメリカ" />
+
+    <label>国名（英語）</label>
+    <input name="countryEn" value="<%= person.countryEn || '' %>" placeholder="例: United States" />
+
     <label>カテゴリ</label>
     <input name="category" value="<%= person.category || '' %>" />
 
