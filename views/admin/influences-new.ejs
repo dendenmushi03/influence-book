@@ -2,46 +2,72 @@
 
 <section class="card narrow">
   <h1>影響関係追加</h1>
+  <% const values = formValues || {}; %>
   <form action="/admin/influences" method="POST">
+    <% if (errorMessage) { %>
+      <div class="notice warning">
+        <p><strong>登録できませんでした。</strong> <%= errorMessage %></p>
+      </div>
+    <% } %>
+
     <label>人物 *</label>
     <select name="personId" required>
       <option value="">選択してください</option>
       <% people.forEach((person) => { %>
-        <option value="<%= person._id %>"><%= person.name %></option>
+        <option value="<%= person._id %>" <%= String(values.personId || '') === String(person._id) ? 'selected' : '' %>><%= person.name %></option>
       <% }) %>
     </select>
 
-    <label>本 *</label>
-    <select name="bookId" required>
+    <label>既存Book（任意）</label>
+    <select name="bookId" data-book-id-select>
       <option value="">選択してください</option>
       <% books.forEach((book) => { %>
-        <option value="<%= book._id %>"><%= book.title %></option>
+        <option value="<%= book._id %>" <%= String(values.bookId || '') === String(book._id) ? 'selected' : '' %>><%= book.title %></option>
       <% }) %>
     </select>
+
+    <label>Book 検索（タイトル or ISBN）</label>
+    <div class="inline-field">
+      <input name="bookQuery" value="<%= values.bookQuery || '' %>" placeholder="例: The Everything Store / 9780316219282" data-book-query />
+      <button type="button" class="secondary" data-book-resolve>Book を検索 / 取得</button>
+    </div>
+
+    <label>著者（任意 / 補助）</label>
+    <input name="bookAuthor" value="<%= values.bookAuthor || '' %>" data-book-author />
+
+    <input type="hidden" name="resolvedBookId" value="<%= values.resolvedBookId || '' %>" data-resolved-book-id />
+    <small class="text-muted" data-book-resolve-status>
+      <% if (resolvePreview && resolvePreview.action === 'use_existing' && resolvePreview.book) { %>
+        既存 Book を利用します: <%= resolvePreview.book.title %>
+      <% } else if (resolvePreview && resolvePreview.action === 'create_new' && resolvePreview.book) { %>
+        新規 Book を作成して紐づけます: <%= resolvePreview.book.title %>
+      <% } %>
+    </small>
 
     <label>種類 *</label>
     <select name="kind" required>
-      <option value="influence">influence（影響を受けた本）</option>
-      <option value="about">about（この人を知る本）</option>
+      <option value="influence" <%= values.kind !== 'about' ? 'selected' : '' %>>influence（影響を受けた本）</option>
+      <option value="about" <%= values.kind === 'about' ? 'selected' : '' %>>about（この人を知る本）</option>
     </select>
 
     <label>影響の要約</label>
-    <textarea name="impactSummary" rows="3"></textarea>
+    <textarea name="impactSummary" rows="3"><%= values.impactSummary || '' %></textarea>
 
     <label>出典タイトル</label>
-    <input name="sourceTitle" />
+    <input name="sourceTitle" value="<%= values.sourceTitle || '' %>" />
 
     <label>出典URL</label>
-    <input name="sourceUrl" />
+    <input name="sourceUrl" value="<%= values.sourceUrl || '' %>" />
 
     <label>出典タイプ</label>
-    <input name="sourceType" placeholder="interview / article" />
+    <input name="sourceType" placeholder="interview / article" value="<%= values.sourceType || '' %>" />
 
     <label>表示順</label>
-    <input type="number" name="featuredOrder" value="0" />
+    <input type="number" name="featuredOrder" value="<%= values.featuredOrder || 0 %>" />
 
     <button type="submit">登録する</button>
   </form>
 </section>
 
+<script src="/js/admin-influence-form.js"></script>
 <%- include('../partials/footer') %>
