@@ -2,6 +2,9 @@
 
 <section class="card person-header-card page-section detail-hero">
   <% const displayName = person.displayNameJa || person.name; %>
+  <% const displayOccupation = person.occupationJa || person.occupation || person.occupationEn || '肩書き未設定'; %>
+  <% const displayCountry = person.countryJa || person.countryEn || person.countryCode || ''; %>
+  <% const mergedSummary = [person.summary, person.bio].filter(Boolean).join('\n\n'); %>
   <div class="person-detail-header">
     <% if (person.imageUrl) { %>
       <img src="<%= person.imageUrl %>" alt="<%= displayName %> の写真" class="person-detail-image" />
@@ -12,10 +15,13 @@
     <% } %>
     <div class="person-detail-headings">
       <h1><%= displayName %></h1>
-      <p class="section-description"><%= person.occupation || '肩書き未設定' %></p>
+      <p class="section-description"><%= displayOccupation %></p>
     </div>
   </div>
-  <p class="person-category">カテゴリ: <%= person.category || '未設定' %></p>
+  <p class="person-category">
+    カテゴリ: <%= person.category || '未設定' %>
+    <% if (displayCountry) { %> ・ 国: <%= displayCountry %><% } %>
+  </p>
 
   <% if (person.coreMessage) { %>
     <p class="person-core-message">"<%= person.coreMessage %>"</p>
@@ -30,24 +36,10 @@
   <% } %>
 
   <div class="person-detail-meta">
-    <div class="card-subsection detail-block thought-traits-block">
-      <h2>思考の特徴</h2>
-      <p class="section-description">意思決定の軸として繰り返し現れる、思考の柱を整理しています。</p>
-      <% if (person.thoughtTraits && person.thoughtTraits.length > 0) { %>
-        <ul class="thought-traits-list">
-          <% person.thoughtTraits.forEach((trait) => { %>
-            <li><%= trait %></li>
-          <% }) %>
-        </ul>
-      <% } else { %>
-        <p class="text-muted">思考の特徴はまだ登録されていません。</p>
-      <% } %>
-    </div>
-
     <div class="card-subsection detail-block text-block summary-block">
-      <h2>思考と意思決定の要約</h2>
+      <h2><%= displayName %>について</h2>
       <p class="section-description">この人物が何を優先し、どのように判断するかを先に把握できます。</p>
-      <p class="person-longtext"><%= person.summary || '思考の要約はまだ登録されていません。' %></p>
+      <p class="person-longtext"><%= mergedSummary || 'この人物の紹介はまだ登録されていません。' %></p>
     </div>
 
     <div class="card-subsection detail-block text-block career-block">
@@ -66,12 +58,6 @@
       <% } else { %>
         <p class="person-longtext">経歴はまだ登録されていません。</p>
       <% } %>
-    </div>
-
-    <div class="card-subsection detail-block text-block">
-      <h2>人物理解の補足</h2>
-      <p class="section-description">経歴だけでは見えない背景や人物像を補うセクションです。</p>
-      <p class="person-longtext"><%= person.bio || '紹介文はまだ登録されていません。' %></p>
     </div>
 
     <div class="card-subsection detail-block">
