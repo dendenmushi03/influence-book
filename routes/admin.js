@@ -4,6 +4,7 @@ const Influence = require('../models/Influence');
 const Person = require('../models/Person');
 const { searchGoogleBooks, buildBookAutofillPatch } = require('../lib/google-books');
 const { bookFieldsFromInput, findDuplicateBookMatches, buildFillBlankPatch } = require('../lib/book-dedup');
+const { resolveBookForInfluence, normalizeInput } = require('../lib/resolve-book-for-influence');
 
 const router = express.Router();
 
@@ -49,6 +50,21 @@ function toPopularity(value) {
 
 function toInfluenceKind(value) {
   return value === 'about' ? 'about' : 'influence';
+}
+
+async function renderInfluenceNewPage(res, data = {}) {
+  const [people, books] = await Promise.all([
+    Person.find({}).sort({ name: 1 }),
+    Book.find({}).sort({ title: 1 })
+  ]);
+
+  return res.render('admin/influences-new', {
+    people,
+    books,
+    formValues: data.formValues || {},
+    resolvePreview: data.resolvePreview || null,
+    errorMessage: data.errorMessage || ''
+  });
 }
 
 function requireAdminAuth(req, res, next) {
@@ -374,23 +390,112 @@ router.post('/books/:id/delete', async (req, res) => {
 
 router.get('/influences/new', async (req, res) => {
   try {
-    const [people, books] = await Promise.all([
-      Person.find({}).sort({ name: 1 }),
-      Book.find({}).sort({ title: 1 })
-    ]);
-
-    res.render('admin/influences-new', { people, books });
+    await renderInfluenceNewPage(res);
   } catch (error) {
     console.error('Failed to load influence form:', error.message);
     res.status(500).send('Failed to load influence form');
   }
 });
 
+router.get('/influences/resolve-book', async (req, res) => {
+  try {
+    const input = normalizeInput({
+      bookQuery: req.query.bookQuery,
+      author: req.query.bookAuthor,
+      title: req.query.bookTitle,
+      googleBooksId: req.query.googleBooksId,
+      isbn: req.query.isbn,
+      isbn10: req.query.isbn10,
+      isbn13: req.query.isbn13
+    });
+
+    if (!input.bookQuery && !input.title && !input.isbn && !input.googleBooksId) {
+      return res.status(400).json({ error: 'book_query_required' });
+    }
+
+    const result = await resolveBookForInfluence({
+      Book,
+      Influence,
+      input,
+      slugify,
+      dryRun: true
+    });
+
+    if (!result.ok) {
+      return res.status(404).json({
+        error: result.error || 'book_not_resolved',
+        message: result.message || 'Book を解決できませんでした。'
+      });
+    }
+
+    if (result.action === 'use_existing') {
+      return res.json({
+        action: result.action,
+        reason: result.reason,
+        resolvedBook: {
+          id: result.book._id,
+          title: result.book.title,
+          author: result.book.author,
+          slug: result.book.slug
+        },
+        candidates: (result.candidates || []).map((item) => ({
+          id: item.book._id,
+          title: item.book.title,
+          author: item.book.author,
+          reason: item.reason
+        }))
+      });
+    }
+
+    return res.json({
+      action: result.action,
+      reason: result.reason,
+      candidate: {
+        title: result.book.title,
+        author: result.book.author,
+        googleBooksId: result.book.googleBooksId,
+        isbn10: result.book.isbn10,
+        isbn13: result.book.isbn13
+      }
+    });
+  } catch (error) {
+    console.error('Failed to resolve book for influence:', error.message);
+    return res.status(500).json({ error: 'book_resolve_failed' });
+  }
+});
+
 router.post('/influences', async (req, res) => {
   try {
+    let resolvedBookId = req.body.bookId ? String(req.body.bookId).trim() : '';
+
+    if (!resolvedBookId && req.body.resolvedBookId) {
+      resolvedBookId = String(req.body.resolvedBookId).trim();
+    }
+
+    if (!resolvedBookId) {
+      const result = await resolveBookForInfluence({
+        Book,
+        Influence,
+        input: {
+          bookQuery: req.body.bookQuery,
+          author: req.body.bookAuthor
+        },
+        slugify
+      });
+
+      if (!result.ok || !result.book || !result.book._id) {
+        return renderInfluenceNewPage(res, {
+          formValues: req.body,
+          errorMessage: result.message || 'Book を解決できなかったため、Influence を作成しませんでした。'
+        });
+      }
+
+      resolvedBookId = String(result.book._id);
+    }
+
     await Influence.create({
       personId: req.body.personId,
-      bookId: req.body.bookId,
+      bookId: resolvedBookId,
       kind: toInfluenceKind(req.body.kind),
       impactSummary: req.body.impactSummary,
       sourceTitle: req.body.sourceTitle,
