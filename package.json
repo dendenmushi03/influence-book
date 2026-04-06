@@ -8,7 +8,8 @@
     "dev": "nodemon server.js",
     "seed": "node scripts/seed.js",
     "backfill:books": "node scripts/backfill-books.js",
-    "duplicates:books": "node scripts/find-duplicate-books.js"
+    "duplicates:books": "node scripts/find-duplicate-books.js",
+    "recover:jeff:invent": "node scripts/recover-jeff-invent-and-wander.js"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
