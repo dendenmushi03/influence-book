@@ -7,6 +7,7 @@ const { bookFieldsFromInput, findDuplicateBookMatches, buildFillBlankPatch } = r
 const { resolveBookForInfluence, normalizeInput } = require('../lib/resolve-book-for-influence');
 const { previewBulkInfluences } = require('../lib/preview-bulk-influences');
 const { applyBulkInfluences } = require('../lib/apply-bulk-influences');
+const { INFLUENCE_KIND_OPTIONS, toInfluenceKind, getInfluenceKindLabel } = require('../lib/influence-kind');
 
 const router = express.Router();
 
@@ -50,10 +51,6 @@ function toPopularity(value) {
   return Number.isFinite(popularity) ? popularity : 0;
 }
 
-function toInfluenceKind(value) {
-  return value === 'about' ? 'about' : 'influence';
-}
-
 async function renderInfluenceNewPage(res, data = {}) {
   const [people, books] = await Promise.all([
     Person.find({}).sort({ name: 1 }),
@@ -63,6 +60,7 @@ async function renderInfluenceNewPage(res, data = {}) {
   return res.render('admin/influences-new', {
     people,
     books,
+    influenceKindOptions: INFLUENCE_KIND_OPTIONS,
     formValues: data.formValues || {},
     resolvePreview: data.resolvePreview || null,
     errorMessage: data.errorMessage || ''
@@ -107,6 +105,7 @@ async function renderInfluenceBulkPage(res, data = {}) {
 
   return res.render('admin/influences-bulk', {
     people,
+    influenceKindOptions: INFLUENCE_KIND_OPTIONS,
     formValues: data.formValues || {},
     previewResult,
     applyResult,
@@ -209,7 +208,12 @@ router.get('/influences', async (req, res) => {
       .populate('personId')
       .populate('bookId');
 
-    res.render('admin/influences-list', { influences });
+    const influencesWithKindLabel = influences.map((influence) => ({
+      ...influence.toObject(),
+      kindLabel: getInfluenceKindLabel(influence.kind)
+    }));
+
+    res.render('admin/influences-list', { influences: influencesWithKindLabel });
   } catch (error) {
     console.error('Failed to load influences list:', error.message);
     res.status(500).send('Failed to load influences list');
@@ -686,7 +690,7 @@ router.get('/influences/:id/edit', async (req, res) => {
       return res.status(404).send('Influence not found');
     }
 
-    return res.render('admin/influences-edit', { influence, people, books });
+    return res.render('admin/influences-edit', { influence, people, books, influenceKindOptions: INFLUENCE_KIND_OPTIONS });
   } catch (error) {
     console.error('Failed to load influence edit form:', error.message);
     return res.status(500).send('Failed to load influence edit form');
