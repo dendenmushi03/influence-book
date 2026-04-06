@@ -21,8 +21,11 @@
 
     <label>種類 *</label>
     <select name="kind" required>
-      <option value="influence" <%= influence.kind !== 'about' ? 'selected' : '' %>>influence（影響を受けた本）</option>
-      <option value="about" <%= influence.kind === 'about' ? 'selected' : '' %>>about（この人を知る本）</option>
+      <% influenceKindOptions.forEach((option) => { %>
+        <option value="<%= option.value %>" <%= influence.kind === option.value ? 'selected' : '' %>>
+          <%= option.value %>（<%= option.label %>）
+        </option>
+      <% }) %>
     </select>
 
     <label>影響の要約</label>

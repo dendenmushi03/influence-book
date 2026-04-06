@@ -174,6 +174,65 @@
   </div>
 </section>
 
+<section class="page-section influence-section section-separator">
+  <header class="section-head">
+    <h2><%= displayName %>が出版・監修している本</h2>
+  </header>
+  <div class="stack">
+    <% if (authoredBooks.length === 0) { %>
+      <article class="card empty-state">
+        <p>まだ本が登録されていません。</p>
+      </article>
+    <% } %>
+
+    <% authoredBooks.forEach((influence) => { %>
+      <% const book = influence.bookId; %>
+      <article class="card book-card influence-card">
+        <% if (book && book.coverUrl) { %>
+          <img src="<%= book.coverUrl %>" alt="<%= book.title %> の書影" class="book-cover" />
+        <% } else { %>
+          <div class="book-cover book-cover-placeholder" aria-hidden="true">
+            <span>No Cover</span>
+          </div>
+        <% } %>
+
+        <div class="book-card-content">
+          <header class="book-meta book-meta-with-label">
+            <div class="book-section-label">出版・監修</div>
+            <h3><%= book ? book.title : '本情報なし' %></h3>
+            <p class="book-author"><strong>著者:</strong> <%= book && book.author ? book.author : '未設定' %></p>
+            <% if (book && book.slug) { %>
+              <a class="person-link" href="/books/<%= book.slug %>">本の詳細を見る</a>
+            <% } %>
+          </header>
+
+          <div class="card-subsection detail-block">
+            <h4>出版・監修のポイント</h4>
+            <p class="person-longtext"><%= influence.impactSummary || '未設定' %></p>
+          </div>
+
+          <div class="card-subsection detail-block source-block">
+            <h4>出典</h4>
+            <p class="source-title"><%= influence.sourceTitle || '未設定' %></p>
+            <% if (influence.sourceUrl) { %>
+              <a class="source-link" href="<%= influence.sourceUrl %>" target="_blank" rel="noopener noreferrer">出典を見る</a>
+            <% } %>
+          </div>
+
+          <div class="links purchase-links">
+            <% if (book && book.amazonUrl) { %>
+              <a class="button-link" href="<%= book.amazonUrl %>" target="_blank" rel="noopener noreferrer">Amazonで見る</a>
+            <% } %>
+            <% if (book && book.rakutenUrl) { %>
+              <a class="button-link" href="<%= book.rakutenUrl %>" target="_blank" rel="noopener noreferrer">楽天で見る</a>
+            <% } %>
+          </div>
+        </div>
+      </article>
+    <% }) %>
+  </div>
+</section>
+
 <section class="page-section section-separator">
   <header class="section-head">
     <h2>次に読む人物</h2>
