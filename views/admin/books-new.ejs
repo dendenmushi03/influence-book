@@ -3,6 +3,11 @@
 <section class="card narrow">
   <h1>本追加</h1>
   <form action="/admin/books" method="POST" data-book-form>
+    <div class="notice warning" data-duplicate-warning hidden>
+      <p><strong>同名または類似の本が既に存在します。</strong> 既存本を編集してください。</p>
+      <ul data-duplicate-list></ul>
+    </div>
+
     <label>Google Books 検索（タイトル or ISBN）</label>
     <div class="inline-field">
       <input name="googleBooksQuery" data-google-books-query placeholder="例: 影響力の武器 / 9784799327511" />

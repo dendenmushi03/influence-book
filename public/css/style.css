@@ -915,6 +915,18 @@ form {
   flex: 1;
 }
 
+.notice.warning {
+  border: 1px solid #e4cda2;
+  background: #fff8eb;
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.notice.warning ul {
+  margin: 8px 0 0;
+  padding-left: 20px;
+}
+
 label {
   font-size: 0.92rem;
   color: #424955;
