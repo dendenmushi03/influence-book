@@ -27,14 +27,6 @@
     <p class="person-core-message">"<%= person.coreMessage %>"</p>
   <% } %>
 
-  <% if (person.tags && person.tags.length > 0) { %>
-    <div class="keywords person-tags">
-      <% person.tags.forEach((tag) => { %>
-        <span class="tag"><%= tag %></span>
-      <% }) %>
-    </div>
-  <% } %>
-
   <div class="person-detail-meta">
     <div class="card-subsection detail-block text-block summary-block">
       <h2><%= displayName %>について</h2>
@@ -58,18 +50,6 @@
       <% } %>
     </div>
 
-    <div class="card-subsection detail-block">
-      <h2>キーワード</h2>
-      <% if (person.keywords && person.keywords.length > 0) { %>
-        <div class="keywords">
-          <% person.keywords.forEach((keyword) => { %>
-            <span class="tag"><%= keyword %></span>
-          <% }) %>
-        </div>
-      <% } else { %>
-        <p class="text-muted">キーワードはまだ登録されていません。</p>
-      <% } %>
-    </div>
   </div>
 </section>
 
