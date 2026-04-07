@@ -77,10 +77,6 @@
 
         <div class="book-card-content">
           <header class="book-meta book-meta-with-label">
-            <div class="book-section-label">Influence</div>
-            <% if (influence.featuredOrder !== undefined && influence.featuredOrder !== null) { %>
-              <div class="featured-order">重要度 <%= influence.featuredOrder %></div>
-            <% } %>
             <h3><%= book ? book.title : '本情報なし' %></h3>
             <p class="book-author"><strong>著者:</strong> <%= book && book.author ? book.author : '未設定' %></p>
             <% if (book && book.slug) { %>
@@ -139,7 +135,6 @@
 
         <div class="book-card-content">
           <header class="book-meta book-meta-with-label">
-            <div class="book-section-label book-section-label-about">About</div>
             <h3><%= book ? book.title : '本情報なし' %></h3>
             <p class="book-author"><strong>著者:</strong> <%= book && book.author ? book.author : '未設定' %></p>
             <% if (book && book.slug) { %>
@@ -198,7 +193,6 @@
 
         <div class="book-card-content">
           <header class="book-meta book-meta-with-label">
-            <div class="book-section-label">出版・監修</div>
             <h3><%= book ? book.title : '本情報なし' %></h3>
             <p class="book-author"><strong>著者:</strong> <%= book && book.author ? book.author : '未設定' %></p>
             <% if (book && book.slug) { %>
