@@ -1002,6 +1002,27 @@ button.quiet {
   margin-top: 10px;
 }
 
+.person-book-section {
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius-lg) + 2px);
+  background: linear-gradient(180deg, #f8f7f4 0%, #f4f2ee 100%);
+  padding: clamp(22px, 3vw, 34px);
+}
+
+.person-book-section .section-head {
+  margin-bottom: clamp(16px, 2.4vw, 24px);
+}
+
+.person-book-section .section-head h2 {
+  font-size: clamp(1.5rem, 2.2vw, 2rem);
+  letter-spacing: -0.01em;
+}
+
+.person-book-section .section-description {
+  font-size: clamp(1.04rem, 1.5vw, 1.1rem);
+  line-height: 1.8;
+}
+
 .influence-card {
   padding: 26px;
 }
@@ -1273,6 +1294,14 @@ select:focus {
 
   .influence-card {
     padding: 20px;
+  }
+
+  .person-book-section {
+    padding: 18px;
+  }
+
+  .person-book-section .section-description {
+    line-height: 1.7;
   }
 
   .book-cover {
