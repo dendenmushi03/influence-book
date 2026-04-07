@@ -5,6 +5,16 @@ const Influence = require('../models/Influence');
 const { buildPrimaryCategoryList, normalizePrimaryCategory } = require('../lib/person-taxonomy');
 
 const router = express.Router();
+const MAJOR_COUNTRY_OPTIONS = [
+  { code: 'US', label: 'アメリカ' },
+  { code: 'JP', label: '日本' },
+  { code: 'GB', label: 'イギリス' },
+  { code: 'FR', label: 'フランス' },
+  { code: 'DE', label: 'ドイツ' },
+  { code: 'CN', label: '中国' },
+  { code: 'KR', label: '韓国' },
+  { code: 'IN', label: 'インド' }
+];
 
 function escapeRegex(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -108,7 +118,8 @@ function normalizeTags(tags) {
 }
 
 function buildCountryOptions(countries) {
-  const countryMap = new Map();
+  const countryMap = new Map(MAJOR_COUNTRY_OPTIONS.map((country) => [country.code, country]));
+  const majorCountryRank = new Map(MAJOR_COUNTRY_OPTIONS.map((country, index) => [country.code, index]));
 
   countries.forEach((country) => {
     const code = (country.countryCode || '').trim();
@@ -122,7 +133,16 @@ function buildCountryOptions(countries) {
     });
   });
 
-  return [...countryMap.values()].sort((a, b) => a.label.localeCompare(b.label, 'ja'));
+  return [...countryMap.values()].sort((a, b) => {
+    const aRank = majorCountryRank.has(a.code) ? majorCountryRank.get(a.code) : Number.POSITIVE_INFINITY;
+    const bRank = majorCountryRank.has(b.code) ? majorCountryRank.get(b.code) : Number.POSITIVE_INFINITY;
+
+    if (aRank !== bRank) {
+      return aRank - bRank;
+    }
+
+    return a.label.localeCompare(b.label, 'ja');
+  });
 }
 
 async function fetchPeopleFilterOptions() {
@@ -265,6 +285,8 @@ router.get('/', async (req, res) => {
   try {
     const topSearchLimit = 4;
     const peopleFilters = normalizePeopleFilters(req.query);
+    peopleFilters.sort = 'popular';
+    peopleFilters.tag = '';
     const peopleQuery = buildPeopleQuery(peopleFilters);
     const peopleSortOption = buildPeopleSortOption(peopleFilters.sort);
     const hasActivePeopleFilters = hasPeopleFilters(peopleFilters);

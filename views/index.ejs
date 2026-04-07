@@ -38,7 +38,7 @@
 <section class="page-section decorated-section reveal-fade people-entry-section">
   <header class="section-head">
     <h2>人物を探す</h2>
-    <p class="section-description">気になる人物をキーワード・カテゴリ・国・タグで絞り込み、そのまま人物一覧へ進めます。</p>
+    <p class="section-description">気になる人物をキーワード・カテゴリ・国で絞り込み、そのまま人物一覧へ進めます。</p>
   </header>
 
   <%- include('partials/people-filter-card', {
@@ -49,6 +49,9 @@
     actionPath: '/',
     clearPath: topSearchClearPath,
     showActiveFilters: false,
+    showSortFilter: false,
+    showTagFilter: false,
+    searchPlaceholder: '人物名・肩書き・紹介文などで検索',
     cardClassName: 'people-entry-filter-card',
     inlineResults: {
       hasActiveFilters: topSearchHasActiveFilters,
