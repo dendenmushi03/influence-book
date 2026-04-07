@@ -110,7 +110,7 @@
         <p class="inline-search-results-label">該当する人物</p>
         <div class="grid">
           <% inlinePeople.forEach((person) => { %>
-            <%- include('person-card', { person, headingLevel: 'h3', showMeta: true }) %>
+            <%- include('person-card', { person, headingLevel: 'h3', showMeta: false }) %>
           <% }) %>
         </div>
 
