@@ -30,7 +30,7 @@ const personSeedData = [
     displayNameJa: 'ジェフ・ベゾス',
     slug: 'jeff-bezos',
     occupation: 'Founder, Amazon',
-    occupationJa: 'アマゾン創業者',
+    occupationJa: 'Amazon創業者',
     occupationEn: 'Founder, Amazon',
     countryCode: 'US',
     countryJa: 'アメリカ',

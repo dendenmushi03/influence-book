@@ -3,7 +3,6 @@
 <section class="card person-header-card page-section detail-hero">
   <% const displayName = person.displayNameJa || person.name; %>
   <% const displayOccupation = person.occupationJa || person.occupation || person.occupationEn || '肩書き未設定'; %>
-  <% const displayCountry = person.countryJa || person.countryEn || person.countryCode || ''; %>
   <% const mergedSummary = [person.bio, person.summary].filter(Boolean).join('\n\n'); %>
   <div class="person-detail-header">
     <% if (person.imageUrl) { %>
@@ -18,11 +17,6 @@
       <p class="section-description"><%= displayOccupation %></p>
     </div>
   </div>
-  <p class="person-category">
-    カテゴリ: <%= person.category || '未設定' %>
-    <% if (displayCountry) { %> ・ 国: <%= displayCountry %><% } %>
-  </p>
-
   <% if (person.coreMessage) { %>
     <p class="person-core-message">"<%= person.coreMessage %>"</p>
   <% } %>
