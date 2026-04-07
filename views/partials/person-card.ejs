@@ -1,8 +1,9 @@
 <%
   const headingTag = headingLevel || 'h3';
   const displayName = person.displayNameJa || person.name;
+  const resolvedCardClassName = typeof cardClassName === 'string' ? cardClassName : '';
 %>
-<article class="card person-card">
+<article class="card person-card <%= resolvedCardClassName %>">
   <div class="person-visual-wrap">
     <% if (person.imageUrl) { %>
       <img src="<%= person.imageUrl %>" alt="<%= displayName %> の写真" class="person-visual" loading="lazy" />
