@@ -57,34 +57,17 @@
     actionPath: '/',
     clearPath: topSearchClearPath,
     showActiveFilters: false,
-    cardClassName: 'people-entry-filter-card'
+    cardClassName: 'people-entry-filter-card',
+    inlineResults: {
+      hasActiveFilters: topSearchHasActiveFilters,
+      people: topSearchPeople,
+      count: topSearchResultCount,
+      limit: topSearchLimit,
+      resultPath: topSearchResultPath,
+      clearPath: topSearchClearPath
+    }
   }) %>
 </section>
-
-<% if (topSearchHasActiveFilters) { %>
-  <section class="page-section section-separator decorated-section reveal-fade">
-    <header class="section-head">
-      <h2>検索結果</h2>
-      <p class="section-description">条件に一致する人物を表示しています（最大6件）。</p>
-    </header>
-
-    <% if (topSearchPeople.length === 0) { %>
-      <p class="empty-state">一致する人物が見つかりませんでした。<a href="<%= topSearchClearPath %>">条件を解除する</a>か、<a href="/people">人物一覧</a>からお探しください。</p>
-    <% } else { %>
-      <div class="grid">
-        <% topSearchPeople.forEach((person) => { %>
-          <%- include('partials/person-card', { person, headingLevel: 'h3', showMeta: true }) %>
-        <% }) %>
-      </div>
-
-      <% if (topSearchResultCount > topSearchPeople.length) { %>
-        <div class="section-actions">
-          <a class="button" href="<%= topSearchResultPath %>">すべての結果を見る</a>
-        </div>
-      <% } %>
-    <% } %>
-  </section>
-<% } %>
 
 <section class="page-section section-separator decorated-section reveal-fade">
   <header class="section-head">

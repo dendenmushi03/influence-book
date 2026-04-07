@@ -3,6 +3,12 @@
   const shouldShowActiveFilters = showActiveFilters !== false;
   const clearLinkPath = clearPath || resolvedActionPath;
   const hasActiveFilters = Boolean(filters.q || filters.category || filters.country || filters.tag || filters.sort === 'new');
+  const inlineResultState = inlineResults || {};
+  const shouldShowInlineResults = Boolean(inlineResultState.hasActiveFilters);
+  const inlinePeople = inlineResultState.people || [];
+  const inlineResultCount = inlineResultState.count || 0;
+  const inlineResultPath = inlineResultState.resultPath || '/people';
+  const inlineClearPath = inlineResultState.clearPath || clearLinkPath;
   const toQuery = (params) =>
     Object.entries(params)
       .filter(([, value]) => value)
@@ -94,5 +100,26 @@
       <%= filters.sort === 'new' ? '並び順: 新着順' : '' %>
       <a class="button quiet filter-clear-link" href="<%= clearLinkPath %>">解除</a>
     </p>
+  <% } %>
+
+  <% if (shouldShowInlineResults) { %>
+    <div class="inline-search-results">
+      <% if (inlinePeople.length === 0) { %>
+        <p class="empty-state">該当する人物が見つかりませんでした。<a href="<%= inlineClearPath %>">条件を解除する</a>か、<a href="/people">人物一覧</a>からお探しください。</p>
+      <% } else { %>
+        <p class="inline-search-results-label">該当する人物</p>
+        <div class="grid">
+          <% inlinePeople.forEach((person) => { %>
+            <%- include('person-card', { person, headingLevel: 'h3', showMeta: true }) %>
+          <% }) %>
+        </div>
+
+        <% if (inlineResultCount > inlinePeople.length) { %>
+          <div class="section-actions">
+            <a class="button" href="<%= inlineResultPath %>">すべての結果を見る</a>
+          </div>
+        <% } %>
+      <% } %>
+    </div>
   <% } %>
 </article>

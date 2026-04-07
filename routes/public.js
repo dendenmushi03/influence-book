@@ -263,6 +263,7 @@ async function buildRelatedPeople(person, influences, maxPeople = 4) {
 
 router.get('/', async (req, res) => {
   try {
+    const topSearchLimit = 4;
     const peopleFilters = normalizePeopleFilters(req.query);
     const peopleQuery = buildPeopleQuery(peopleFilters);
     const peopleSortOption = buildPeopleSortOption(peopleFilters.sort);
@@ -271,7 +272,7 @@ router.get('/', async (req, res) => {
     const [featuredPeople, filterOptions, searchResultPeople, searchResultCount] = await Promise.all([
       Person.find({ featured: true }).sort({ createdAt: -1 }).limit(3),
       fetchPeopleFilterOptions(),
-      hasActivePeopleFilters ? Person.find(peopleQuery).sort(peopleSortOption).limit(6) : Promise.resolve([]),
+      hasActivePeopleFilters ? Person.find(peopleQuery).sort(peopleSortOption).limit(topSearchLimit) : Promise.resolve([]),
       hasActivePeopleFilters ? Person.countDocuments(peopleQuery) : Promise.resolve(0)
     ]);
 
@@ -294,6 +295,7 @@ router.get('/', async (req, res) => {
       topSearchHasActiveFilters: hasActivePeopleFilters,
       topSearchPeople: searchResultPeople,
       topSearchResultCount: searchResultCount,
+      topSearchLimit,
       topSearchResultPath: `/people${searchParams ? `?${searchParams}` : ''}`,
       topSearchClearPath: '/'
     });
