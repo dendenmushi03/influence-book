@@ -264,6 +264,10 @@ p {
   max-width: 58ch;
 }
 
+.hero .lead {
+  margin-bottom: 0;
+}
+
 .hero-search {
   position: relative;
   display: flex;
