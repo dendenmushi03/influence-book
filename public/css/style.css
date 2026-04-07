@@ -133,8 +133,7 @@ main {
 h1,
 h2,
 h3,
-h4,
-h5 {
+h4 {
   font-family: 'Manrope', 'Noto Sans JP', sans-serif;
   line-height: 1.3;
   margin-top: 0;
@@ -156,10 +155,6 @@ h3 {
 
 h4 {
   font-size: 1rem;
-}
-
-h5 {
-  font-size: 0.92rem;
 }
 
 p {
@@ -857,58 +852,6 @@ button.quiet {
   padding: clamp(24px, 3.8vw, 38px);
 }
 
-.detail-premium-hero {
-  margin-bottom: 58px;
-}
-
-.detail-hero-layout {
-  grid-template-columns: minmax(0, 1fr) minmax(290px, 430px);
-  align-items: stretch;
-}
-
-.detail-hero-copy {
-  max-width: 62ch;
-}
-
-.detail-hero-copy h1 {
-  margin-bottom: 8px;
-}
-
-.detail-hero-occupation {
-  margin-bottom: 16px;
-  color: rgba(252, 250, 246, 0.88);
-  font-size: clamp(1rem, 1.8vw, 1.14rem);
-}
-
-.detail-hero-lead {
-  max-width: 62ch;
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.detail-core-message {
-  margin-top: 24px;
-  border-left-color: #a8b5cf;
-  background: rgba(245, 247, 252, 0.93);
-}
-
-.detail-hero-visual {
-  min-height: clamp(320px, 43vw, 510px);
-}
-
-.detail-photo-placeholder {
-  width: 100%;
-  min-height: inherit;
-  border-radius: 0;
-  border: 0;
-}
-
-.detail-hero-badge {
-  backdrop-filter: blur(6px);
-}
-
 .person-detail-header {
   display: flex;
   align-items: center;
@@ -958,19 +901,13 @@ button.quiet {
   margin-top: 8px;
 }
 
-.detail-meta-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
-}
-
 .detail-block {
   border-top: 1px solid var(--border);
   padding-top: 20px;
 }
 
 .detail-block h2,
-.detail-block h4,
-.detail-block h5 {
+.detail-block h4 {
   margin-bottom: 10px;
 }
 
@@ -1067,46 +1004,6 @@ button.quiet {
 
 .influence-card {
   padding: 26px;
-  border-radius: 20px;
-}
-
-.detail-context-section .card,
-.person-book-paths .influence-card,
-.related-people-premium .person-card {
-  background: linear-gradient(180deg, #fffefb 0%, #f9f5ed 100%);
-}
-
-.person-book-path-stack {
-  gap: 28px;
-}
-
-.book-path-section {
-  padding: clamp(22px, 3vw, 34px);
-  border: 1px solid var(--border);
-  border-radius: 24px;
-  background: linear-gradient(180deg, #fffefb 0%, #f8f3ea 100%);
-  box-shadow: var(--shadow-card);
-}
-
-.book-path-head {
-  margin-bottom: 20px;
-}
-
-.book-path-head h3 {
-  margin-bottom: 8px;
-}
-
-.book-path-head .section-description {
-  max-width: 70ch;
-}
-
-.premium-related-grid {
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 20px;
-}
-
-.related-premium-card .person-visual-wrap {
-  margin-bottom: 14px;
 }
 
 .source-block {
@@ -1289,11 +1186,6 @@ select:focus {
   .hero-visual {
     max-width: 640px;
   }
-
-  .detail-hero-layout,
-  .detail-meta-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 640px) {
@@ -1395,19 +1287,6 @@ select:focus {
 
   .person-header-card {
     padding: 20px;
-  }
-
-  .detail-premium-hero {
-    margin-bottom: 42px;
-  }
-
-  .detail-hero-occupation {
-    margin-bottom: 12px;
-  }
-
-  .book-path-section {
-    padding: 18px;
-    border-radius: 18px;
   }
 
   .person-detail-header {
