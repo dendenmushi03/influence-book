@@ -54,12 +54,37 @@
     categories: peopleEntryCategories,
     countries: peopleEntryCountries,
     tags: peopleEntryTags,
-    actionPath: '/people',
-    clearPath: '/people',
+    actionPath: '/',
+    clearPath: topSearchClearPath,
     showActiveFilters: false,
     cardClassName: 'people-entry-filter-card'
   }) %>
 </section>
+
+<% if (topSearchHasActiveFilters) { %>
+  <section class="page-section section-separator decorated-section reveal-fade">
+    <header class="section-head">
+      <h2>検索結果</h2>
+      <p class="section-description">条件に一致する人物を表示しています（最大6件）。</p>
+    </header>
+
+    <% if (topSearchPeople.length === 0) { %>
+      <p class="empty-state">一致する人物が見つかりませんでした。<a href="<%= topSearchClearPath %>">条件を解除する</a>か、<a href="/people">人物一覧</a>からお探しください。</p>
+    <% } else { %>
+      <div class="grid">
+        <% topSearchPeople.forEach((person) => { %>
+          <%- include('partials/person-card', { person, headingLevel: 'h3', showMeta: true }) %>
+        <% }) %>
+      </div>
+
+      <% if (topSearchResultCount > topSearchPeople.length) { %>
+        <div class="section-actions">
+          <a class="button" href="<%= topSearchResultPath %>">すべての結果を見る</a>
+        </div>
+      <% } %>
+    <% } %>
+  </section>
+<% } %>
 
 <section class="page-section section-separator decorated-section reveal-fade">
   <header class="section-head">
@@ -73,22 +98,7 @@
     <% } %>
 
     <% featuredPeople.forEach((person) => { %>
-      <% const displayName = person.displayNameJa || person.name; %>
-      <article class="card person-card">
-        <div class="person-visual-wrap">
-          <% if (person.imageUrl) { %>
-            <img src="<%= person.imageUrl %>" alt="<%= displayName %> の写真" class="person-visual" loading="lazy" />
-          <% } else { %>
-            <div class="person-visual person-visual-placeholder" aria-hidden="true">
-              <span><%= displayName.slice(0, 1).toUpperCase() %></span>
-            </div>
-          <% } %>
-        </div>
-        <h3 class="person-card-title"><%= displayName %></h3>
-        <p class="person-role"><%= person.occupation || '肩書き未設定' %></p>
-        <p class="person-intro"><%= person.intro || '' %></p>
-        <a class="person-link" href="/people/<%= person.slug %>">詳細を見る</a>
-      </article>
+      <%- include('partials/person-card', { person, headingLevel: 'h3', showMeta: false }) %>
     <% }) %>
   </div>
 </section>

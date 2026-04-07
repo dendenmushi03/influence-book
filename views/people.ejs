@@ -25,30 +25,7 @@
     <% } %>
 
     <% people.forEach((person) => { %>
-      <% const displayName = person.displayNameJa || person.name; %>
-      <article class="card person-card">
-        <div class="person-visual-wrap">
-          <% if (person.imageUrl) { %>
-            <img src="<%= person.imageUrl %>" alt="<%= displayName %> の写真" class="person-visual" loading="lazy" />
-          <% } else { %>
-            <div class="person-visual person-visual-placeholder" aria-hidden="true">
-              <span><%= displayName.slice(0, 1).toUpperCase() %></span>
-            </div>
-          <% } %>
-        </div>
-        <h2 class="person-card-title"><%= displayName %></h2>
-        <p class="person-role"><%= person.occupation || '肩書き未設定' %></p>
-        <p class="person-intro"><%= person.intro || '' %></p>
-        <p class="person-category">カテゴリ: <%= person.category || '未設定' %></p>
-        <% if (person.tags && person.tags.length > 0) { %>
-          <div class="keywords">
-            <% person.tags.forEach((tag) => { %>
-              <span class="tag"><%= tag %></span>
-            <% }) %>
-          </div>
-        <% } %>
-        <a class="person-link" href="/people/<%= person.slug %>">詳細を見る</a>
-      </article>
+      <%- include('partials/person-card', { person, headingLevel: 'h2', showMeta: true }) %>
     <% }) %>
   </div>
 </section>
