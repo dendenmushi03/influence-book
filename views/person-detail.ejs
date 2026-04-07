@@ -1,36 +1,84 @@
 <%- include('partials/header') %>
 
-<section class="card person-header-card page-section detail-hero">
-  <% const displayName = person.displayNameJa || person.name; %>
-  <% const displayOccupation = person.occupationJa || person.occupation || person.occupationEn || '肩書き未設定'; %>
-  <% const mergedSummary = [person.bio, person.summary].filter(Boolean).join('\n\n'); %>
-  <div class="person-detail-header">
-    <% if (person.imageUrl) { %>
-      <img src="<%= person.imageUrl %>" alt="<%= displayName %> の写真" class="person-detail-image" />
-    <% } else { %>
-      <div class="person-detail-image person-detail-image-placeholder" aria-hidden="true">
-        <span><%= displayName.slice(0, 1).toUpperCase() %></span>
-      </div>
-    <% } %>
-    <div class="person-detail-headings">
+<%
+  const displayName = person.displayNameJa || person.name;
+  const displayOccupation = person.occupationJa || person.occupation || person.occupationEn || '肩書き未設定';
+  const mergedSummary = [person.bio, person.summary].filter(Boolean).join('\n\n');
+  const heroLeadSource = person.intro || person.summary || person.bio || '';
+  const heroLeadText = heroLeadSource
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)[0] || 'この人物の紹介はまだ登録されていません。';
+  const careerLines = person.career ? person.career.split('\n').map((line) => line.trim()).filter(Boolean) : [];
+  const shouldShowTimeline = careerLines.length > 1;
+  const personBookChapters = [
+    {
+      id: 'influence',
+      title: `${displayName}が影響を受けた本`,
+      lead: '価値観や意思決定の原点になった読書体験を辿ります。',
+      sectionClass: 'book-path-influence',
+      items: influenceBooks,
+      pointHeading: `${displayName}との接点・重要性`
+    },
+    {
+      id: 'about',
+      title: `${displayName}を知る本`,
+      lead: '人物像の背景や転機を理解するための視点をまとめています。',
+      sectionClass: 'book-path-about',
+      items: aboutBooks,
+      pointHeading: '人物理解のポイント'
+    },
+    {
+      id: 'authored',
+      title: `${displayName}が出版・監修している本`,
+      lead: '本人が発信しているテーマや思想を、言葉そのものから読み解きます。',
+      sectionClass: 'book-path-authored',
+      items: authoredBooks,
+      pointHeading: '出版・監修のポイント'
+    }
+  ];
+%>
+
+<section class="hero hero-premium detail-premium-hero reveal-fade reveal-on-scroll" data-reveal>
+  <div class="hero-backdrop" aria-hidden="true"></div>
+  <div class="hero-layout detail-hero-layout">
+    <div class="hero-content hero-content-premium detail-hero-copy">
+      <p class="hero-eyebrow">Profile</p>
       <h1><%= displayName %></h1>
-      <p class="section-description"><%= displayOccupation %></p>
+      <p class="detail-hero-occupation"><%= displayOccupation %></p>
+      <p class="lead detail-hero-lead"><%= heroLeadText %></p>
+      <% if (person.coreMessage) { %>
+        <p class="person-core-message detail-core-message">"<%= person.coreMessage %>"</p>
+      <% } %>
+    </div>
+
+    <div class="hero-visual hero-visual-premium detail-hero-visual" aria-label="<%= displayName %> の写真">
+      <% if (person.imageUrl) { %>
+        <img src="<%= person.imageUrl %>" alt="<%= displayName %> の写真" />
+      <% } else { %>
+        <div class="person-detail-image person-detail-image-placeholder detail-photo-placeholder" aria-hidden="true">
+          <span><%= displayName.slice(0, 1).toUpperCase() %></span>
+        </div>
+      <% } %>
+      <span class="hero-visual-badge detail-hero-badge">人物を深く知るプロフィール</span>
     </div>
   </div>
-  <% if (person.coreMessage) { %>
-    <p class="person-core-message">"<%= person.coreMessage %>"</p>
-  <% } %>
+</section>
 
-  <div class="person-detail-meta">
-    <div class="card-subsection detail-block text-block summary-block">
-      <h2><%= displayName %>について</h2>
+<section class="page-section section-separator detail-context-section reveal-fade reveal-on-scroll" data-reveal>
+  <header class="section-head">
+    <h2><%= displayName %>の歩み</h2>
+    <p class="section-description">思考の背景を理解するために、紹介文と経歴を静かに辿れる構成にしています。</p>
+  </header>
+
+  <div class="person-detail-meta detail-meta-grid">
+    <article class="card card-subsection detail-block text-block summary-block">
+      <h3><%= displayName %>について</h3>
       <p class="person-longtext"><%= mergedSummary || 'この人物の紹介はまだ登録されていません。' %></p>
-    </div>
+    </article>
 
-    <div class="card-subsection detail-block text-block career-block">
-      <h2>経歴（タイムライン）</h2>
-      <% const careerLines = person.career ? person.career.split('\n').map((line) => line.trim()).filter(Boolean) : []; %>
-      <% const shouldShowTimeline = careerLines.length > 1; %>
+    <article class="card card-subsection detail-block text-block career-block">
+      <h3>経歴（タイムライン）</h3>
       <% if (shouldShowTimeline) { %>
         <ul class="career-timeline">
           <% careerLines.forEach((line) => { %>
@@ -42,188 +90,84 @@
       <% } else { %>
         <p class="person-longtext">経歴はまだ登録されていません。</p>
       <% } %>
-    </div>
-
+    </article>
   </div>
 </section>
 
-<section class="page-section influence-section section-separator">
+<section class="page-section section-separator person-book-paths reveal-fade reveal-on-scroll" data-reveal>
   <header class="section-head">
-    <h2><%= displayName %>が影響を受けた本</h2>
+    <h2>人物を読み解く3つの入口</h2>
+    <p class="section-description">本は主役ではなく、<%= displayName %>という人物像を理解するための補助線として整理しています。</p>
   </header>
-  <div class="stack">
-    <% if (influenceBooks.length === 0) { %>
-      <article class="card empty-state">
-        <p>まだ本が登録されていません。</p>
-      </article>
-    <% } %>
 
-    <% influenceBooks.forEach((influence) => { %>
-      <% const book = influence.bookId; %>
-      <article class="card book-card influence-card">
-        <% if (book && book.coverUrl) { %>
-          <img src="<%= book.coverUrl %>" alt="<%= book.title %> の書影" class="book-cover" />
-        <% } else { %>
-          <div class="book-cover book-cover-placeholder" aria-hidden="true">
-            <span>No Cover</span>
-          </div>
-        <% } %>
+  <div class="stack person-book-path-stack">
+    <% personBookChapters.forEach((chapter) => { %>
+      <section class="book-path-section <%= chapter.sectionClass %>">
+        <header class="book-path-head">
+          <h3><%= chapter.title %></h3>
+          <p class="section-description"><%= chapter.lead %></p>
+        </header>
 
-        <div class="book-card-content">
-          <header class="book-meta book-meta-with-label">
-            <h3><%= book ? book.title : '本情報なし' %></h3>
-            <p class="book-author"><strong>著者:</strong> <%= book && book.author ? book.author : '未設定' %></p>
-            <% if (book && book.slug) { %>
-              <a class="person-link" href="/books/<%= book.slug %>">本の詳細を見る</a>
-            <% } %>
-          </header>
+        <div class="stack">
+          <% if (chapter.items.length === 0) { %>
+            <article class="card empty-state">
+              <p>まだ本が登録されていません。</p>
+            </article>
+          <% } %>
 
-          <div class="card-subsection detail-block">
-            <h4><%= displayName %>との接点・重要性</h4>
-            <p class="person-longtext"><%= influence.impactSummary || '未設定' %></p>
-          </div>
+          <% chapter.items.forEach((influence) => { %>
+            <% const book = influence.bookId; %>
+            <article class="card book-card influence-card">
+              <% if (book && book.coverUrl) { %>
+                <img src="<%= book.coverUrl %>" alt="<%= book.title %> の書影" class="book-cover" />
+              <% } else { %>
+                <div class="book-cover book-cover-placeholder" aria-hidden="true">
+                  <span>No Cover</span>
+                </div>
+              <% } %>
 
-          <div class="card-subsection detail-block source-block">
-            <h4>出典</h4>
-            <p class="source-title"><%= influence.sourceTitle || '未設定' %></p>
-            <% if (influence.sourceUrl) { %>
-              <a class="source-link" href="<%= influence.sourceUrl %>" target="_blank" rel="noopener noreferrer">出典を見る</a>
-            <% } %>
-          </div>
+              <div class="book-card-content">
+                <header class="book-meta book-meta-with-label">
+                  <h4><%= book ? book.title : '本情報なし' %></h4>
+                  <p class="book-author"><strong>著者:</strong> <%= book && book.author ? book.author : '未設定' %></p>
+                  <% if (book && book.slug) { %>
+                    <a class="person-link" href="/books/<%= book.slug %>">本の詳細を見る</a>
+                  <% } %>
+                </header>
 
-          <div class="links purchase-links">
-            <% if (book && book.amazonUrl) { %>
-              <a class="button-link" href="<%= book.amazonUrl %>" target="_blank" rel="noopener noreferrer">Amazonで見る</a>
-            <% } %>
-            <% if (book && book.rakutenUrl) { %>
-              <a class="button-link" href="<%= book.rakutenUrl %>" target="_blank" rel="noopener noreferrer">楽天で見る</a>
-            <% } %>
-          </div>
+                <div class="card-subsection detail-block">
+                  <h5><%= chapter.pointHeading %></h5>
+                  <p class="person-longtext"><%= influence.impactSummary || '未設定' %></p>
+                </div>
+
+                <div class="card-subsection detail-block source-block">
+                  <h5>出典</h5>
+                  <p class="source-title"><%= influence.sourceTitle || '未設定' %></p>
+                  <% if (influence.sourceUrl) { %>
+                    <a class="source-link" href="<%= influence.sourceUrl %>" target="_blank" rel="noopener noreferrer">出典を見る</a>
+                  <% } %>
+                </div>
+
+                <div class="links purchase-links">
+                  <% if (book && book.amazonUrl) { %>
+                    <a class="button-link" href="<%= book.amazonUrl %>" target="_blank" rel="noopener noreferrer">Amazonで見る</a>
+                  <% } %>
+                  <% if (book && book.rakutenUrl) { %>
+                    <a class="button-link" href="<%= book.rakutenUrl %>" target="_blank" rel="noopener noreferrer">楽天で見る</a>
+                  <% } %>
+                </div>
+              </div>
+            </article>
+          <% }) %>
         </div>
-      </article>
+      </section>
     <% }) %>
   </div>
 </section>
 
-<section class="page-section influence-section section-separator">
+<section class="page-section section-separator related-people-premium reveal-fade reveal-on-scroll" data-reveal>
   <header class="section-head">
-    <h2><%= displayName %>を知る本</h2>
-  </header>
-  <div class="stack">
-    <% if (aboutBooks.length === 0) { %>
-      <article class="card empty-state">
-        <p>まだ本が登録されていません。</p>
-      </article>
-    <% } %>
-
-    <% aboutBooks.forEach((influence) => { %>
-      <% const book = influence.bookId; %>
-      <article class="card book-card influence-card">
-        <% if (book && book.coverUrl) { %>
-          <img src="<%= book.coverUrl %>" alt="<%= book.title %> の書影" class="book-cover" />
-        <% } else { %>
-          <div class="book-cover book-cover-placeholder" aria-hidden="true">
-            <span>No Cover</span>
-          </div>
-        <% } %>
-
-        <div class="book-card-content">
-          <header class="book-meta book-meta-with-label">
-            <h3><%= book ? book.title : '本情報なし' %></h3>
-            <p class="book-author"><strong>著者:</strong> <%= book && book.author ? book.author : '未設定' %></p>
-            <% if (book && book.slug) { %>
-              <a class="person-link" href="/books/<%= book.slug %>">本の詳細を見る</a>
-            <% } %>
-          </header>
-
-          <div class="card-subsection detail-block">
-            <h4>人物理解のポイント</h4>
-            <p class="person-longtext"><%= influence.impactSummary || '未設定' %></p>
-          </div>
-
-          <div class="card-subsection detail-block source-block">
-            <h4>出典</h4>
-            <p class="source-title"><%= influence.sourceTitle || '未設定' %></p>
-            <% if (influence.sourceUrl) { %>
-              <a class="source-link" href="<%= influence.sourceUrl %>" target="_blank" rel="noopener noreferrer">出典を見る</a>
-            <% } %>
-          </div>
-
-          <div class="links purchase-links">
-            <% if (book && book.amazonUrl) { %>
-              <a class="button-link" href="<%= book.amazonUrl %>" target="_blank" rel="noopener noreferrer">Amazonで見る</a>
-            <% } %>
-            <% if (book && book.rakutenUrl) { %>
-              <a class="button-link" href="<%= book.rakutenUrl %>" target="_blank" rel="noopener noreferrer">楽天で見る</a>
-            <% } %>
-          </div>
-        </div>
-      </article>
-    <% }) %>
-  </div>
-</section>
-
-<section class="page-section influence-section section-separator">
-  <header class="section-head">
-    <h2><%= displayName %>が出版・監修している本</h2>
-  </header>
-  <div class="stack">
-    <% if (authoredBooks.length === 0) { %>
-      <article class="card empty-state">
-        <p>まだ本が登録されていません。</p>
-      </article>
-    <% } %>
-
-    <% authoredBooks.forEach((influence) => { %>
-      <% const book = influence.bookId; %>
-      <article class="card book-card influence-card">
-        <% if (book && book.coverUrl) { %>
-          <img src="<%= book.coverUrl %>" alt="<%= book.title %> の書影" class="book-cover" />
-        <% } else { %>
-          <div class="book-cover book-cover-placeholder" aria-hidden="true">
-            <span>No Cover</span>
-          </div>
-        <% } %>
-
-        <div class="book-card-content">
-          <header class="book-meta book-meta-with-label">
-            <h3><%= book ? book.title : '本情報なし' %></h3>
-            <p class="book-author"><strong>著者:</strong> <%= book && book.author ? book.author : '未設定' %></p>
-            <% if (book && book.slug) { %>
-              <a class="person-link" href="/books/<%= book.slug %>">本の詳細を見る</a>
-            <% } %>
-          </header>
-
-          <div class="card-subsection detail-block">
-            <h4>出版・監修のポイント</h4>
-            <p class="person-longtext"><%= influence.impactSummary || '未設定' %></p>
-          </div>
-
-          <div class="card-subsection detail-block source-block">
-            <h4>出典</h4>
-            <p class="source-title"><%= influence.sourceTitle || '未設定' %></p>
-            <% if (influence.sourceUrl) { %>
-              <a class="source-link" href="<%= influence.sourceUrl %>" target="_blank" rel="noopener noreferrer">出典を見る</a>
-            <% } %>
-          </div>
-
-          <div class="links purchase-links">
-            <% if (book && book.amazonUrl) { %>
-              <a class="button-link" href="<%= book.amazonUrl %>" target="_blank" rel="noopener noreferrer">Amazonで見る</a>
-            <% } %>
-            <% if (book && book.rakutenUrl) { %>
-              <a class="button-link" href="<%= book.rakutenUrl %>" target="_blank" rel="noopener noreferrer">楽天で見る</a>
-            <% } %>
-          </div>
-        </div>
-      </article>
-    <% }) %>
-  </div>
-</section>
-
-<section class="page-section section-separator">
-  <header class="section-head">
-    <h2>次に読む人物</h2>
+    <h2>次に辿るべき人物</h2>
     <p class="section-description">思考軸やテーマが近い人物です。続けて読むと比較しながら理解を深められます。</p>
   </header>
 
@@ -232,28 +176,18 @@
       <p>関連人物はまだ見つかりません。</p>
     </article>
   <% } else { %>
-    <div class="grid related-people-grid">
+    <div class="grid related-people-grid premium-related-grid">
       <% relatedPeople.forEach((relatedPerson) => { %>
-        <% const relatedDisplayName = relatedPerson.displayNameJa || relatedPerson.name; %>
-        <article class="card person-card">
-          <div class="person-visual-wrap">
-            <% if (relatedPerson.imageUrl) { %>
-              <img src="<%= relatedPerson.imageUrl %>" alt="<%= relatedDisplayName %> の写真" class="person-visual" loading="lazy" />
-            <% } else { %>
-              <div class="person-visual person-visual-placeholder" aria-hidden="true">
-                <span><%= relatedDisplayName.slice(0, 1).toUpperCase() %></span>
-              </div>
-            <% } %>
-          </div>
-          <h3 class="person-card-title"><%= relatedDisplayName %></h3>
-          <p class="person-role"><%= relatedPerson.occupation || '肩書き未設定' %></p>
-          <p class="person-intro"><%= relatedPerson.intro || '' %></p>
-          <p class="person-category">カテゴリ: <%= relatedPerson.category || '未設定' %></p>
-          <a class="person-link" href="/people/<%= relatedPerson.slug %>">詳細を見る</a>
-        </article>
+        <%- include('partials/person-card', {
+          person: relatedPerson,
+          headingLevel: 'h3',
+          showMeta: false,
+          cardClassName: 'featured-gallery-card related-premium-card'
+        }) %>
       <% }) %>
     </div>
   <% } %>
 </section>
 
+<script src="/js/person-detail.js" defer></script>
 <%- include('partials/footer') %>
