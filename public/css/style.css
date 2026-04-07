@@ -228,6 +228,29 @@ p {
   box-shadow: var(--shadow-soft);
 }
 
+.hero-premium {
+  min-height: clamp(480px, 74vh, 720px);
+  display: grid;
+  align-items: end;
+  isolation: isolate;
+}
+
+.hero-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 54%),
+    linear-gradient(140deg, #171d27 0%, #222d3a 55%, #2e3a48 100%);
+}
+
+.hero-backdrop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, rgba(14, 17, 22, 0.84) 18%, rgba(14, 17, 22, 0.38) 50%, rgba(14, 17, 22, 0.2) 100%);
+}
+
 .hero::after {
   content: '';
   position: absolute;
@@ -244,6 +267,42 @@ p {
   grid-template-columns: minmax(0, 1fr) minmax(280px, 410px);
   gap: clamp(20px, 4vw, 44px);
   align-items: center;
+}
+
+.hero-layout-premium {
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 390px);
+}
+
+.hero-content-premium {
+  max-width: 64ch;
+}
+
+.hero-content-premium .button {
+  margin-top: 24px;
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  padding: 4px 12px;
+  margin-bottom: 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(11, 14, 19, 0.42);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero-premium h1,
+.hero-premium .lead {
+  color: #fcfbf9;
+}
+
+.hero-premium .button.secondary {
+  background: rgba(254, 252, 248, 0.92);
+  border-color: rgba(255, 255, 255, 0.9);
+  color: #171c27;
 }
 
 .hero-content {
@@ -295,6 +354,12 @@ p {
   border: 1px solid rgba(217, 205, 187, 0.9);
   box-shadow: 0 18px 34px rgba(31, 37, 48, 0.16);
   isolation: isolate;
+}
+
+.hero-visual-premium {
+  backdrop-filter: blur(1px);
+  transform: translateY(var(--hero-media-shift, 0px));
+  transition: transform 580ms var(--ease-premium);
 }
 
 .hero-visual::after {
@@ -405,6 +470,30 @@ button.quiet {
   transition: transform 0.24s var(--ease-premium), box-shadow 0.24s var(--ease-premium);
 }
 
+.featured-gallery-grid {
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 22px;
+}
+
+.featured-gallery-card {
+  padding: 18px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #fffefc 0%, #f9f5ef 100%);
+}
+
+.featured-gallery-card .person-visual-wrap {
+  margin: -18px -18px 10px;
+}
+
+.featured-gallery-card .person-visual {
+  aspect-ratio: 4 / 5;
+}
+
+.featured-gallery-card .person-link {
+  padding-top: 8px;
+  border-top: 1px solid #ddd4c7;
+}
+
 .person-card:hover {
   transform: translateY(-6px);
   box-shadow: 0 20px 34px rgba(29, 31, 36, 0.16);
@@ -480,8 +569,15 @@ button.quiet {
   margin-top: -30px;
 }
 
+.people-entry-premium .section-head {
+  margin-bottom: 20px;
+}
+
 .people-entry-filter-card {
   margin-bottom: 0;
+  border-radius: 22px;
+  border-color: #d8d0c2;
+  box-shadow: 0 16px 32px rgba(24, 27, 35, 0.08);
 }
 
 .filter-card {
@@ -1035,6 +1131,17 @@ select:focus {
   animation: fadeUp 560ms var(--ease-premium) both;
 }
 
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 700ms var(--ease-premium), transform 700ms var(--ease-premium);
+}
+
+.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1072,6 +1179,10 @@ select:focus {
     grid-template-columns: 1fr;
   }
 
+  .hero-layout-premium {
+    gap: 26px;
+  }
+
   .hero-visual {
     max-width: 640px;
   }
@@ -1098,6 +1209,37 @@ select:focus {
 
   .hero {
     padding: 28px 22px;
+  }
+
+  .hero-premium {
+    min-height: 0;
+  }
+
+  .hero-backdrop::after {
+    background: linear-gradient(180deg, rgba(14, 17, 22, 0.56) 0%, rgba(14, 17, 22, 0.72) 74%, rgba(14, 17, 22, 0.78) 100%);
+  }
+
+  .hero-layout-premium {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-content-premium .button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .hero-visual-premium {
+    max-width: 100%;
+    min-height: 240px;
+  }
+
+  .featured-gallery-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .featured-gallery-card .person-visual {
+    aspect-ratio: 3 / 4;
   }
 
   .hero-actions {

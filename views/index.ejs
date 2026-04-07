@@ -21,21 +21,24 @@
   };
 %>
 
-<section class="hero card reveal-fade">
-  <div class="hero-layout">
-    <div class="hero-content">
+<section class="hero hero-premium reveal-fade reveal-on-scroll" data-reveal>
+  <div class="hero-backdrop" aria-hidden="true"></div>
+  <div class="hero-layout hero-layout-premium">
+    <div class="hero-content hero-content-premium">
+      <p class="hero-eyebrow">Curated People Intelligence</p>
       <h1><%= heroCopy.title %></h1>
       <p class="lead"><%= heroCopy.lead %></p>
+      <a class="button secondary" href="#people-entry">人物を探し始める</a>
     </div>
 
-    <div class="hero-visual" aria-label="思考と読書を象徴するビジュアル">
+    <div class="hero-visual hero-visual-premium" aria-label="思考と読書を象徴するビジュアル">
       <img src="<%= heroVisual.src %>" alt="<%= heroVisual.alt %>" loading="lazy" />
       <span class="hero-visual-badge">Curated Reading Intelligence</span>
     </div>
   </div>
 </section>
 
-<section class="page-section decorated-section reveal-fade people-entry-section">
+<section id="people-entry" class="page-section decorated-section reveal-fade reveal-on-scroll people-entry-section people-entry-premium" data-reveal>
   <header class="section-head">
     <h2>人物を探す</h2>
     <p class="section-description">気になる人物をキーワード・カテゴリ・国で絞り込み、そのまま人物一覧へ進めます。</p>
@@ -64,21 +67,22 @@
   }) %>
 </section>
 
-<section class="page-section section-separator decorated-section reveal-fade">
+<section class="page-section section-separator decorated-section reveal-fade reveal-on-scroll featured-gallery-section" data-reveal>
   <header class="section-head">
     <h2>注目の人物</h2>
     <p class="section-description">思考の源泉を知りたい人物を、厳選して掲載しています。</p>
   </header>
 
-  <div class="grid">
+  <div class="grid featured-gallery-grid">
     <% if (featuredPeople.length === 0) { %>
       <p class="empty-state">注目の人物はまだ登録されていません。</p>
     <% } %>
 
     <% featuredPeople.forEach((person) => { %>
-      <%- include('partials/person-card', { person, headingLevel: 'h3', showMeta: false }) %>
+      <%- include('partials/person-card', { person, headingLevel: 'h3', showMeta: false, cardClassName: 'featured-gallery-card' }) %>
     <% }) %>
   </div>
 </section>
 
+<script src="/js/homepage.js" defer></script>
 <%- include('partials/footer') %>
