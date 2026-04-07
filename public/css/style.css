@@ -569,15 +569,27 @@ button.quiet {
   margin-top: -30px;
 }
 
+.people-entry-premium {
+  border: 1px solid #d8d0c2;
+  border-radius: 24px;
+  background: linear-gradient(180deg, #f8f5ef 0%, #f4f0e8 100%);
+  padding: clamp(20px, 3.2vw, 32px);
+}
+
 .people-entry-premium .section-head {
-  margin-bottom: 20px;
+  margin-bottom: clamp(16px, 2.2vw, 24px);
+}
+
+.people-entry-head .section-description {
+  max-width: 62ch;
 }
 
 .people-entry-filter-card {
   margin-bottom: 0;
-  border-radius: 22px;
-  border-color: #d8d0c2;
-  box-shadow: 0 16px 32px rgba(24, 27, 35, 0.08);
+  border-radius: 20px;
+  border-color: rgba(207, 198, 184, 0.58);
+  background: rgba(255, 254, 251, 0.52);
+  box-shadow: 0 6px 14px rgba(24, 27, 35, 0.04);
 }
 
 .filter-card {
@@ -1270,6 +1282,10 @@ select:focus {
   .hero-actions .button,
   .hero-actions .button.secondary {
     width: 100%;
+  }
+
+  .people-entry-premium {
+    padding: 18px 16px;
   }
 
   .people-search-form {
