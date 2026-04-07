@@ -574,6 +574,18 @@ button.quiet {
   margin-left: auto;
 }
 
+.inline-search-results {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #d9d2c6;
+}
+
+.inline-search-results-label {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  margin-bottom: 12px;
+}
+
 .empty-state {
   background: linear-gradient(165deg, #f9f5ed 0%, #f4eee4 100%);
   border: 1px dashed #d5cbbb;
@@ -1091,6 +1103,16 @@ select:focus {
   .hero-actions .button,
   .hero-actions .button.secondary {
     width: 100%;
+  }
+
+  .people-search-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .inline-search-results {
+    margin-top: 16px;
+    padding-top: 16px;
   }
 
   .grid,
