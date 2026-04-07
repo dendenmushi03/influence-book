@@ -10,6 +10,89 @@ function escapeRegex(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function toPeopleSearchParams(filters) {
+  const params = new URLSearchParams();
+
+  if (filters.q) {
+    params.set('q', filters.q);
+  }
+  if (filters.category) {
+    params.set('category', filters.category);
+  }
+  if (filters.country) {
+    params.set('country', filters.country);
+  }
+  if (filters.tag) {
+    params.set('tag', filters.tag);
+  }
+  if (filters.sort && filters.sort !== 'popular') {
+    params.set('sort', filters.sort);
+  }
+
+  return params;
+}
+
+function normalizePeopleFilters(rawFilters = {}) {
+  const requestedKeyword = rawFilters.q ? rawFilters.q.trim() : '';
+  const keyword = requestedKeyword ? requestedKeyword.replace(/\s+/g, ' ') : '';
+  const selectedCategory = normalizePrimaryCategory(rawFilters.category);
+  const selectedCountry = rawFilters.country ? rawFilters.country.trim() : '';
+  const selectedTag = rawFilters.tag ? rawFilters.tag.trim() : '';
+  const requestedSort = rawFilters.sort ? rawFilters.sort.trim() : '';
+  const selectedSort = requestedSort === 'new' ? 'new' : 'popular';
+
+  return {
+    q: keyword,
+    category: selectedCategory,
+    country: selectedCountry,
+    countryLabel: '',
+    tag: selectedTag,
+    sort: selectedSort
+  };
+}
+
+function hasPeopleFilters(filters) {
+  return Boolean(filters.q || filters.category || filters.country || filters.tag || filters.sort === 'new');
+}
+
+function buildPeopleQuery(filters) {
+  const query = {};
+
+  if (filters.category) {
+    query.category = filters.category;
+  }
+
+  if (filters.country) {
+    query.countryCode = filters.country;
+  }
+
+  if (filters.tag) {
+    query.tags = filters.tag;
+  }
+
+  if (filters.q) {
+    const escapedKeyword = escapeRegex(filters.q);
+    const keywordRegex = new RegExp(escapedKeyword, 'i');
+    query.$or = [
+      { name: keywordRegex },
+      { displayNameJa: keywordRegex },
+      { occupation: keywordRegex },
+      { occupationJa: keywordRegex },
+      { occupationEn: keywordRegex },
+      { intro: keywordRegex },
+      { summary: keywordRegex },
+      { tags: keywordRegex },
+      { keywords: keywordRegex }
+    ];
+  }
+
+  return query;
+}
+
+function buildPeopleSortOption(sort) {
+  return sort === 'new' ? { createdAt: -1 } : { popularity: -1, createdAt: -1 };
+}
+
 function toIdString(value) {
   return value ? String(value) : '';
 }
@@ -180,24 +263,39 @@ async function buildRelatedPeople(person, influences, maxPeople = 4) {
 
 router.get('/', async (req, res) => {
   try {
-    const [featuredPeople, filterOptions] = await Promise.all([
+    const peopleFilters = normalizePeopleFilters(req.query);
+    const peopleQuery = buildPeopleQuery(peopleFilters);
+    const peopleSortOption = buildPeopleSortOption(peopleFilters.sort);
+    const hasActivePeopleFilters = hasPeopleFilters(peopleFilters);
+
+    const [featuredPeople, filterOptions, searchResultPeople, searchResultCount] = await Promise.all([
       Person.find({ featured: true }).sort({ createdAt: -1 }).limit(3),
-      fetchPeopleFilterOptions()
+      fetchPeopleFilterOptions(),
+      hasActivePeopleFilters ? Person.find(peopleQuery).sort(peopleSortOption).limit(6) : Promise.resolve([]),
+      hasActivePeopleFilters ? Person.countDocuments(peopleQuery) : Promise.resolve(0)
     ]);
+
+    const selectedCountryLabel = peopleFilters.country
+      ? (filterOptions.countries.find((country) => country.code === peopleFilters.country) || {}).label || peopleFilters.country
+      : '';
+
+    const indexPeopleFilters = {
+      ...peopleFilters,
+      countryLabel: selectedCountryLabel
+    };
+    const searchParams = toPeopleSearchParams(indexPeopleFilters).toString();
 
     res.render('index', {
       featuredPeople,
       peopleEntryCategories: filterOptions.categories,
       peopleEntryCountries: filterOptions.countries,
       peopleEntryTags: filterOptions.tags,
-      peopleEntryFilters: {
-        q: '',
-        category: '',
-        country: '',
-        countryLabel: '',
-        tag: '',
-        sort: 'popular'
-      }
+      peopleEntryFilters: indexPeopleFilters,
+      topSearchHasActiveFilters: hasActivePeopleFilters,
+      topSearchPeople: searchResultPeople,
+      topSearchResultCount: searchResultCount,
+      topSearchResultPath: `/people${searchParams ? `?${searchParams}` : ''}`,
+      topSearchClearPath: '/'
     });
   } catch (error) {
     console.error('Failed to load top page:', error.message);
@@ -207,55 +305,17 @@ router.get('/', async (req, res) => {
 
 router.get('/people', async (req, res) => {
   try {
-    const query = {};
-    const requestedKeyword = req.query.q ? req.query.q.trim() : '';
-    const keyword = requestedKeyword ? requestedKeyword.replace(/\s+/g, ' ') : '';
-    const selectedCategory = normalizePrimaryCategory(req.query.category);
-    const selectedCountry = req.query.country ? req.query.country.trim() : '';
-    const selectedTag = req.query.tag ? req.query.tag.trim() : '';
-    const requestedSort = req.query.sort ? req.query.sort.trim() : '';
-    const selectedSort = requestedSort === 'new' ? 'new' : 'popular';
-
-    if (selectedCategory) {
-      query.category = selectedCategory;
-    }
-
-    if (selectedCountry) {
-      query.countryCode = selectedCountry;
-    }
-
-    if (selectedTag) {
-      query.tags = selectedTag;
-    }
-
-    if (keyword) {
-      const escapedKeyword = escapeRegex(keyword);
-      const keywordRegex = new RegExp(escapedKeyword, 'i');
-      query.$or = [
-        { name: keywordRegex },
-        { displayNameJa: keywordRegex },
-        { occupation: keywordRegex },
-        { occupationJa: keywordRegex },
-        { occupationEn: keywordRegex },
-        { intro: keywordRegex },
-        { summary: keywordRegex },
-        { tags: keywordRegex },
-        { keywords: keywordRegex }
-      ];
-    }
-
-    const sortOption =
-      selectedSort === 'new'
-        ? { createdAt: -1 }
-        : { popularity: -1, createdAt: -1 };
+    const filters = normalizePeopleFilters(req.query);
+    const query = buildPeopleQuery(filters);
+    const sortOption = buildPeopleSortOption(filters.sort);
 
     const [people, filterOptions] = await Promise.all([
       Person.find(query).sort(sortOption),
       fetchPeopleFilterOptions()
     ]);
 
-    const selectedCountryLabel = selectedCountry
-      ? (filterOptions.countries.find((country) => country.code === selectedCountry) || {}).label || selectedCountry
+    const selectedCountryLabel = filters.country
+      ? (filterOptions.countries.find((country) => country.code === filters.country) || {}).label || filters.country
       : '';
 
     res.render('people', {
@@ -264,12 +324,10 @@ router.get('/people', async (req, res) => {
       countries: filterOptions.countries,
       tags: filterOptions.tags,
       filters: {
-        q: keyword,
-        category: selectedCategory,
-        country: selectedCountry,
+        ...filters,
+        country: filters.country,
         countryLabel: selectedCountryLabel,
-        tag: selectedTag,
-        sort: selectedSort
+        sort: filters.sort
       }
     });
   } catch (error) {
