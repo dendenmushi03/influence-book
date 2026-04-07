@@ -476,6 +476,22 @@ button.quiet {
   background: var(--surface-soft);
 }
 
+.people-search-form {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.people-search-form input[type='search'] {
+  flex: 1 1 280px;
+}
+
+.people-search-form button {
+  flex-shrink: 0;
+}
+
 .filter-group + .filter-group {
   margin-top: 14px;
 }

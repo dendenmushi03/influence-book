@@ -156,6 +156,8 @@ router.get('/', async (req, res) => {
 router.get('/people', async (req, res) => {
   try {
     const query = {};
+    const requestedKeyword = req.query.q ? req.query.q.trim() : '';
+    const keyword = requestedKeyword ? requestedKeyword.replace(/\s+/g, ' ') : '';
     const selectedCategory = normalizePrimaryCategory(req.query.category);
     const selectedCountry = req.query.country ? req.query.country.trim() : '';
     const selectedTag = req.query.tag ? req.query.tag.trim() : '';
@@ -172,6 +174,22 @@ router.get('/people', async (req, res) => {
 
     if (selectedTag) {
       query.tags = selectedTag;
+    }
+
+    if (keyword) {
+      const escapedKeyword = escapeRegex(keyword);
+      const keywordRegex = new RegExp(escapedKeyword, 'i');
+      query.$or = [
+        { name: keywordRegex },
+        { displayNameJa: keywordRegex },
+        { occupation: keywordRegex },
+        { occupationJa: keywordRegex },
+        { occupationEn: keywordRegex },
+        { intro: keywordRegex },
+        { summary: keywordRegex },
+        { tags: keywordRegex },
+        { keywords: keywordRegex }
+      ];
     }
 
     const sortOption =
@@ -210,6 +228,7 @@ router.get('/people', async (req, res) => {
       countries: [...countryMap.values()].sort((a, b) => a.label.localeCompare(b.label, 'ja')),
       tags: tags.filter(Boolean).sort(),
       filters: {
+        q: keyword,
         category: selectedCategory,
         country: selectedCountry,
         countryLabel: selectedCountryLabel,
