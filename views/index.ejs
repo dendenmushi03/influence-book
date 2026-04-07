@@ -43,6 +43,24 @@
   </div>
 </section>
 
+<section class="page-section decorated-section reveal-fade people-entry-section">
+  <header class="section-head">
+    <h2>人物を探す</h2>
+    <p class="section-description">気になる人物をキーワード・カテゴリ・国・タグで絞り込み、そのまま人物一覧へ進めます。</p>
+  </header>
+
+  <%- include('partials/people-filter-card', {
+    filters: peopleEntryFilters,
+    categories: peopleEntryCategories,
+    countries: peopleEntryCountries,
+    tags: peopleEntryTags,
+    actionPath: '/people',
+    clearPath: '/people',
+    showActiveFilters: false,
+    cardClassName: 'people-entry-filter-card'
+  }) %>
+</section>
+
 <section class="page-section section-separator decorated-section reveal-fade">
   <header class="section-head">
     <h2>注目の人物</h2>

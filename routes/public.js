@@ -24,6 +24,41 @@ function normalizeTags(tags) {
     .filter(Boolean);
 }
 
+function buildCountryOptions(countries) {
+  const countryMap = new Map();
+
+  countries.forEach((country) => {
+    const code = (country.countryCode || '').trim();
+    if (!code || countryMap.has(code)) {
+      return;
+    }
+
+    countryMap.set(code, {
+      code,
+      label: country.countryJa || country.countryEn || code
+    });
+  });
+
+  return [...countryMap.values()].sort((a, b) => a.label.localeCompare(b.label, 'ja'));
+}
+
+async function fetchPeopleFilterOptions() {
+  const [categories, tags, countries] = await Promise.all([
+    Person.distinct('category', { category: { $exists: true, $nin: ['', null] } }),
+    Person.distinct('tags', { tags: { $exists: true, $ne: [] } }),
+    Person.find(
+      { countryCode: { $exists: true, $nin: ['', null] } },
+      { countryCode: 1, countryJa: 1, countryEn: 1, _id: 0 }
+    )
+  ]);
+
+  return {
+    categories: buildPrimaryCategoryList(categories),
+    tags: tags.filter(Boolean).sort(),
+    countries: buildCountryOptions(countries)
+  };
+}
+
 function compareRelatedPeople(a, b) {
   if (b.score !== a.score) {
     return b.score - a.score;
@@ -145,8 +180,25 @@ async function buildRelatedPeople(person, influences, maxPeople = 4) {
 
 router.get('/', async (req, res) => {
   try {
-    const featuredPeople = await Person.find({ featured: true }).sort({ createdAt: -1 }).limit(3);
-    res.render('index', { featuredPeople });
+    const [featuredPeople, filterOptions] = await Promise.all([
+      Person.find({ featured: true }).sort({ createdAt: -1 }).limit(3),
+      fetchPeopleFilterOptions()
+    ]);
+
+    res.render('index', {
+      featuredPeople,
+      peopleEntryCategories: filterOptions.categories,
+      peopleEntryCountries: filterOptions.countries,
+      peopleEntryTags: filterOptions.tags,
+      peopleEntryFilters: {
+        q: '',
+        category: '',
+        country: '',
+        countryLabel: '',
+        tag: '',
+        sort: 'popular'
+      }
+    });
   } catch (error) {
     console.error('Failed to load top page:', error.message);
     res.status(500).send('Internal Server Error');
@@ -197,36 +249,20 @@ router.get('/people', async (req, res) => {
         ? { createdAt: -1 }
         : { popularity: -1, createdAt: -1 };
 
-    const [people, categories, tags, countries] = await Promise.all([
+    const [people, filterOptions] = await Promise.all([
       Person.find(query).sort(sortOption),
-      Person.distinct('category', { category: { $exists: true, $nin: ['', null] } }),
-      Person.distinct('tags', { tags: { $exists: true, $ne: [] } }),
-      Person.find(
-        { countryCode: { $exists: true, $nin: ['', null] } },
-        { countryCode: 1, countryJa: 1, countryEn: 1, _id: 0 }
-      )
+      fetchPeopleFilterOptions()
     ]);
 
-    const countryMap = new Map();
-    countries.forEach((country) => {
-      const code = (country.countryCode || '').trim();
-      if (!code || countryMap.has(code)) {
-        return;
-      }
-      countryMap.set(code, {
-        code,
-        label: country.countryJa || country.countryEn || code
-      });
-    });
     const selectedCountryLabel = selectedCountry
-      ? (countryMap.get(selectedCountry) && countryMap.get(selectedCountry).label) || selectedCountry
+      ? (filterOptions.countries.find((country) => country.code === selectedCountry) || {}).label || selectedCountry
       : '';
 
     res.render('people', {
       people,
-      categories: buildPrimaryCategoryList(categories),
-      countries: [...countryMap.values()].sort((a, b) => a.label.localeCompare(b.label, 'ja')),
-      tags: tags.filter(Boolean).sort(),
+      categories: filterOptions.categories,
+      countries: filterOptions.countries,
+      tags: filterOptions.tags,
       filters: {
         q: keyword,
         category: selectedCategory,
