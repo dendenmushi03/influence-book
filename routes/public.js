@@ -2,6 +2,7 @@ const express = require('express');
 const Person = require('../models/Person');
 const Book = require('../models/Book');
 const Influence = require('../models/Influence');
+const { buildPrimaryCategoryList, normalizePrimaryCategory } = require('../lib/person-taxonomy');
 
 const router = express.Router();
 
@@ -155,13 +156,18 @@ router.get('/', async (req, res) => {
 router.get('/people', async (req, res) => {
   try {
     const query = {};
-    const selectedCategory = req.query.category ? req.query.category.trim() : '';
+    const selectedCategory = normalizePrimaryCategory(req.query.category);
+    const selectedCountry = req.query.country ? req.query.country.trim() : '';
     const selectedTag = req.query.tag ? req.query.tag.trim() : '';
     const requestedSort = req.query.sort ? req.query.sort.trim() : '';
     const selectedSort = requestedSort === 'new' ? 'new' : 'popular';
 
     if (selectedCategory) {
       query.category = selectedCategory;
+    }
+
+    if (selectedCountry) {
+      query.countryCode = selectedCountry;
     }
 
     if (selectedTag) {
@@ -173,18 +179,40 @@ router.get('/people', async (req, res) => {
         ? { createdAt: -1 }
         : { popularity: -1, createdAt: -1 };
 
-    const [people, categories, tags] = await Promise.all([
+    const [people, categories, tags, countries] = await Promise.all([
       Person.find(query).sort(sortOption),
       Person.distinct('category', { category: { $exists: true, $nin: ['', null] } }),
-      Person.distinct('tags', { tags: { $exists: true, $ne: [] } })
+      Person.distinct('tags', { tags: { $exists: true, $ne: [] } }),
+      Person.find(
+        { countryCode: { $exists: true, $nin: ['', null] } },
+        { countryCode: 1, countryJa: 1, countryEn: 1, _id: 0 }
+      )
     ]);
+
+    const countryMap = new Map();
+    countries.forEach((country) => {
+      const code = (country.countryCode || '').trim();
+      if (!code || countryMap.has(code)) {
+        return;
+      }
+      countryMap.set(code, {
+        code,
+        label: country.countryJa || country.countryEn || code
+      });
+    });
+    const selectedCountryLabel = selectedCountry
+      ? (countryMap.get(selectedCountry) && countryMap.get(selectedCountry).label) || selectedCountry
+      : '';
 
     res.render('people', {
       people,
-      categories: categories.filter(Boolean).sort(),
+      categories: buildPrimaryCategoryList(categories),
+      countries: [...countryMap.values()].sort((a, b) => a.label.localeCompare(b.label, 'ja')),
       tags: tags.filter(Boolean).sort(),
       filters: {
         category: selectedCategory,
+        country: selectedCountry,
+        countryLabel: selectedCountryLabel,
         tag: selectedTag,
         sort: selectedSort
       }

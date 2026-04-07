@@ -8,6 +8,11 @@ const { resolveBookForInfluence, normalizeInput } = require('../lib/resolve-book
 const { previewBulkInfluences } = require('../lib/preview-bulk-influences');
 const { applyBulkInfluences } = require('../lib/apply-bulk-influences');
 const { INFLUENCE_KIND_OPTIONS, toInfluenceKind, getInfluenceKindLabel } = require('../lib/influence-kind');
+const {
+  PRIMARY_CATEGORY_OPTIONS,
+  normalizePrimaryCategory,
+  buildPrimaryCategoryList
+} = require('../lib/person-taxonomy');
 
 const router = express.Router();
 
@@ -221,7 +226,9 @@ router.get('/influences', async (req, res) => {
 });
 
 router.get('/people/new', (req, res) => {
-  res.render('admin/people-new');
+  res.render('admin/people-new', {
+    categoryOptions: PRIMARY_CATEGORY_OPTIONS
+  });
 });
 
 router.post('/people', async (req, res) => {
@@ -244,7 +251,7 @@ router.post('/people', async (req, res) => {
       countryEn: req.body.countryEn,
       imageUrl: req.body.imageUrl,
       keywords,
-      category: req.body.category,
+      category: normalizePrimaryCategory(req.body.category),
       popularity: toPopularity(req.body.popularity),
       tags,
       intro: req.body.intro,
@@ -264,7 +271,8 @@ router.get('/people/:id/edit', async (req, res) => {
     if (!person) {
       return res.status(404).send('Person not found');
     }
-    res.render('admin/people-edit', { person });
+    const categoryOptions = buildPrimaryCategoryList([person.category]);
+    res.render('admin/people-edit', { person, categoryOptions });
   } catch (error) {
     console.error('Failed to load person edit form:', error.message);
     res.status(500).send('Failed to load person edit form');
@@ -291,7 +299,7 @@ router.post('/people/:id', async (req, res) => {
       countryEn: req.body.countryEn,
       imageUrl: req.body.imageUrl,
       keywords,
-      category: req.body.category,
+      category: normalizePrimaryCategory(req.body.category),
       popularity: toPopularity(req.body.popularity),
       tags,
       intro: req.body.intro,

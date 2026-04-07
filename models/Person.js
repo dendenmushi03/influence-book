@@ -17,7 +17,7 @@ const personSchema = new mongoose.Schema(
     countryEn: { type: String },
     imageUrl: { type: String },
     keywords: [{ type: String }],
-    category: { type: String },
+    category: { type: String, trim: true },
     popularity: { type: Number, default: 0 },
     tags: [{ type: String }],
     thoughtTraits: [{ type: String }],
@@ -26,5 +26,8 @@ const personSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+personSchema.index({ category: 1, countryCode: 1, popularity: -1, createdAt: -1 });
+personSchema.index({ tags: 1 });
 
 module.exports = mongoose.model('Person', personSchema);

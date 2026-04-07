@@ -30,8 +30,13 @@
     <label>国名（英語）</label>
     <input name="countryEn" value="<%= person.countryEn || '' %>" placeholder="例: United States" />
 
-    <label>カテゴリ</label>
-    <input name="category" value="<%= person.category || '' %>" />
+    <label>カテゴリ（主分類）</label>
+    <select name="category">
+      <option value="">未設定</option>
+      <% categoryOptions.forEach((category) => { %>
+        <option value="<%= category %>" <%= person.category === category ? 'selected' : '' %>><%= category %></option>
+      <% }) %>
+    </select>
 
     <label>人気度（手動設定）</label>
     <input type="number" name="popularity" min="0" step="1" value="<%= person.popularity || 0 %>" />

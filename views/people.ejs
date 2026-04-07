@@ -1,6 +1,13 @@
 <%- include('partials/header') %>
 
 <section class="page-section decorated-section reveal-fade">
+  <%
+    const toQuery = (params) =>
+      Object.entries(params)
+        .filter(([, value]) => value)
+        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+        .join('&');
+  %>
   <header class="section-head">
     <h1>人物一覧</h1>
     <p class="section-description">各人物の思想や価値観に影響を与えた本を、一覧で確認できます。</p>
@@ -12,13 +19,29 @@
       <div class="filter-chip-list">
         <a
           class="filter-chip <%= !filters.category ? 'filter-chip-active' : '' %>"
-          href="/people?<%= filters.sort ? `sort=${encodeURIComponent(filters.sort)}${filters.tag ? '&' : ''}` : '' %><%= filters.tag ? `tag=${encodeURIComponent(filters.tag)}` : '' %>"
+          href="/people?<%= toQuery({ country: filters.country, sort: filters.sort, tag: filters.tag }) %>"
         >すべて</a>
         <% categories.forEach((category) => { %>
           <a
             class="filter-chip <%= filters.category === category ? 'filter-chip-active' : '' %>"
-            href="/people?category=<%= encodeURIComponent(category) %><%= filters.sort ? `&sort=${encodeURIComponent(filters.sort)}` : '' %><%= filters.tag ? `&tag=${encodeURIComponent(filters.tag)}` : '' %>"
+            href="/people?<%= toQuery({ category, country: filters.country, sort: filters.sort, tag: filters.tag }) %>"
           ><%= category %></a>
+        <% }) %>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <p class="filter-group-label">国</p>
+      <div class="filter-chip-list">
+        <a
+          class="filter-chip <%= !filters.country ? 'filter-chip-active' : '' %>"
+          href="/people?<%= toQuery({ category: filters.category, sort: filters.sort, tag: filters.tag }) %>"
+        >すべて</a>
+        <% countries.forEach((country) => { %>
+          <a
+            class="filter-chip <%= filters.country === country.code ? 'filter-chip-active' : '' %>"
+            href="/people?<%= toQuery({ category: filters.category, country: country.code, sort: filters.sort, tag: filters.tag }) %>"
+          ><%= country.label %></a>
         <% }) %>
       </div>
     </div>
@@ -28,32 +51,34 @@
       <div class="filter-chip-list">
         <a
           class="filter-chip <%= filters.sort !== 'new' ? 'filter-chip-active' : '' %>"
-          href="/people?<%= filters.category ? `category=${encodeURIComponent(filters.category)}&` : '' %>sort=popular<%= filters.tag ? `&tag=${encodeURIComponent(filters.tag)}` : '' %>"
+          href="/people?<%= toQuery({ category: filters.category, country: filters.country, sort: 'popular', tag: filters.tag }) %>"
         >人気順</a>
         <a
           class="filter-chip <%= filters.sort === 'new' ? 'filter-chip-active' : '' %>"
-          href="/people?<%= filters.category ? `category=${encodeURIComponent(filters.category)}&` : '' %>sort=new<%= filters.tag ? `&tag=${encodeURIComponent(filters.tag)}` : '' %>"
+          href="/people?<%= toQuery({ category: filters.category, country: filters.country, sort: 'new', tag: filters.tag }) %>"
         >新着順</a>
       </div>
     </div>
 
     <div class="tag-filter-list">
       <span class="tag-filter-label">タグ:</span>
-      <a class="tag <%= !filters.tag ? 'tag-active' : '' %>" href="/people?<%= filters.category ? `category=${encodeURIComponent(filters.category)}&` : '' %><%= filters.sort ? `sort=${encodeURIComponent(filters.sort)}` : '' %>">すべて</a>
+      <a class="tag <%= !filters.tag ? 'tag-active' : '' %>" href="/people?<%= toQuery({ category: filters.category, country: filters.country, sort: filters.sort }) %>">すべて</a>
       <% tags.forEach((tag) => { %>
-        <a class="tag <%= filters.tag === tag ? 'tag-active' : '' %>" href="/people?<%= filters.category ? `category=${encodeURIComponent(filters.category)}&` : '' %><%= filters.sort ? `sort=${encodeURIComponent(filters.sort)}&` : '' %>tag=<%= encodeURIComponent(tag) %>"><%= tag %></a>
+        <a class="tag <%= filters.tag === tag ? 'tag-active' : '' %>" href="/people?<%= toQuery({ category: filters.category, country: filters.country, sort: filters.sort, tag }) %>"><%= tag %></a>
       <% }) %>
     </div>
 
-    <% if (filters.category || filters.tag || filters.sort) { %>
+    <% if (filters.category || filters.country || filters.tag || filters.sort) { %>
       <p class="active-filters">
         適用中:
         <%= filters.category ? `カテゴリ: ${filters.category}` : '' %>
-        <%= filters.category && (filters.tag || filters.sort) ? ' / ' : '' %>
+        <%= filters.category && (filters.country || filters.tag || filters.sort) ? ' / ' : '' %>
+        <%= filters.country ? `国: ${filters.countryLabel || filters.country}` : '' %>
+        <%= filters.country && (filters.tag || filters.sort) ? ' / ' : '' %>
         <%= filters.tag ? `タグ: ${filters.tag}` : '' %>
         <%= filters.tag && filters.sort ? ' / ' : '' %>
         <%= filters.sort === 'new' ? '並び順: 新着順' : '並び順: 人気順' %>
-        <% if (filters.category || filters.tag || filters.sort) { %>
+        <% if (filters.category || filters.country || filters.tag || filters.sort) { %>
           <a class="button quiet filter-clear-link" href="/people">解除</a>
         <% } %>
       </p>
