@@ -471,27 +471,28 @@ button.quiet {
 }
 
 .featured-gallery-grid {
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 22px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 18px;
 }
 
 .featured-gallery-card {
-  padding: 18px;
-  border-radius: 22px;
+  padding: 16px;
+  border-radius: 20px;
   background: linear-gradient(180deg, #fffefc 0%, #f9f5ef 100%);
 }
 
 .featured-gallery-card .person-visual-wrap {
-  margin: -18px -18px 10px;
+  margin: -16px -16px 8px;
 }
 
 .featured-gallery-card .person-visual {
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 16 / 10;
+  object-position: center 20%;
 }
 
 .featured-gallery-card .person-link {
-  padding-top: 8px;
-  border-top: 1px solid #ddd4c7;
+  padding-top: 6px;
+  border-top: 1px solid #eee7dc;
 }
 
 .person-card:hover {
@@ -1288,7 +1289,7 @@ select:focus {
   }
 
   .featured-gallery-card .person-visual {
-    aspect-ratio: 3 / 4;
+    aspect-ratio: 16 / 11;
   }
 
   .hero-actions {
