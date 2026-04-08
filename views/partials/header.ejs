@@ -37,16 +37,43 @@
       </div>
       <div class="mobile-menu" id="mobile-menu-panel" role="dialog" aria-modal="true" aria-label="スマホメニュー" hidden>
         <button class="mobile-menu-backdrop" type="button" aria-label="メニューを閉じる"></button>
-        <div class="mobile-menu-panel">
+        <div class="mobile-menu-panel" role="document">
           <div class="mobile-menu-header">
-            <span class="mobile-menu-title">MENU</span>
-            <button class="mobile-menu-close" type="button" aria-label="メニューを閉じる">&times;</button>
+            <span class="mobile-menu-title">Menu</span>
+            <button class="mobile-menu-close" type="button" aria-label="メニューを閉じる">×</button>
           </div>
-          <nav class="mobile-menu-nav" aria-label="モバイルナビゲーション">
-            <a href="/people">人物一覧</a>
-            <a href="/books">本一覧</a>
-            <a href="/admin">管理画面</a>
-          </nav>
+
+          <div class="mobile-menu-section" aria-label="サイトトップ導線">
+            <p class="mobile-menu-section-label">サイトTOP</p>
+            <nav class="mobile-menu-nav" aria-label="モバイルナビゲーション">
+              <a href="/" class="mobile-menu-link"><span>ホーム</span><span class="mobile-menu-link-arrow" aria-hidden="true">›</span></a>
+            </nav>
+          </div>
+
+          <div class="mobile-menu-section" aria-label="主要導線">
+            <p class="mobile-menu-section-label">ナビゲーション</p>
+            <nav class="mobile-menu-nav" aria-label="主要メニュー">
+              <a href="/search" class="mobile-menu-link"><span>検索する</span><span class="mobile-menu-link-arrow" aria-hidden="true">›</span></a>
+              <a href="/people" class="mobile-menu-link"><span>人物一覧</span><span class="mobile-menu-link-arrow" aria-hidden="true">›</span></a>
+              <a href="/books" class="mobile-menu-link"><span>本一覧</span><span class="mobile-menu-link-arrow" aria-hidden="true">›</span></a>
+            </nav>
+          </div>
+
+          <div class="mobile-menu-section" aria-label="運営者導線">
+            <p class="mobile-menu-section-label">運営者向け</p>
+            <nav class="mobile-menu-nav" aria-label="管理メニュー">
+              <a href="/admin" class="mobile-menu-link"><span>管理画面</span><span class="mobile-menu-link-arrow" aria-hidden="true">›</span></a>
+            </nav>
+          </div>
+
+          <div class="mobile-menu-section" aria-label="固定ページ導線">
+            <p class="mobile-menu-section-label">インフォメーション</p>
+            <nav class="mobile-menu-nav" aria-label="補助メニュー">
+              <a href="/affiliate-disclosure" class="mobile-menu-link"><span>アフィリエイト開示</span><span class="mobile-menu-link-arrow" aria-hidden="true">›</span></a>
+              <a href="/privacy-policy" class="mobile-menu-link"><span>プライバシーポリシー</span><span class="mobile-menu-link-arrow" aria-hidden="true">›</span></a>
+              <a href="/contact" class="mobile-menu-link"><span>お問い合わせ</span><span class="mobile-menu-link-arrow" aria-hidden="true">›</span></a>
+            </nav>
+          </div>
         </div>
       </div>
     </header>
