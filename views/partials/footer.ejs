@@ -16,18 +16,40 @@
         const closeButton = menu.querySelector('.mobile-menu-close');
         const backdropButton = menu.querySelector('.mobile-menu-backdrop');
         const menuLinks = menu.querySelectorAll('.mobile-menu-nav a');
+        let closeTimer = null;
 
         const openMenu = () => {
+          if (!menu.hidden && !menu.classList.contains('is-closing')) {
+            return;
+          }
+
+          if (closeTimer) {
+            clearTimeout(closeTimer);
+            closeTimer = null;
+          }
           menu.hidden = false;
+          menu.classList.remove('is-closing');
+          requestAnimationFrame(() => menu.classList.add('is-open'));
           toggleButton.setAttribute('aria-expanded', 'true');
           document.body.classList.add('mobile-menu-open');
           closeButton?.focus();
         };
 
         const closeMenu = ({ restoreFocus = true } = {}) => {
-          menu.hidden = true;
+          if (menu.hidden || menu.classList.contains('is-closing')) {
+            return;
+          }
+
+          menu.classList.remove('is-open');
+          menu.classList.add('is-closing');
           toggleButton.setAttribute('aria-expanded', 'false');
           document.body.classList.remove('mobile-menu-open');
+
+          closeTimer = window.setTimeout(() => {
+            menu.hidden = true;
+            menu.classList.remove('is-closing');
+            closeTimer = null;
+          }, 280);
 
           if (restoreFocus) {
             toggleButton.focus();
