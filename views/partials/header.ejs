@@ -22,15 +22,32 @@
     <header class="site-header">
       <div class="container header-inner">
         <a href="/" class="logo">Influence Book</a>
-        <nav class="site-nav">
+        <nav class="site-nav" aria-label="グローバルナビゲーション">
           <a href="/people">人物一覧</a>
           <a href="/books">本一覧</a>
           <a class="admin-link" href="/admin">管理画面</a>
         </nav>
+        <button class="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu-panel">
+          MENU
+        </button>
         <form class="header-search" action="/search" method="GET">
           <input type="search" name="q" placeholder="人物名・本タイトルで検索" aria-label="人物名・本タイトルで検索" />
           <button class="quiet" type="submit">検索</button>
         </form>
+      </div>
+      <div class="mobile-menu" id="mobile-menu-panel" role="dialog" aria-modal="true" aria-label="スマホメニュー" hidden>
+        <button class="mobile-menu-backdrop" type="button" aria-label="メニューを閉じる"></button>
+        <div class="mobile-menu-panel">
+          <div class="mobile-menu-header">
+            <span class="mobile-menu-title">MENU</span>
+            <button class="mobile-menu-close" type="button" aria-label="メニューを閉じる">&times;</button>
+          </div>
+          <nav class="mobile-menu-nav" aria-label="モバイルナビゲーション">
+            <a href="/people">人物一覧</a>
+            <a href="/books">本一覧</a>
+            <a href="/admin">管理画面</a>
+          </nav>
+        </div>
       </div>
     </header>
     <main class="container">

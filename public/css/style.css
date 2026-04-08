@@ -125,6 +125,111 @@ a:hover {
   width: min(360px, 100%);
 }
 
+
+.mobile-menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid #cbc2b4;
+  background: rgba(255, 254, 251, 0.9);
+  color: #1f232c;
+  font-family: 'Manrope', 'Noto Sans JP', sans-serif;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.mobile-menu-toggle:hover {
+  background: #f5f0e8;
+  border-color: #bcb19f;
+}
+
+.mobile-menu-toggle:focus-visible,
+.mobile-menu-close:focus-visible,
+.mobile-menu-nav a:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.mobile-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+}
+
+.mobile-menu-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(19, 23, 31, 0.35);
+}
+
+.mobile-menu-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: min(320px, 84vw);
+  height: 100%;
+  background: #fcf9f2;
+  border-left: 1px solid #d8cebf;
+  box-shadow: -14px 0 36px rgba(15, 19, 27, 0.16);
+  padding: 18px 16px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.mobile-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mobile-menu-title {
+  font-family: 'Manrope', 'Noto Sans JP', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.mobile-menu-close {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid #cfc6b8;
+  background: #fffefb;
+  font-size: 1.45rem;
+  line-height: 1;
+  color: #2a2f39;
+}
+
+.mobile-menu-nav {
+  display: grid;
+  gap: 10px;
+}
+
+.mobile-menu-nav a {
+  display: block;
+  padding: 14px 14px;
+  border-radius: 12px;
+  border: 1px solid #ded5c7;
+  background: #fffefb;
+  color: #252a35;
+  font-size: 0.98rem;
+}
+
+.mobile-menu-nav a:hover {
+  background: #f4efe6;
+}
+
+body.mobile-menu-open {
+  overflow: hidden;
+}
+
 main {
   padding: 62px 0 90px;
   position: relative;
@@ -1244,13 +1349,27 @@ select:focus {
     letter-spacing: 0.07em;
   }
 
+  .header-inner {
+    grid-template-columns: 1fr auto;
+    gap: 10px 12px;
+    padding: 12px 0;
+  }
+
   .site-nav {
-    flex-wrap: wrap;
-    gap: 8px;
+    display: none;
+  }
+
+  .mobile-menu-toggle {
+    display: inline-flex;
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
   }
 
   .header-search {
     width: 100%;
+    grid-column: 1 / -1;
+    grid-row: 2;
   }
 
   .header-search input {
