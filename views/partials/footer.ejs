@@ -4,5 +4,57 @@
         <small>&copy; <%= new Date().getFullYear() %> Influence Book</small>
       </div>
     </footer>
+    <script>
+      (() => {
+        const menu = document.getElementById('mobile-menu-panel');
+        const toggleButton = document.querySelector('.mobile-menu-toggle');
+
+        if (!menu || !toggleButton) {
+          return;
+        }
+
+        const closeButton = menu.querySelector('.mobile-menu-close');
+        const backdropButton = menu.querySelector('.mobile-menu-backdrop');
+        const menuLinks = menu.querySelectorAll('.mobile-menu-nav a');
+
+        const openMenu = () => {
+          menu.hidden = false;
+          toggleButton.setAttribute('aria-expanded', 'true');
+          document.body.classList.add('mobile-menu-open');
+          closeButton?.focus();
+        };
+
+        const closeMenu = ({ restoreFocus = true } = {}) => {
+          menu.hidden = true;
+          toggleButton.setAttribute('aria-expanded', 'false');
+          document.body.classList.remove('mobile-menu-open');
+
+          if (restoreFocus) {
+            toggleButton.focus();
+          }
+        };
+
+        toggleButton.addEventListener('click', () => {
+          if (menu.hidden) {
+            openMenu();
+            return;
+          }
+
+          closeMenu();
+        });
+
+        closeButton?.addEventListener('click', closeMenu);
+        backdropButton?.addEventListener('click', closeMenu);
+        menuLinks.forEach((link) => {
+          link.addEventListener('click', () => closeMenu({ restoreFocus: false }));
+        });
+
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && !menu.hidden) {
+            closeMenu();
+          }
+        });
+      })();
+    </script>
   </body>
 </html>
