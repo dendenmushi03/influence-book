@@ -454,6 +454,18 @@ router.get('/books/:slug', async (req, res) => {
   }
 });
 
+router.get('/affiliate-disclosure', (req, res) => {
+  res.render('affiliate-disclosure', { pageTitle: 'アフィリエイト開示' });
+});
+
+router.get('/privacy-policy', (req, res) => {
+  res.render('privacy-policy', { pageTitle: 'プライバシーポリシー' });
+});
+
+router.get('/contact', (req, res) => {
+  res.render('contact', { pageTitle: 'お問い合わせ' });
+});
+
 router.get('/search', async (req, res) => {
   try {
     const rawKeyword = req.query.q ? req.query.q.trim() : '';
