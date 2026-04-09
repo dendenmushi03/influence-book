@@ -1552,6 +1552,10 @@ select:focus {
     padding-top: 34px;
   }
 
+  section.page-section.section-separator.person-book-section {
+    padding-top: 0;
+  }
+
   section.page-section.section-separator::before {
     background: rgba(198, 188, 174, 0.34);
   }
