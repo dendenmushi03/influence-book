@@ -18,6 +18,21 @@ const {
 
 const router = express.Router();
 
+const COUNTRY_JA_OPTIONS = [
+  '未設定',
+  '日本',
+  'アメリカ',
+  'イギリス',
+  '中国',
+  '韓国',
+  'フランス',
+  'ドイツ',
+  'カナダ',
+  'オーストラリア',
+  'インド',
+  'シンガポール'
+];
+
 function getAdminAuthConfigError() {
   const missingKeys = [];
   if (!process.env.ADMIN_EMAIL) {
@@ -34,16 +49,6 @@ function getAdminAuthConfigError() {
   return '';
 }
 
-function toTagArray(value) {
-  if (!value) {
-    return [];
-  }
-  return value
-    .split(',')
-    .map((word) => word.trim())
-    .filter(Boolean);
-}
-
 function slugify(value) {
   return String(value || '')
     .toLowerCase()
@@ -53,32 +58,18 @@ function slugify(value) {
     .replace(/-{2,}/g, '-');
 }
 
-function toPopularity(value) {
-  const popularity = Number(value);
-  return Number.isFinite(popularity) ? popularity : 0;
-}
-
 function normalizePersonInput(input = {}) {
   return {
     name: input.name,
-    displayNameJa: input.displayNameJa,
     slug: input.slug,
-    summary: input.summary,
-    coreMessage: input.coreMessage,
-    career: input.career,
-    bio: input.bio,
-    occupation: input.occupation,
-    occupationJa: input.occupationJa,
-    occupationEn: input.occupationEn,
-    countryCode: input.countryCode,
-    countryJa: input.countryJa,
-    countryEn: input.countryEn,
     imageUrl: input.imageUrl,
-    keywords: toTagArray(input.keywords),
+    occupationJa: input.occupationJa,
+    occupation: input.occupationJa,
+    countryJa: input.countryJa,
     category: normalizePrimaryCategory(input.category),
-    popularity: toPopularity(input.popularity),
-    tags: toTagArray(input.tags),
     intro: input.intro,
+    career: input.career,
+    coreMessage: input.coreMessage,
     featured: input.featured === 'on'
   };
 }
@@ -89,6 +80,7 @@ async function renderPersonForm(res, { person = null, errorMessage = '', formVal
   return res.render(viewName, {
     person,
     categoryOptions,
+    countryOptions: COUNTRY_JA_OPTIONS,
     errorMessage,
     formValues
   });
@@ -278,6 +270,7 @@ router.get('/influences', async (req, res) => {
 router.get('/people/new', (req, res) => {
   res.render('admin/people-new', {
     categoryOptions: PRIMARY_CATEGORY_OPTIONS,
+    countryOptions: COUNTRY_JA_OPTIONS,
     errorMessage: '',
     formValues: {}
   });
@@ -289,18 +282,13 @@ router.post('/people', async (req, res) => {
     const isDraft = req.body.saveAsDraft === 'on';
 
     if (isDraft) {
-      personData.displayNameJa = personData.displayNameJa || personData.name;
-      personData.occupationJa = personData.occupationJa || personData.occupation || '未設定（下書き）';
+      personData.occupationJa = personData.occupationJa || '未設定（下書き）';
+      personData.occupation = personData.occupationJa;
       personData.intro = personData.intro || '下書きです。公開前に内容を更新してください。';
-      personData.summary = personData.summary || '下書き';
       personData.career = personData.career || '下書き';
-      personData.bio = personData.bio || '下書き';
       personData.imageUrl = personData.imageUrl || '';
       personData.category = personData.category || '起業家';
       personData.countryJa = personData.countryJa || '未設定';
-      if (!personData.tags.includes('下書き')) {
-        personData.tags.push('下書き');
-      }
     } else {
       const validation = validatePersonTemplate(personData);
       if (!validation.ok) {
@@ -342,13 +330,14 @@ router.get('/people/:id/edit', async (req, res) => {
 
 router.post('/people/:id', async (req, res) => {
   try {
+    const person = await Person.findById(req.params.id);
+    if (!person) {
+      return res.status(404).send('Person not found');
+    }
+
     const personData = normalizePersonInput(req.body);
     const validation = validatePersonTemplate(personData);
     if (!validation.ok) {
-      const person = await Person.findById(req.params.id);
-      if (!person) {
-        return res.status(404).send('Person not found');
-      }
       return renderPersonForm(res, {
         person,
         errorMessage: toValidationMessage(validation.missingFields),
@@ -356,7 +345,11 @@ router.post('/people/:id', async (req, res) => {
       });
     }
 
-    await Person.findByIdAndUpdate(req.params.id, personData);
+    Object.entries(personData).forEach(([key, value]) => {
+      person[key] = value;
+    });
+
+    await person.save();
 
     res.redirect('/admin/people');
   } catch (error) {

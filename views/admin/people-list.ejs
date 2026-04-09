@@ -18,7 +18,7 @@
         <h2><%= person.name %></h2>
         <p><strong>表示名（日本語）:</strong> <%= person.displayNameJa || '未設定' %></p>
         <p><strong>スラッグ:</strong> <%= person.slug %></p>
-        <p><strong>肩書き:</strong> <%= person.occupation || '未設定' %></p>
+        <p><strong>肩書き:</strong> <%= person.occupationJa || person.occupation || '未設定' %></p>
         <p><strong>カテゴリ:</strong> <%= person.category || '未設定' %></p>
         <p><strong>人気度:</strong> <%= person.popularity || 0 %></p>
       </div>

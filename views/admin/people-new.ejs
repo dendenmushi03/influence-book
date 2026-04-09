@@ -9,61 +9,41 @@
     <label>名前 *</label>
     <input name="name" required value="<%= formValues.name || '' %>" />
 
-    <label>表示名（日本語・公開ページ優先表示）</label>
-    <input name="displayNameJa" value="<%= formValues.displayNameJa || '' %>" placeholder="例: ジェフ・ベゾス（未入力なら name を表示）" />
+    <label>画像URL</label>
+    <input name="imageUrl" value="<%= formValues.imageUrl || '' %>" placeholder="https://example.com/image.jpg" />
 
-    <label>slug *（URL用）</label>
-    <input name="slug" required value="<%= formValues.slug || '' %>" />
+    <label>ページURL名 *</label>
+    <input name="slug" required value="<%= formValues.slug || '' %>" placeholder="例: jeff-bezos" />
 
-    <label>肩書き</label>
-    <input name="occupation" value="<%= formValues.occupation || '' %>" />
+    <label>肩書き（日本語） *</label>
+    <input name="occupationJa" required value="<%= formValues.occupationJa || '' %>" placeholder="例: アマゾン創業者" />
 
-    <label>肩書き（日本語表示優先）</label>
-    <input name="occupationJa" value="<%= formValues.occupationJa || '' %>" placeholder="例: アマゾン創業者" />
+    <label>国名（日本語） *</label>
+    <select name="countryJa" required>
+      <% countryOptions.forEach((country) => { %>
+        <option value="<%= country %>" <%= (formValues.countryJa || '未設定') === country ? 'selected' : '' %>><%= country %></option>
+      <% }) %>
+      <% if (formValues.countryJa && !countryOptions.includes(formValues.countryJa)) { %>
+        <option value="<%= formValues.countryJa %>" selected><%= formValues.countryJa %>（既存値）</option>
+      <% } %>
+    </select>
 
-    <label>肩書き（英語）</label>
-    <input name="occupationEn" value="<%= formValues.occupationEn || '' %>" placeholder="例: Founder, Amazon" />
-
-    <label>国コード（検索用・任意）</label>
-    <input name="countryCode" value="<%= formValues.countryCode || '' %>" placeholder="例: US / JP" />
-
-    <label>国名（日本語）</label>
-    <input name="countryJa" value="<%= formValues.countryJa || '' %>" placeholder="例: アメリカ" />
-
-    <label>国名（英語）</label>
-    <input name="countryEn" value="<%= formValues.countryEn || '' %>" placeholder="例: United States" />
-
-    <label>カテゴリ（主分類）</label>
-    <select name="category">
+    <label>カテゴリ（主分類） *</label>
+    <select name="category" required>
       <option value="">未設定</option>
       <% categoryOptions.forEach((category) => { %>
         <option value="<%= category %>" <%= formValues.category === category ? 'selected' : '' %>><%= category %></option>
       <% }) %>
     </select>
 
-    <label>人気度（手動設定）</label>
-    <input type="number" name="popularity" min="0" step="1" value="<%= formValues.popularity || 0 %>" />
+    <label>紹介文（短文） *</label>
+    <textarea name="intro" rows="2" required><%= formValues.intro || '' %></textarea>
 
-    <label>タグ（カンマ区切り）</label>
-    <input name="tags" value="<%= formValues.tags || '' %>" placeholder="経営, 長期思考, テクノロジー" />
+    <label>career（経歴） *</label>
+    <textarea name="career" rows="5" required placeholder="学歴、初期キャリア、転機、創業・現在の立場など"><%= formValues.career || '' %></textarea>
 
-    <label>紹介文（短文）</label>
-    <textarea name="intro" rows="2"><%= formValues.intro || '' %></textarea>
-
-    <label>summary（思考の要約）</label>
-    <textarea name="summary" rows="4" placeholder="この人物の思考の特徴を3〜5行で要約"><%= formValues.summary || '' %></textarea>
-
-    <label>career（経歴）</label>
-    <textarea name="career" rows="5" placeholder="学歴、初期キャリア、転機、創業・現在の立場など"><%= formValues.career || '' %></textarea>
-
-    <label>bio（プロフィール補足）</label>
-    <textarea name="bio" rows="4" placeholder="人物像の補足や背景情報（summary / career に入らない要素）"><%= formValues.bio || '' %></textarea>
-
-    <label>画像URL</label>
-    <input name="imageUrl" value="<%= formValues.imageUrl || '' %>" placeholder="https://example.com/image.jpg" />
-
-    <label>キーワード（カンマ区切り）</label>
-    <input name="keywords" value="<%= formValues.keywords || '' %>" placeholder="経営, テクノロジー" />
+    <label>coreMessage（コアメッセージ）</label>
+    <textarea name="coreMessage" rows="3" placeholder="この人物が繰り返し伝える中心的なメッセージ"><%= formValues.coreMessage || '' %></textarea>
 
     <label>
       <input type="checkbox" name="featured" <%= formValues.featured === 'on' ? 'checked' : '' %> />

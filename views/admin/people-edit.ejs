@@ -6,9 +6,8 @@
     const hasFormValue = (key) => formValues && Object.prototype.hasOwnProperty.call(formValues, key) && typeof formValues[key] !== 'undefined';
     const valueOf = (key, fallback = '') => hasFormValue(key) ? formValues[key] : (person && typeof person[key] !== 'undefined' ? person[key] : fallback);
     const textValue = (key) => valueOf(key, '') || '';
-    const arrayLikeToCsv = (value) => Array.isArray(value) ? value.join(', ') : (value || '');
     const selectedCategory = valueOf('category', '');
-    const popularityValue = valueOf('popularity', 0);
+    const selectedCountryJa = textValue('countryJa') || '未設定';
     const featuredRawValue = valueOf('featured', false);
     const featuredChecked = featuredRawValue === true || featuredRawValue === 'on' || featuredRawValue === 'true' || featuredRawValue === 1 || featuredRawValue === '1';
   %>
@@ -19,61 +18,41 @@
     <label>名前 *</label>
     <input name="name" required value="<%= textValue('name') %>" />
 
-    <label>表示名（日本語・公開ページ優先表示）</label>
-    <input name="displayNameJa" value="<%= textValue('displayNameJa') %>" placeholder="例: ジェフ・ベゾス（未入力なら name を表示）" />
+    <label>画像URL</label>
+    <input name="imageUrl" value="<%= textValue('imageUrl') %>" placeholder="https://example.com/image.jpg" />
 
-    <label>slug *（URL用）</label>
-    <input name="slug" required value="<%= textValue('slug') %>" />
+    <label>ページURL名 *</label>
+    <input name="slug" required value="<%= textValue('slug') %>" placeholder="例: jeff-bezos" />
 
-    <label>肩書き</label>
-    <input name="occupation" value="<%= textValue('occupation') %>" />
+    <label>肩書き（日本語） *</label>
+    <input name="occupationJa" required value="<%= textValue('occupationJa') %>" placeholder="例: アマゾン創業者" />
 
-    <label>肩書き（日本語表示優先）</label>
-    <input name="occupationJa" value="<%= textValue('occupationJa') %>" placeholder="例: アマゾン創業者" />
+    <label>国名（日本語） *</label>
+    <select name="countryJa" required>
+      <% countryOptions.forEach((country) => { %>
+        <option value="<%= country %>" <%= selectedCountryJa === country ? 'selected' : '' %>><%= country %></option>
+      <% }) %>
+      <% if (selectedCountryJa && !countryOptions.includes(selectedCountryJa)) { %>
+        <option value="<%= selectedCountryJa %>" selected><%= selectedCountryJa %>（既存値）</option>
+      <% } %>
+    </select>
 
-    <label>肩書き（英語）</label>
-    <input name="occupationEn" value="<%= textValue('occupationEn') %>" placeholder="例: Founder, Amazon" />
-
-    <label>国コード（検索用・任意）</label>
-    <input name="countryCode" value="<%= textValue('countryCode') %>" placeholder="例: US / JP" />
-
-    <label>国名（日本語）</label>
-    <input name="countryJa" value="<%= textValue('countryJa') %>" placeholder="例: アメリカ" />
-
-    <label>国名（英語）</label>
-    <input name="countryEn" value="<%= textValue('countryEn') %>" placeholder="例: United States" />
-
-    <label>カテゴリ（主分類）</label>
-    <select name="category">
+    <label>カテゴリ（主分類） *</label>
+    <select name="category" required>
       <option value="">未設定</option>
       <% categoryOptions.forEach((category) => { %>
         <option value="<%= category %>" <%= selectedCategory === category ? 'selected' : '' %>><%= category %></option>
       <% }) %>
     </select>
 
-    <label>人気度（手動設定）</label>
-    <input type="number" name="popularity" min="0" step="1" value="<%= popularityValue %>" />
+    <label>紹介文（短文） *</label>
+    <textarea name="intro" rows="2" required><%= textValue('intro') %></textarea>
 
-    <label>タグ（カンマ区切り）</label>
-    <input name="tags" value="<%= arrayLikeToCsv(valueOf('tags', '')) %>" />
+    <label>career（経歴） *</label>
+    <textarea name="career" rows="5" required placeholder="学歴、初期キャリア、転機、創業・現在の立場など"><%= textValue('career') %></textarea>
 
-    <label>紹介文（短文）</label>
-    <textarea name="intro" rows="2"><%= textValue('intro') %></textarea>
-
-    <label>summary（思考の要約）</label>
-    <textarea name="summary" rows="4" placeholder="この人物の思考の特徴を3〜5行で要約"><%= textValue('summary') %></textarea>
-
-    <label>career（経歴）</label>
-    <textarea name="career" rows="5" placeholder="学歴、初期キャリア、転機、創業・現在の立場など"><%= textValue('career') %></textarea>
-
-    <label>bio（プロフィール補足）</label>
-    <textarea name="bio" rows="4" placeholder="人物像の補足や背景情報（summary / career に入らない要素）"><%= textValue('bio') %></textarea>
-
-    <label>画像URL</label>
-    <input name="imageUrl" value="<%= textValue('imageUrl') %>" placeholder="https://example.com/image.jpg" />
-
-    <label>キーワード（カンマ区切り）</label>
-    <input name="keywords" value="<%= arrayLikeToCsv(valueOf('keywords', '')) %>" />
+    <label>coreMessage（コアメッセージ）</label>
+    <textarea name="coreMessage" rows="3" placeholder="この人物が繰り返し伝える中心的なメッセージ"><%= textValue('coreMessage') %></textarea>
 
     <label>
       <input type="checkbox" name="featured" <%= featuredChecked ? 'checked' : '' %> />
