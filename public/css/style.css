@@ -879,6 +879,12 @@ section.page-section.featured-gallery-section.decorated-section::after {
   max-width: 62ch;
 }
 
+
+.search-keyword-note {
+  margin-top: 6px;
+  color: var(--text-muted);
+}
+
 .filter-card {
   margin-bottom: 26px;
   background: var(--surface-soft);
