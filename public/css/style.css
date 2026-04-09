@@ -1563,6 +1563,19 @@ select:focus {
     width: 100%;
     grid-column: 1 / -1;
     grid-row: 2;
+    position: relative;
+    margin-top: 1px;
+    padding-top: 8px;
+  }
+
+  .header-search::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(198, 188, 174, 0.42);
   }
 
   .header-search input {
