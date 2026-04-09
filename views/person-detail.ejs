@@ -243,7 +243,7 @@
   <% } else { %>
     <div class="grid related-people-grid">
       <% relatedPeople.forEach((relatedPerson) => { %>
-        <%- include('partials/person-card', { person: relatedPerson, headingLevel: 'h3', showMeta: true }) %>
+        <%- include('partials/person-card', { person: relatedPerson, headingLevel: 'h3', showMeta: false, cardClassName: 'featured-gallery-card' }) %>
       <% }) %>
     </div>
   <% } %>
