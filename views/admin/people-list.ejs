@@ -3,6 +3,9 @@
 <section class="page-section">
   <h1>人物一覧（管理）</h1>
   <p class="section-description">登録済みの人物データです。</p>
+  <% if (saveResult) { %>
+    <p><strong>下書き保存完了:</strong> 人物更新 <%= saveResult.personUpdatedFields.length %>件 / 本(新規 <%= saveResult.booksCreated %>件, 再利用 <%= saveResult.booksReused %>件) / Influence(新規 <%= saveResult.influencesCreated %>件, 再利用 <%= saveResult.influencesReused %>件)</p>
+  <% } %>
 </section>
 
 <section class="stack">
@@ -25,6 +28,7 @@
       <div class="admin-link-group">
         <a href="/people/<%= person.slug %>">公開ページを見る</a>
         <a href="/admin/people/<%= person._id %>/edit">編集する</a>
+        <a href="/admin/people/<%= person._id %>/generate">情報登録（下書き生成）</a>
         <form action="/admin/people/<%= person._id %>/delete" method="POST" onsubmit="return confirm('この人物を削除しますか？');">
           <button class="button secondary" type="submit">削除</button>
         </form>

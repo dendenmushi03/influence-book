@@ -10,6 +10,8 @@ const { applyBulkInfluences } = require('../lib/apply-bulk-influences');
 const { INFLUENCE_KIND_OPTIONS, toInfluenceKind, getInfluenceKindLabel } = require('../lib/influence-kind');
 const { importPeopleCsv, importBooksCsv, importInfluencesCsv } = require('../lib/csv-import');
 const { validatePersonTemplate, toValidationMessage } = require('../lib/person-draft-validation');
+const { generatePersonDraft, slugify } = require('../services/person-draft-generator');
+const { persistPersonDraft, buildNonEmptyPatch, normalizeKind } = require('../services/person-draft-persistence');
 const {
   PRIMARY_CATEGORY_OPTIONS,
   normalizePrimaryCategory,
@@ -49,15 +51,6 @@ function getAdminAuthConfigError() {
   return '';
 }
 
-function slugify(value) {
-  return String(value || '')
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9ぁ-んァ-ヶ一-龠ー]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .replace(/-{2,}/g, '-');
-}
-
 function normalizePersonInput(input = {}) {
   return {
     name: input.name,
@@ -73,6 +66,131 @@ function normalizePersonInput(input = {}) {
     coreMessage: input.coreMessage,
     featured: input.featured === 'on'
   };
+}
+
+function normalizeDraftBook(rawBook = {}) {
+  const title = String(rawBook.title || '').trim();
+  const slug = String(rawBook.slug || '').trim() || slugify(title);
+  return {
+    title,
+    slug,
+    author: String(rawBook.author || '').trim(),
+    description: String(rawBook.description || '').trim(),
+    coverUrl: String(rawBook.coverUrl || '').trim(),
+    amazonUrl: String(rawBook.amazonUrl || '').trim(),
+    rakutenUrl: String(rawBook.rakutenUrl || '').trim(),
+    googleBooksId: String(rawBook.googleBooksId || '').trim(),
+    isbn: String(rawBook.isbn || '').trim(),
+    isbn10: String(rawBook.isbn10 || '').trim(),
+    isbn13: String(rawBook.isbn13 || '').trim()
+  };
+}
+
+function normalizeDraftInfluence(rawInfluence = {}) {
+  const rawKind = String(rawInfluence.kind || '').trim();
+  if (!['influence', 'about', 'authored'].includes(rawKind)) {
+    const error = new Error(`不正な kind が指定されました: ${rawKind}`);
+    error.code = 'invalid_influence_kind';
+    throw error;
+  }
+
+  return {
+    personSlug: String(rawInfluence.personSlug || '').trim(),
+    bookSlug: String(rawInfluence.bookSlug || '').trim(),
+    kind: normalizeKind(rawKind),
+    impactSummary: String(rawInfluence.impactSummary || '').trim(),
+    sourceTitle: String(rawInfluence.sourceTitle || '').trim(),
+    sourceUrl: String(rawInfluence.sourceUrl || '').trim(),
+    sourceType: String(rawInfluence.sourceType || '').trim(),
+    featuredOrder: Number(rawInfluence.featuredOrder) || 0
+  };
+}
+
+function toArray(value) {
+  if (Array.isArray(value)) {
+    return value;
+  }
+  if (!value || typeof value !== 'object') {
+    return [];
+  }
+  return Object.keys(value)
+    .sort((a, b) => Number(a) - Number(b))
+    .map((key) => value[key]);
+}
+
+async function classifyGeneratedBooks(books = []) {
+  const classified = [];
+  const existingBookIds = new Set();
+
+  for (const rawBook of books) {
+    const book = normalizeDraftBook(rawBook);
+    if (!book.title || !book.slug) {
+      continue;
+    }
+
+    let existingBook = await Book.findOne({ slug: book.slug });
+    if (!existingBook) {
+      const isbnCandidates = [book.isbn, book.isbn13, book.isbn10].filter(Boolean);
+      if (isbnCandidates.length > 0) {
+        existingBook = await Book.findOne({
+          $or: [{ isbn: { $in: isbnCandidates } }, { isbn13: { $in: isbnCandidates } }, { isbn10: { $in: isbnCandidates } }]
+        });
+      }
+    }
+
+    const existingBookId = existingBook ? String(existingBook._id) : '';
+    if (existingBookId) {
+      existingBookIds.add(existingBookId);
+    }
+
+    classified.push({
+      ...book,
+      existingBookId,
+      existingBookTitle: existingBook ? existingBook.title : '',
+      resolutionType: existingBook ? 'reuse' : 'create'
+    });
+  }
+
+  return {
+    books: classified,
+    existingBookIds: [...existingBookIds]
+  };
+}
+
+function mergeInfluencesWithBooks(influences = [], books = []) {
+  const bookMap = new Map(books.map((book) => [book.slug, book]));
+  return influences.map((rawInfluence) => {
+    const normalized = normalizeDraftInfluence(rawInfluence);
+    const relatedBook = bookMap.get(normalized.bookSlug);
+    return {
+      ...normalized,
+      resolutionType: relatedBook && relatedBook.resolutionType === 'reuse' ? 'reuse' : 'create',
+      bookTitle: relatedBook ? relatedBook.title : normalized.bookSlug
+    };
+  });
+}
+
+function mergeInfluencesWithBooksForPreview(influences = [], books = []) {
+  const bookMap = new Map(books.map((book) => [book.slug, book]));
+  return influences.map((rawInfluence) => {
+    const personSlug = String(rawInfluence.personSlug || '').trim();
+    const bookSlug = String(rawInfluence.bookSlug || '').trim();
+    const kind = String(rawInfluence.kind || '').trim();
+    const relatedBook = bookMap.get(bookSlug);
+
+    return {
+      personSlug,
+      bookSlug,
+      kind,
+      impactSummary: String(rawInfluence.impactSummary || '').trim(),
+      sourceTitle: String(rawInfluence.sourceTitle || '').trim(),
+      sourceUrl: String(rawInfluence.sourceUrl || '').trim(),
+      sourceType: String(rawInfluence.sourceType || '').trim(),
+      featuredOrder: Number(rawInfluence.featuredOrder) || 0,
+      resolutionType: relatedBook && relatedBook.resolutionType === 'reuse' ? 'reuse' : 'create',
+      bookTitle: relatedBook ? relatedBook.title : bookSlug
+    };
+  });
 }
 
 async function renderPersonForm(res, { person = null, errorMessage = '', formValues = {} } = {}) {
@@ -231,8 +349,12 @@ router.get('/', (req, res) => {
 
 router.get('/people', async (req, res) => {
   try {
+    const saveResult = req.session ? req.session.personDraftSaveResult : null;
+    if (req.session) {
+      req.session.personDraftSaveResult = null;
+    }
     const people = await Person.find({}).sort({ createdAt: -1 });
-    res.render('admin/people-list', { people });
+    res.render('admin/people-list', { people, saveResult });
   } catch (error) {
     console.error('Failed to load people list:', error.message);
     res.status(500).send('Failed to load people list');
@@ -326,6 +448,124 @@ router.get('/people/:id/edit', async (req, res) => {
   } catch (error) {
     console.error('Failed to load person edit form:', error.message);
     res.status(500).send('Failed to load person edit form');
+  }
+});
+
+router.get('/people/:id/generate', async (req, res) => {
+  try {
+    const person = await Person.findById(req.params.id);
+    if (!person) {
+      return res.status(404).send('Person not found');
+    }
+
+    return res.render('admin/people-generate', {
+      person,
+      errorMessage: '',
+      generationNotice: '',
+      draft: null
+    });
+  } catch (error) {
+    console.error('Failed to load person generation page:', error.message);
+    return res.status(500).send('Failed to load person generation page');
+  }
+});
+
+router.post('/people/:id/generate', async (req, res) => {
+  try {
+    const person = await Person.findById(req.params.id);
+    if (!person) {
+      return res.status(404).send('Person not found');
+    }
+
+    if (!person.name || !String(person.name).trim()) {
+      return res.status(400).render('admin/people-generate', {
+        person,
+        errorMessage: '人物名が未入力のため下書きを生成できません。人物編集画面で名前を設定してください。',
+        generationNotice: '',
+        draft: null
+      });
+    }
+
+    const generatedDraft = await generatePersonDraft(person);
+    const personPatch = buildNonEmptyPatch(generatedDraft.personPatch || {});
+    const { books } = await classifyGeneratedBooks(generatedDraft.books || []);
+    const influences = mergeInfluencesWithBooks(generatedDraft.influences || [], books);
+
+    return res.render('admin/people-generate-preview', {
+      person,
+      errorMessage: '',
+      generationNotice: '下書きを生成しました。内容を確認・編集してから保存してください。',
+      draft: {
+        personPatch,
+        books,
+        influences
+      }
+    });
+  } catch (error) {
+    console.error('Failed to generate person draft:', error.message);
+
+    const person = await Person.findById(req.params.id);
+    return res.status(500).render('admin/people-generate', {
+      person,
+      errorMessage: `下書き生成に失敗しました。時間をおいて再実行してください。詳細: ${error.message}`,
+      generationNotice: '',
+      draft: null
+    });
+  }
+});
+
+router.post('/people/:id/generate/save', async (req, res) => {
+  try {
+    const personId = req.params.id;
+    const personPatch = buildNonEmptyPatch(req.body.personPatch || {});
+    const books = toArray(req.body.books).map(normalizeDraftBook).filter((book) => book.title && book.slug);
+    const influences = toArray(req.body.influences).map(normalizeDraftInfluence).filter((influence) => influence.bookSlug);
+
+    const result = await persistPersonDraft({
+      Person,
+      Book,
+      Influence,
+      personId,
+      draft: {
+        personPatch,
+        books,
+        influences
+      }
+    });
+
+    if (req.session) {
+      req.session.personDraftSaveResult = result;
+    }
+
+    return res.redirect('/admin/people');
+  } catch (error) {
+    console.error('Failed to save generated draft:', error.message);
+    const person = await Person.findById(req.params.id);
+    const { books } = await classifyGeneratedBooks(toArray(req.body.books).map(normalizeDraftBook));
+    const influences = mergeInfluencesWithBooksForPreview(
+      toArray(req.body.influences).map((rawInfluence) => ({
+        personSlug: String(rawInfluence.personSlug || '').trim(),
+        bookSlug: String(rawInfluence.bookSlug || '').trim(),
+        kind: String(rawInfluence.kind || '').trim(),
+        impactSummary: String(rawInfluence.impactSummary || '').trim(),
+        sourceTitle: String(rawInfluence.sourceTitle || '').trim(),
+        sourceUrl: String(rawInfluence.sourceUrl || '').trim(),
+        sourceType: String(rawInfluence.sourceType || '').trim(),
+        featuredOrder: Number(rawInfluence.featuredOrder) || 0
+      })),
+      books
+    );
+
+    return res.status(500).render('admin/people-generate-preview', {
+      person,
+      errorMessage: `下書き保存に失敗しました。詳細: ${error.message}`,
+      generationNotice: '',
+      draft: {
+        personPatch: buildNonEmptyPatch(req.body.personPatch || {}),
+        books,
+        influences
+      }
+    });
   }
 });
 
