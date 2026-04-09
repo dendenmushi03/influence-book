@@ -1237,27 +1237,23 @@ button.quiet {
 }
 
 
-.person-book-section {
+.person-book-section-card {
   border: 1px solid var(--border);
   border-radius: calc(var(--radius-lg) + 2px);
   background: linear-gradient(180deg, #f8f7f4 0%, #f4f2ee 100%);
   padding: clamp(22px, 3vw, 34px);
 }
 
-section.page-section.section-separator.person-book-section {
-  padding-top: 0;
-}
-
-.person-book-section .section-head {
+.person-book-section-card .section-head {
   margin-bottom: clamp(16px, 2.4vw, 24px);
 }
 
-.person-book-section .section-head h2 {
+.person-book-section-card .section-head h2 {
   font-size: clamp(1.5rem, 2.2vw, 2rem);
   letter-spacing: -0.01em;
 }
 
-.person-book-section .section-description {
+.person-book-section-card .section-description {
   font-size: clamp(1.04rem, 1.5vw, 1.1rem);
   line-height: 1.8;
 }
@@ -1746,11 +1742,11 @@ select:focus {
     padding: 20px;
   }
 
-  .person-book-section {
+  .person-book-section-card {
     padding: 18px;
   }
 
-  .person-book-section .section-description {
+  .person-book-section-card .section-description {
     line-height: 1.7;
   }
 
