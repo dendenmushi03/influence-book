@@ -360,9 +360,19 @@ p {
   color: var(--text-muted);
 }
 
-.section-separator {
-  border-top: 1px solid var(--border);
-  padding-top: 44px;
+section.page-section.section-separator {
+  position: relative;
+  padding-top: 40px;
+}
+
+section.page-section.section-separator::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(198, 188, 174, 0.38);
 }
 
 .card {
@@ -1537,6 +1547,14 @@ select:focus {
 }
 
 @media (max-width: 640px) {
+  section.page-section.section-separator {
+    padding-top: 36px;
+  }
+
+  section.page-section.section-separator::before {
+    background: rgba(198, 188, 174, 0.34);
+  }
+
   .logo {
     font-size: 0.98rem;
     letter-spacing: 0.07em;
