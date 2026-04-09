@@ -15,4 +15,9 @@ const influenceSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+influenceSchema.index(
+  { personId: 1, bookId: 1, kind: 1 },
+  { unique: true, name: 'uniq_person_book_kind' }
+);
+
 module.exports = mongoose.model('Influence', influenceSchema);

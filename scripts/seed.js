@@ -8,6 +8,17 @@ dotenv.config();
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/influence-book';
 
+
+function assertSeedExecutionAllowed() {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('Seed is blocked in production environment (NODE_ENV=production).');
+  }
+
+  if (process.env.CONFIRM_SEED !== 'true') {
+    throw new Error('Seed requires explicit confirmation: set CONFIRM_SEED=true.');
+  }
+}
+
 // ------------------------------
 // Seed source data
 // ------------------------------
@@ -159,6 +170,7 @@ const bookSeedData = [
 
 async function seed() {
   try {
+    assertSeedExecutionAllowed();
     await mongoose.connect(MONGODB_URI);
     console.log('Connected to MongoDB for seed');
 
@@ -302,6 +314,7 @@ async function seed() {
     console.log('Seed completed successfully');
   } catch (error) {
     console.error('Seed failed:', error.message);
+    process.exitCode = 1;
   } finally {
     await mongoose.connection.close();
     console.log('MongoDB connection closed');

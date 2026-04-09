@@ -17,4 +17,6 @@ const bookSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+bookSchema.index({ isbn: 1 }, { unique: true, sparse: true, name: 'uniq_book_isbn' });
+
 module.exports = mongoose.model('Book', bookSchema);

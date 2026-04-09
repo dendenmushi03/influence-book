@@ -37,12 +37,22 @@
       <li>総件数: <strong><%= result.totalCount %></strong></li>
       <li>成功件数: <strong><%= result.successCount %></strong></li>
       <li>失敗件数: <strong><%= result.failedCount %></strong></li>
+      <li>スキップ件数: <strong><%= result.skippedCount || 0 %></strong></li>
     </ul>
 
     <% if (result.errors && result.errors.length > 0) { %>
       <h3>エラー一覧</h3>
       <ul>
         <% result.errors.forEach((item) => { %>
+          <li>行 <%= item.rowNumber %>: <%= item.message %></li>
+        <% }) %>
+      </ul>
+    <% } %>
+
+    <% if (result.skipped && result.skipped.length > 0) { %>
+      <h3>スキップ一覧</h3>
+      <ul>
+        <% result.skipped.forEach((item) => { %>
           <li>行 <%= item.rowNumber %>: <%= item.message %></li>
         <% }) %>
       </ul>
