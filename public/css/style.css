@@ -17,6 +17,7 @@
   --radius-md: 13px;
   --radius-sm: 10px;
   --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
+  --section-gap: 48px;
 }
 
 * {
@@ -331,7 +332,7 @@ p {
 }
 
 .page-section {
-  margin-bottom: 48px;
+  margin-bottom: var(--section-gap);
   position: relative;
 }
 
@@ -368,7 +369,7 @@ section.page-section.section-separator {
 section.page-section.section-separator::before {
   content: '';
   position: absolute;
-  top: 0;
+  top: calc(var(--section-gap) / -2);
   left: 0;
   right: 0;
   height: 1px;
@@ -1547,8 +1548,12 @@ select:focus {
 }
 
 @media (max-width: 640px) {
+  :root {
+    --section-gap: 42px;
+  }
+
   section.page-section.section-separator {
-    padding-top: 36px;
+    padding-top: 34px;
   }
 
   section.page-section.section-separator::before {
