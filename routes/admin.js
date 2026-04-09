@@ -8,6 +8,8 @@ const { resolveBookForInfluence, normalizeInput } = require('../lib/resolve-book
 const { previewBulkInfluences } = require('../lib/preview-bulk-influences');
 const { applyBulkInfluences } = require('../lib/apply-bulk-influences');
 const { INFLUENCE_KIND_OPTIONS, toInfluenceKind, getInfluenceKindLabel } = require('../lib/influence-kind');
+const { importPeopleCsv, importBooksCsv, importInfluencesCsv } = require('../lib/csv-import');
+const { validatePersonTemplate, toValidationMessage } = require('../lib/person-draft-validation');
 const {
   PRIMARY_CATEGORY_OPTIONS,
   normalizePrimaryCategory,
@@ -54,6 +56,54 @@ function slugify(value) {
 function toPopularity(value) {
   const popularity = Number(value);
   return Number.isFinite(popularity) ? popularity : 0;
+}
+
+function normalizePersonInput(input = {}) {
+  return {
+    name: input.name,
+    displayNameJa: input.displayNameJa,
+    slug: input.slug,
+    summary: input.summary,
+    coreMessage: input.coreMessage,
+    career: input.career,
+    bio: input.bio,
+    occupation: input.occupation,
+    occupationJa: input.occupationJa,
+    occupationEn: input.occupationEn,
+    countryCode: input.countryCode,
+    countryJa: input.countryJa,
+    countryEn: input.countryEn,
+    imageUrl: input.imageUrl,
+    keywords: toTagArray(input.keywords),
+    category: normalizePrimaryCategory(input.category),
+    popularity: toPopularity(input.popularity),
+    tags: toTagArray(input.tags),
+    intro: input.intro,
+    featured: input.featured === 'on'
+  };
+}
+
+async function renderPersonForm(res, { person = null, errorMessage = '', formValues = {} } = {}) {
+  const categoryOptions = buildPrimaryCategoryList([person ? person.category : formValues.category]);
+  const viewName = person ? 'admin/people-edit' : 'admin/people-new';
+  return res.render(viewName, {
+    person,
+    categoryOptions,
+    errorMessage,
+    formValues
+  });
+}
+
+async function renderCsvImportPage(res, data = {}) {
+  return res.render('admin/csv-import', {
+    formValues: data.formValues || {
+      entityType: 'people',
+      csvText: '',
+      dryRun: true
+    },
+    result: data.result || null,
+    errorMessage: data.errorMessage || ''
+  });
 }
 
 async function renderInfluenceNewPage(res, data = {}) {
@@ -227,41 +277,50 @@ router.get('/influences', async (req, res) => {
 
 router.get('/people/new', (req, res) => {
   res.render('admin/people-new', {
-    categoryOptions: PRIMARY_CATEGORY_OPTIONS
+    categoryOptions: PRIMARY_CATEGORY_OPTIONS,
+    errorMessage: '',
+    formValues: {}
   });
 });
 
 router.post('/people', async (req, res) => {
   try {
-    const keywords = toTagArray(req.body.keywords);
-    const tags = toTagArray(req.body.tags);
+    const personData = normalizePersonInput(req.body);
+    const isDraft = req.body.saveAsDraft === 'on';
 
-    await Person.create({
-      name: req.body.name,
-      displayNameJa: req.body.displayNameJa,
-      slug: req.body.slug,
-      summary: req.body.summary,
-      career: req.body.career,
-      bio: req.body.bio,
-      occupation: req.body.occupation,
-      occupationJa: req.body.occupationJa,
-      occupationEn: req.body.occupationEn,
-      countryCode: req.body.countryCode,
-      countryJa: req.body.countryJa,
-      countryEn: req.body.countryEn,
-      imageUrl: req.body.imageUrl,
-      keywords,
-      category: normalizePrimaryCategory(req.body.category),
-      popularity: toPopularity(req.body.popularity),
-      tags,
-      intro: req.body.intro,
-      featured: req.body.featured === 'on'
-    });
+    if (isDraft) {
+      personData.displayNameJa = personData.displayNameJa || personData.name;
+      personData.occupationJa = personData.occupationJa || personData.occupation || '未設定（下書き）';
+      personData.intro = personData.intro || '下書きです。公開前に内容を更新してください。';
+      personData.summary = personData.summary || '下書き';
+      personData.career = personData.career || '下書き';
+      personData.bio = personData.bio || '下書き';
+      personData.imageUrl = personData.imageUrl || '';
+      personData.category = personData.category || '起業家';
+      personData.countryJa = personData.countryJa || '未設定';
+      if (!personData.tags.includes('下書き')) {
+        personData.tags.push('下書き');
+      }
+    } else {
+      const validation = validatePersonTemplate(personData);
+      if (!validation.ok) {
+        return renderPersonForm(res, {
+          errorMessage: toValidationMessage(validation.missingFields),
+          formValues: req.body
+        });
+      }
+    }
+
+    await Person.create(personData);
 
     res.redirect('/admin');
   } catch (error) {
     console.error('Failed to create person:', error.message);
-    res.status(500).send('Failed to create person');
+    res.status(500);
+    return renderPersonForm(res, {
+      errorMessage: `人物の登録に失敗しました: ${error.message}`,
+      formValues: req.body
+    });
   }
 });
 
@@ -271,8 +330,7 @@ router.get('/people/:id/edit', async (req, res) => {
     if (!person) {
       return res.status(404).send('Person not found');
     }
-    const categoryOptions = buildPrimaryCategoryList([person.category]);
-    res.render('admin/people-edit', { person, categoryOptions });
+    res.render('admin/people-edit', { person, categoryOptions: buildPrimaryCategoryList([person.category]), errorMessage: '', formValues: {} });
   } catch (error) {
     console.error('Failed to load person edit form:', error.message);
     res.status(500).send('Failed to load person edit form');
@@ -281,30 +339,21 @@ router.get('/people/:id/edit', async (req, res) => {
 
 router.post('/people/:id', async (req, res) => {
   try {
-    const keywords = toTagArray(req.body.keywords);
-    const tags = toTagArray(req.body.tags);
+    const personData = normalizePersonInput(req.body);
+    const validation = validatePersonTemplate(personData);
+    if (!validation.ok) {
+      const person = await Person.findById(req.params.id);
+      if (!person) {
+        return res.status(404).send('Person not found');
+      }
+      return renderPersonForm(res, {
+        person,
+        errorMessage: toValidationMessage(validation.missingFields),
+        formValues: req.body
+      });
+    }
 
-    await Person.findByIdAndUpdate(req.params.id, {
-      name: req.body.name,
-      displayNameJa: req.body.displayNameJa,
-      slug: req.body.slug,
-      summary: req.body.summary,
-      career: req.body.career,
-      bio: req.body.bio,
-      occupation: req.body.occupation,
-      occupationJa: req.body.occupationJa,
-      occupationEn: req.body.occupationEn,
-      countryCode: req.body.countryCode,
-      countryJa: req.body.countryJa,
-      countryEn: req.body.countryEn,
-      imageUrl: req.body.imageUrl,
-      keywords,
-      category: normalizePrimaryCategory(req.body.category),
-      popularity: toPopularity(req.body.popularity),
-      tags,
-      intro: req.body.intro,
-      featured: req.body.featured === 'on'
-    });
+    await Person.findByIdAndUpdate(req.params.id, personData);
 
     res.redirect('/admin/people');
   } catch (error) {
@@ -453,6 +502,50 @@ router.get('/influences/new', async (req, res) => {
   } catch (error) {
     console.error('Failed to load influence form:', error.message);
     res.status(500).send('Failed to load influence form');
+  }
+});
+
+router.get('/import/csv', async (req, res) => {
+  try {
+    await renderCsvImportPage(res);
+  } catch (error) {
+    console.error('Failed to load CSV import page:', error.message);
+    res.status(500).send('Failed to load CSV import page');
+  }
+});
+
+router.post('/import/csv', async (req, res) => {
+  try {
+    const entityType = String(req.body.entityType || '').trim();
+    const csvText = String(req.body.csvText || '');
+    const dryRun = req.body.dryRun === 'on';
+    const formValues = { entityType, csvText, dryRun };
+
+    if (!csvText.trim()) {
+      return renderCsvImportPage(res, {
+        formValues,
+        errorMessage: 'CSVテキストを入力してください。'
+      });
+    }
+
+    let result;
+    if (entityType === 'people') {
+      result = await importPeopleCsv({ csvText, Person, dryRun });
+    } else if (entityType === 'books') {
+      result = await importBooksCsv({ csvText, Book, dryRun });
+    } else if (entityType === 'influences') {
+      result = await importInfluencesCsv({ csvText, Person, Book, Influence, dryRun });
+    } else {
+      return renderCsvImportPage(res, {
+        formValues,
+        errorMessage: '対象エンティティを選択してください。'
+      });
+    }
+
+    return renderCsvImportPage(res, { formValues, result });
+  } catch (error) {
+    console.error('Failed to import CSV:', error.message);
+    return res.status(500).send('Failed to import CSV');
   }
 });
 
