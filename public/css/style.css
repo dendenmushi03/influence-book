@@ -363,7 +363,6 @@ p {
 
 section.page-section.section-separator {
   position: relative;
-  padding-top: 40px;
 }
 
 section.page-section.section-separator::before {
@@ -381,8 +380,11 @@ section.page-section.section-separator::before {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 24px;
-  margin-bottom: 16px;
   box-shadow: var(--shadow-card);
+}
+
+.card:not(.page-section) {
+  margin-bottom: 16px;
 }
 
 .reveal-fade {
@@ -1091,6 +1093,7 @@ button.quiet {
   padding: clamp(24px, 3.8vw, 38px);
 }
 
+
 .person-detail-header {
   display: flex;
   align-items: center;
@@ -1548,13 +1551,6 @@ select:focus {
     --section-gap: 42px;
   }
 
-  section.page-section.section-separator {
-    padding-top: 34px;
-  }
-
-  section.page-section.section-separator.person-book-section {
-    padding-top: 0;
-  }
 
   section.page-section.section-separator::before {
     background: rgba(198, 188, 174, 0.34);
