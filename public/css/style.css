@@ -17,7 +17,7 @@
   --radius-md: 13px;
   --radius-sm: 10px;
   --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
-  --section-gap: 42px;
+  --section-gap: 48px;
 }
 
 * {
@@ -332,14 +332,20 @@ p {
 }
 
 .page-section {
-  margin-bottom: 0;
+  margin-bottom: var(--section-gap);
   position: relative;
 }
 
-section.page-section.section-separator {
-  margin-top: var(--section-gap);
-  position: relative;
-  padding-top: 0;
+.decorated-section::before {
+  content: '';
+  position: absolute;
+  inset: -8px -22px auto auto;
+  width: min(320px, 44vw);
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(213, 201, 181, 0.2) 0%, rgba(213, 201, 181, 0) 72%);
+  pointer-events: none;
+  z-index: -1;
 }
 
 .section-head {
@@ -355,16 +361,9 @@ section.page-section.section-separator {
   color: var(--text-muted);
 }
 
-.decorated-section::before {
-  content: '';
-  position: absolute;
-  inset: -8px -22px auto auto;
-  width: min(320px, 44vw);
-  height: 220px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(213, 201, 181, 0.2) 0%, rgba(213, 201, 181, 0) 72%);
-  pointer-events: none;
-  z-index: -1;
+section.page-section.section-separator {
+  position: relative;
+  padding-top: 40px;
 }
 
 section.page-section.section-separator::before {
@@ -375,7 +374,6 @@ section.page-section.section-separator::before {
   right: 0;
   height: 1px;
   background: rgba(198, 188, 174, 0.38);
-  pointer-events: none;
 }
 
 .card {
@@ -1550,6 +1548,14 @@ select:focus {
 }
 
 @media (max-width: 640px) {
+  :root {
+    --section-gap: 42px;
+  }
+
+  section.page-section.section-separator {
+    padding-top: 34px;
+  }
+
   section.page-section.section-separator::before {
     background: rgba(198, 188, 174, 0.34);
   }
