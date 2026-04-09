@@ -21,6 +21,9 @@
     <label>画像URL</label>
     <input name="imageUrl" value="<%= textValue('imageUrl') %>" placeholder="https://example.com/image.jpg" />
 
+    <label>coreMessage（コアメッセージ）</label>
+    <textarea name="coreMessage" rows="3" placeholder="この人物が繰り返し伝える中心的なメッセージ"><%= textValue('coreMessage') %></textarea>
+
     <label>ページURL名 *</label>
     <input name="slug" required value="<%= textValue('slug') %>" placeholder="例: jeff-bezos" />
 
@@ -50,9 +53,6 @@
 
     <label>career（経歴） *</label>
     <textarea name="career" rows="5" required placeholder="学歴、初期キャリア、転機、創業・現在の立場など"><%= textValue('career') %></textarea>
-
-    <label>coreMessage（コアメッセージ）</label>
-    <textarea name="coreMessage" rows="3" placeholder="この人物が繰り返し伝える中心的なメッセージ"><%= textValue('coreMessage') %></textarea>
 
     <label>
       <input type="checkbox" name="featured" <%= featuredChecked ? 'checked' : '' %> />
