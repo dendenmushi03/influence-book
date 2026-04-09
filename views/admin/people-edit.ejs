@@ -48,11 +48,11 @@
       <% }) %>
     </select>
 
-    <label>人物カード表示用紹介文（短文） *</label>
-    <textarea name="intro" rows="2" required><%= textValue('intro') %></textarea>
-
     <label>career（経歴） *</label>
     <textarea name="career" rows="5" required placeholder="学歴、初期キャリア、転機、創業・現在の立場など"><%= textValue('career') %></textarea>
+
+    <label>人物カード表示用紹介文（短文） *</label>
+    <textarea name="intro" rows="2" required><%= textValue('intro') %></textarea>
 
     <label>
       <input type="checkbox" name="featured" <%= featuredChecked ? 'checked' : '' %> />
