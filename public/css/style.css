@@ -1284,7 +1284,35 @@ button.quiet {
 }
 
 .related-people-section {
+  position: relative;
+  isolation: isolate;
   padding: clamp(18px, 2.4vw, 26px);
+}
+
+.related-people-section.section-separator::before {
+  content: '';
+  position: absolute;
+  inset: auto;
+  top: calc(var(--section-gap) / -2);
+  left: 0;
+  right: 0;
+  width: auto;
+  height: 1px;
+  border-radius: 0;
+  background: rgba(198, 188, 174, 0.38);
+  z-index: 2;
+}
+
+.related-people-section.decorated-section::after {
+  content: '';
+  position: absolute;
+  inset: -8px -22px auto auto;
+  width: min(320px, 44vw);
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(213, 201, 181, 0.2) 0%, rgba(213, 201, 181, 0) 72%);
+  pointer-events: none;
+  z-index: -1;
 }
 
 .related-people-head {
@@ -1694,6 +1722,10 @@ select:focus {
 
   .related-people-section {
     padding: 18px 16px;
+  }
+
+  .related-people-section.section-separator::before {
+    background: rgba(198, 188, 174, 0.34);
   }
 
   .people-entry-filter-card .people-search-form {
