@@ -628,6 +628,24 @@ button.quiet {
   font-size: 0.89rem;
 }
 
+.purchase-links .button-link,
+.purchase-links .button-link:link,
+.purchase-links .button-link:visited,
+.purchase-links .button-link:hover,
+.purchase-links .button-link:active,
+.purchase-links .button-link:focus,
+.purchase-links .button-link:focus-visible,
+.purchase-links .button-link > * {
+  color: #fff;
+  -webkit-text-fill-color: #fff;
+}
+
+.purchase-links .button-link svg,
+.purchase-links .button-link svg * {
+  fill: currentColor;
+  stroke: currentColor;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
