@@ -330,7 +330,10 @@ router.get('/people/:id/edit', async (req, res) => {
     if (!person) {
       return res.status(404).send('Person not found');
     }
-    res.render('admin/people-edit', { person, categoryOptions: buildPrimaryCategoryList([person.category]), errorMessage: '', formValues: {} });
+    return renderPersonForm(res, {
+      person,
+      errorMessage: ''
+    });
   } catch (error) {
     console.error('Failed to load person edit form:', error.message);
     res.status(500).send('Failed to load person edit form');
