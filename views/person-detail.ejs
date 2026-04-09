@@ -243,23 +243,7 @@
   <% } else { %>
     <div class="grid related-people-grid">
       <% relatedPeople.forEach((relatedPerson) => { %>
-        <% const relatedDisplayName = relatedPerson.displayNameJa || relatedPerson.name; %>
-        <article class="card person-card">
-          <div class="person-visual-wrap">
-            <% if (relatedPerson.imageUrl) { %>
-              <img src="<%= relatedPerson.imageUrl %>" alt="<%= relatedDisplayName %> の写真" class="person-visual" loading="lazy" />
-            <% } else { %>
-              <div class="person-visual person-visual-placeholder" aria-hidden="true">
-                <span><%= relatedDisplayName.slice(0, 1).toUpperCase() %></span>
-              </div>
-            <% } %>
-          </div>
-          <h3 class="person-card-title"><%= relatedDisplayName %></h3>
-          <p class="person-role"><%= relatedPerson.occupation || '肩書き未設定' %></p>
-          <p class="person-intro"><%= relatedPerson.intro || '' %></p>
-          <p class="person-category">カテゴリ: <%= relatedPerson.category || '未設定' %></p>
-          <a class="person-link" href="/people/<%= relatedPerson.slug %>">詳細を見る</a>
-        </article>
+        <%- include('partials/person-card', { person: relatedPerson, headingLevel: 'h3', showMeta: true }) %>
       <% }) %>
     </div>
   <% } %>
