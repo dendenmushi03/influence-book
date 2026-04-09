@@ -2,31 +2,34 @@
   const headingTag = headingLevel || 'h3';
   const displayName = person.displayNameJa || person.name;
   const resolvedCardClassName = typeof cardClassName === 'string' ? cardClassName : '';
+  const resolvedLinkLabel = typeof linkLabel === 'string' ? linkLabel : '詳細を見る';
 %>
 <article class="card person-card <%= resolvedCardClassName %>">
-  <div class="person-visual-wrap">
-    <% if (person.imageUrl) { %>
-      <img src="<%= person.imageUrl %>" alt="<%= displayName %> の写真" class="person-visual" loading="lazy" />
-    <% } else { %>
-      <div class="person-visual person-visual-placeholder" aria-hidden="true">
-        <span><%= displayName.slice(0, 1).toUpperCase() %></span>
-      </div>
-    <% } %>
-  </div>
-  <<%= headingTag %> class="person-card-title"><%= displayName %></<%= headingTag %>>
-  <p class="person-role"><%= person.occupation || '肩書き未設定' %></p>
-  <p class="person-intro"><%= person.intro || '' %></p>
+  <a class="person-card-link" href="/people/<%= person.slug %>">
+    <div class="person-visual-wrap">
+      <% if (person.imageUrl) { %>
+        <img src="<%= person.imageUrl %>" alt="<%= displayName %> の写真" class="person-visual" loading="lazy" />
+      <% } else { %>
+        <div class="person-visual person-visual-placeholder" aria-hidden="true">
+          <span><%= displayName.slice(0, 1).toUpperCase() %></span>
+        </div>
+      <% } %>
+    </div>
+    <<%= headingTag %> class="person-card-title"><%= displayName %></<%= headingTag %>>
+    <p class="person-role"><%= person.occupation || '肩書き未設定' %></p>
+    <p class="person-intro"><%= person.intro || '' %></p>
 
-  <% if (showMeta) { %>
-    <p class="person-category">カテゴリ: <%= person.category || '未設定' %></p>
-    <% if (person.tags && person.tags.length > 0) { %>
-      <div class="keywords">
-        <% person.tags.forEach((tag) => { %>
-          <span class="tag"><%= tag %></span>
-        <% }) %>
-      </div>
+    <% if (showMeta) { %>
+      <p class="person-category">カテゴリ: <%= person.category || '未設定' %></p>
+      <% if (person.tags && person.tags.length > 0) { %>
+        <div class="keywords">
+          <% person.tags.forEach((tag) => { %>
+            <span class="tag"><%= tag %></span>
+          <% }) %>
+        </div>
+      <% } %>
     <% } %>
-  <% } %>
 
-  <a class="person-link" href="/people/<%= person.slug %>">詳細を見る</a>
+    <span class="person-link"><%= resolvedLinkLabel %></span>
+  </a>
 </article>
