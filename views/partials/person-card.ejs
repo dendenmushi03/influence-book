@@ -1,6 +1,7 @@
 <%
   const headingTag = headingLevel || 'h3';
   const displayName = person.displayNameJa || person.name;
+  const displayOccupation = person.occupationJa || person.occupation || person.occupationEn || '肩書き未設定';
   const resolvedCardClassName = typeof cardClassName === 'string' ? cardClassName : '';
   const resolvedLinkLabel = typeof linkLabel === 'string' ? linkLabel : '詳細を見る';
 %>
@@ -16,7 +17,7 @@
       <% } %>
     </div>
     <<%= headingTag %> class="person-card-title"><%= displayName %></<%= headingTag %>>
-    <p class="person-role"><%= person.occupation || '肩書き未設定' %></p>
+    <p class="person-role"><%= displayOccupation %></p>
     <p class="person-intro"><%= person.intro || '' %></p>
 
     <% if (showMeta) { %>

@@ -30,7 +30,7 @@
     <% } %>
 
     <% peopleResults.forEach((person) => { %>
-      <%- include('partials/person-card', { person, headingLevel: 'h3', showMeta: true }) %>
+      <%- include('partials/person-card', { person, headingLevel: 'h3', showMeta: false, cardClassName: 'featured-gallery-card' }) %>
     <% }) %>
   </div>
 </section>
