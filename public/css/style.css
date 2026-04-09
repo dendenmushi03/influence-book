@@ -1273,6 +1273,14 @@ button.quiet {
   margin-bottom: 0;
 }
 
+.related-people-section {
+  padding: clamp(18px, 2.4vw, 26px);
+}
+
+.related-people-head {
+  margin-bottom: clamp(14px, 2vw, 22px);
+}
+
 .admin-actions-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -1649,6 +1657,10 @@ select:focus {
   }
 
   .featured-gallery-premium {
+    padding: 18px 16px;
+  }
+
+  .related-people-section {
     padding: 18px 16px;
   }
 
