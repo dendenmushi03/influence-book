@@ -3,7 +3,7 @@
 <section class="card person-header-card page-section detail-hero">
   <% const displayName = person.displayNameJa || person.name; %>
   <% const displayOccupation = person.occupationJa || person.occupation || person.occupationEn || '肩書き未設定'; %>
-  <% const mergedSummary = [person.bio, person.summary].filter(Boolean).join('\n\n'); %>
+  <% const personDescription = person.bio || person.summary || ''; %>
   <div class="person-detail-header">
     <% if (person.imageUrl) { %>
       <img src="<%= person.imageUrl %>" alt="<%= displayName %> の写真" class="person-detail-image" />
@@ -24,7 +24,7 @@
   <div class="person-detail-meta">
     <div class="card-subsection detail-block text-block summary-block">
       <h2><%= displayName %>について</h2>
-      <p class="person-longtext"><%= mergedSummary || 'この人物の紹介はまだ登録されていません。' %></p>
+      <p class="person-longtext"><%= personDescription || 'この人物の紹介はまだ登録されていません。' %></p>
     </div>
 
     <div class="card-subsection detail-block text-block career-block">

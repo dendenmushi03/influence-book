@@ -12,6 +12,9 @@
     <label>画像URL</label>
     <input name="imageUrl" value="<%= formValues.imageUrl || '' %>" placeholder="https://example.com/image.jpg" />
 
+    <label>coreMessage（コアメッセージ）</label>
+    <textarea name="coreMessage" rows="3" placeholder="この人物が繰り返し伝える中心的なメッセージ"><%= formValues.coreMessage || '' %></textarea>
+
     <label>ページURL名 *</label>
     <input name="slug" required value="<%= formValues.slug || '' %>" placeholder="例: jeff-bezos" />
 
@@ -36,14 +39,14 @@
       <% }) %>
     </select>
 
-    <label>紹介文（短文） *</label>
-    <textarea name="intro" rows="2" required><%= formValues.intro || '' %></textarea>
+    <label>人物説明</label>
+    <textarea name="bio" rows="5" placeholder="人物の背景や考え方、代表的な実績などを記入してください"><%= formValues.bio || '' %></textarea>
 
     <label>career（経歴） *</label>
     <textarea name="career" rows="5" required placeholder="学歴、初期キャリア、転機、創業・現在の立場など"><%= formValues.career || '' %></textarea>
 
-    <label>coreMessage（コアメッセージ）</label>
-    <textarea name="coreMessage" rows="3" placeholder="この人物が繰り返し伝える中心的なメッセージ"><%= formValues.coreMessage || '' %></textarea>
+    <label>人物カード表示用紹介文（短文） *</label>
+    <textarea name="intro" rows="2" required><%= formValues.intro || '' %></textarea>
 
     <label>
       <input type="checkbox" name="featured" <%= formValues.featured === 'on' ? 'checked' : '' %> />
