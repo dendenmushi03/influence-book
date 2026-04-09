@@ -1242,6 +1242,22 @@ button.quiet {
   border-radius: calc(var(--radius-lg) + 2px);
   background: linear-gradient(180deg, #f8f7f4 0%, #f4f2ee 100%);
   padding: clamp(22px, 3vw, 34px);
+  position: relative;
+  z-index: 2;
+}
+
+.person-book-section {
+  position: relative;
+  isolation: isolate;
+}
+
+.person-book-section.section-separator::before {
+  z-index: 1;
+  pointer-events: none;
+}
+
+.person-header-card + .person-book-section.section-separator::before {
+  top: calc((var(--section-gap) + 16px) / -2);
 }
 
 .person-book-section-card .section-head {
@@ -1550,10 +1566,6 @@ select:focus {
 
   section.page-section.section-separator {
     padding-top: 34px;
-  }
-
-  section.page-section.section-separator.person-book-section {
-    padding-top: 0;
   }
 
   section.page-section.section-separator::before {
