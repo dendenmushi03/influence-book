@@ -1565,7 +1565,8 @@ select:focus {
     grid-row: 2;
     position: relative;
     margin-top: 1px;
-    padding-top: 8px;
+    padding-top: 6px;
+    padding-bottom: 2px;
   }
 
   .header-search::before {
@@ -1582,12 +1583,8 @@ select:focus {
     width: 100%;
   }
 
-  .hero {
-    padding: 28px 22px;
-  }
-
   .hero-premium {
-    padding: 22px 18px;
+    padding: 21px 18px;
   }
 
   .hero-premium {
