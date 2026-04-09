@@ -1,0 +1,53 @@
+<%- include('../partials/header') %>
+
+<section class="card narrow">
+  <h1>CSV一括登録</h1>
+  <p class="section-description">Person / Book / Influence をCSVでまとめて投入できます。先に dry-run で検証してください。</p>
+
+  <% if (errorMessage) { %>
+    <p class="error-message"><%= errorMessage %></p>
+  <% } %>
+
+  <form action="/admin/import/csv" method="POST">
+    <label>対象</label>
+    <select name="entityType">
+      <option value="people" <%= formValues.entityType === 'people' ? 'selected' : '' %>>Person</option>
+      <option value="books" <%= formValues.entityType === 'books' ? 'selected' : '' %>>Book</option>
+      <option value="influences" <%= formValues.entityType === 'influences' ? 'selected' : '' %>>Influence</option>
+    </select>
+
+    <label>CSVテキスト</label>
+    <textarea name="csvText" rows="14" placeholder="1行目はヘッダー、2行目以降がデータ"><%= formValues.csvText || '' %></textarea>
+
+    <label>
+      <input type="checkbox" name="dryRun" <%= formValues.dryRun ? 'checked' : '' %> />
+      dry-run（DBには保存しない）
+    </label>
+
+    <button type="submit">検証・登録を実行</button>
+  </form>
+</section>
+
+<% if (result) { %>
+  <section class="card narrow">
+    <h2>実行結果</h2>
+    <ul>
+      <li>対象: <strong><%= result.entity %></strong></li>
+      <li>モード: <strong><%= result.dryRun ? 'dry-run' : 'apply' %></strong></li>
+      <li>総件数: <strong><%= result.totalCount %></strong></li>
+      <li>成功件数: <strong><%= result.successCount %></strong></li>
+      <li>失敗件数: <strong><%= result.failedCount %></strong></li>
+    </ul>
+
+    <% if (result.errors && result.errors.length > 0) { %>
+      <h3>エラー一覧</h3>
+      <ul>
+        <% result.errors.forEach((item) => { %>
+          <li>行 <%= item.rowNumber %>: <%= item.message %></li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </section>
+<% } %>
+
+<%- include('../partials/footer') %>
