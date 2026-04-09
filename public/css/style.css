@@ -1237,15 +1237,15 @@ button.quiet {
 }
 
 
-.influence-section {
-  margin-top: 10px;
-}
-
 .person-book-section {
   border: 1px solid var(--border);
   border-radius: calc(var(--radius-lg) + 2px);
   background: linear-gradient(180deg, #f8f7f4 0%, #f4f2ee 100%);
   padding: clamp(22px, 3vw, 34px);
+}
+
+section.page-section.section-separator.person-book-section {
+  padding-top: 0;
 }
 
 .person-book-section .section-head {
@@ -1554,6 +1554,10 @@ select:focus {
 
   section.page-section.section-separator {
     padding-top: 34px;
+  }
+
+  section.page-section.section-separator.person-book-section {
+    padding-top: 0;
   }
 
   section.page-section.section-separator::before {
