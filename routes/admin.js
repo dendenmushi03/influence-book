@@ -68,6 +68,7 @@ function normalizePersonInput(input = {}) {
     countryJa: input.countryJa,
     category: normalizePrimaryCategory(input.category),
     intro: input.intro,
+    bio: typeof input.bio === 'string' ? input.bio : '',
     career: input.career,
     coreMessage: input.coreMessage,
     featured: input.featured === 'on'

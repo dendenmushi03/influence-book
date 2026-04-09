@@ -90,6 +90,7 @@ function buildPeopleQuery(filters) {
       { occupationJa: keywordRegex },
       { occupationEn: keywordRegex },
       { intro: keywordRegex },
+      { bio: keywordRegex },
       { summary: keywordRegex },
       { tags: keywordRegex },
       { keywords: keywordRegex }
