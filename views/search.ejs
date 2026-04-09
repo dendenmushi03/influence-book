@@ -3,18 +3,12 @@
 <section class="page-section">
   <header class="section-head">
     <h1>検索</h1>
-    <p class="section-description">人物と本の両方を同時に検索できます。</p>
-  </header>
-
-  <article class="card filter-card">
-    <form class="filter-form" action="/search" method="GET">
-      <input type="search" name="q" value="<%= keyword %>" placeholder="人物名・肩書き・本タイトルなど" aria-label="検索キーワード" />
-      <button type="submit">検索する</button>
-    </form>
     <% if (keyword) { %>
-      <p class="active-filters">検索キーワード: 「<%= keyword %>」</p>
+      <p class="section-description search-keyword-note">検索キーワード: 「<%= keyword %>」</p>
+    <% } else { %>
+      <p class="section-description search-keyword-note">ヘッダーの検索欄からキーワードを入力すると、人物と本の検索結果を表示できます。</p>
     <% } %>
-  </article>
+  </header>
 </section>
 
 <section class="page-section section-separator">
@@ -24,7 +18,7 @@
 
   <div class="grid">
     <% if (!keyword) { %>
-      <p class="empty-state">キーワードを入力して検索してください。</p>
+      <p class="empty-state">キーワードが未入力のため、人物の検索結果は表示されていません。</p>
     <% } else if (peopleResults.length === 0) { %>
       <p class="empty-state">該当する人物は見つかりませんでした。</p>
     <% } %>
@@ -42,7 +36,7 @@
 
   <div class="stack">
     <% if (!keyword) { %>
-      <p class="empty-state">キーワードを入力して検索してください。</p>
+      <p class="empty-state">キーワードが未入力のため、本の検索結果は表示されていません。</p>
     <% } else if (bookResults.length === 0) { %>
       <p class="empty-state">該当する本は見つかりませんでした。</p>
     <% } %>
