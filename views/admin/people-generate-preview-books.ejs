@@ -1,0 +1,123 @@
+<%- include('../partials/header') %>
+
+<section class="card">
+  <h1>本情報の下書きプレビュー</h1>
+  <p class="section-description">保存前に Book / Influence 候補を確認・編集してください。</p>
+
+  <% if (errorMessage) { %>
+    <p class="error-message"><%= errorMessage %></p>
+  <% } %>
+  <% if (generationNotice) { %>
+    <p><%= generationNotice %></p>
+  <% } %>
+
+  <p><strong>対象人物:</strong> <%= person.name %>（<%= person.slug %>）</p>
+
+  <form action="/admin/people/<%= person._id %>/generate/books/save" method="POST" id="save-draft-form">
+    <div class="card-subsection">
+      <h2>Book 候補</h2>
+      <% if (!draft.books || draft.books.length === 0) { %>
+        <p>Book候補は生成されませんでした。</p>
+      <% } %>
+      <% (draft.books || []).forEach((book, index) => { %>
+        <article class="card" style="margin-bottom: 16px;">
+          <p>
+            <strong><%= index + 1 %>. </strong>
+            <% if (book.resolutionType === 'reuse') { %>
+              <span>既存Book再利用候補</span>
+            <% } else { %>
+              <span>新規Book候補</span>
+            <% } %>
+          </p>
+          <% if (book.existingBookTitle) { %>
+            <p>再利用対象: <%= book.existingBookTitle %></p>
+          <% } %>
+
+          <label>title</label>
+          <input name="books[<%= index %>][title]" value="<%= book.title || '' %>" />
+
+          <label>slug</label>
+          <input name="books[<%= index %>][slug]" value="<%= book.slug || '' %>" />
+
+          <label>author</label>
+          <input name="books[<%= index %>][author]" value="<%= book.author || '' %>" />
+
+          <label>description</label>
+          <textarea name="books[<%= index %>][description]" rows="4"><%= book.description || '' %></textarea>
+
+          <input type="hidden" name="books[<%= index %>][coverUrl]" value="<%= book.coverUrl || '' %>" />
+          <input type="hidden" name="books[<%= index %>][amazonUrl]" value="<%= book.amazonUrl || '' %>" />
+          <input type="hidden" name="books[<%= index %>][rakutenUrl]" value="<%= book.rakutenUrl || '' %>" />
+          <input type="hidden" name="books[<%= index %>][googleBooksId]" value="<%= book.googleBooksId || '' %>" />
+          <input type="hidden" name="books[<%= index %>][isbn]" value="<%= book.isbn || '' %>" />
+          <input type="hidden" name="books[<%= index %>][isbn10]" value="<%= book.isbn10 || '' %>" />
+          <input type="hidden" name="books[<%= index %>][isbn13]" value="<%= book.isbn13 || '' %>" />
+        </article>
+      <% }) %>
+    </div>
+
+    <div class="card-subsection">
+      <h2>Influence 候補</h2>
+      <% if (!draft.influences || draft.influences.length === 0) { %>
+        <p>Influence候補は生成されませんでした。</p>
+      <% } %>
+      <% (draft.influences || []).forEach((influence, index) => { %>
+        <article class="card" style="margin-bottom: 16px;">
+          <p>
+            <strong><%= index + 1 %>. </strong>
+            <% if (influence.resolutionType === 'reuse') { %>
+              <span>既存Book再利用に紐づく候補</span>
+            <% } else { %>
+              <span>新規Influence候補</span>
+            <% } %>
+          </p>
+          <p>対象Book: <%= influence.bookTitle || influence.bookSlug %></p>
+
+          <input type="hidden" name="influences[<%= index %>][personSlug]" value="<%= influence.personSlug || person.slug %>" />
+          <input type="hidden" name="influences[<%= index %>][bookSlug]" value="<%= influence.bookSlug || '' %>" />
+          <input type="hidden" name="influences[<%= index %>][sourceTitle]" value="<%= influence.sourceTitle || '' %>" />
+          <input type="hidden" name="influences[<%= index %>][sourceUrl]" value="<%= influence.sourceUrl || '' %>" />
+          <input type="hidden" name="influences[<%= index %>][sourceType]" value="<%= influence.sourceType || '' %>" />
+
+          <label>kind</label>
+          <select name="influences[<%= index %>][kind]">
+            <option value="influence" <%= influence.kind === 'influence' ? 'selected' : '' %>>influence</option>
+            <option value="about" <%= influence.kind === 'about' ? 'selected' : '' %>>about</option>
+            <option value="authored" <%= influence.kind === 'authored' ? 'selected' : '' %>>authored</option>
+          </select>
+
+          <label>impactSummary</label>
+          <textarea name="influences[<%= index %>][impactSummary]" rows="3"><%= influence.impactSummary || '' %></textarea>
+
+          <label>featuredOrder</label>
+          <input type="number" name="influences[<%= index %>][featuredOrder]" value="<%= influence.featuredOrder || 0 %>" />
+        </article>
+      <% }) %>
+    </div>
+
+    <div class="admin-link-group">
+      <button type="submit" id="save-draft-button">本情報を保存</button>
+      <a href="/admin/people/<%= person._id %>/generate/books">保存せず戻る</a>
+    </div>
+    <p id="save-loading" style="display:none; margin-top: 12px;">保存中です。しばらくお待ちください…</p>
+  </form>
+</section>
+
+<script>
+  (function () {
+    var form = document.getElementById('save-draft-form');
+    var button = document.getElementById('save-draft-button');
+    var loading = document.getElementById('save-loading');
+    if (!form || !button || !loading) {
+      return;
+    }
+
+    form.addEventListener('submit', function () {
+      button.disabled = true;
+      button.textContent = '保存中...';
+      loading.style.display = 'block';
+    });
+  })();
+</script>
+
+<%- include('../partials/footer') %>

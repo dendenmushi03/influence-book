@@ -1,0 +1,57 @@
+<%- include('../partials/header') %>
+
+<section class="card">
+  <h1>人物情報の下書きプレビュー</h1>
+  <p class="section-description">保存前に内容を確認・編集してください。</p>
+
+  <% if (errorMessage) { %>
+    <p class="error-message"><%= errorMessage %></p>
+  <% } %>
+  <% if (generationNotice) { %>
+    <p><%= generationNotice %></p>
+  <% } %>
+
+  <p><strong>対象人物:</strong> <%= person.name %>（<%= person.slug %>）</p>
+
+  <form action="/admin/people/<%= person._id %>/generate/person/save" method="POST" id="save-draft-form">
+    <div class="card-subsection">
+      <h2>Person 更新対象（下書き）</h2>
+      <label>coreMessage</label>
+      <textarea name="personPatch[coreMessage]" rows="3"><%= draft.personPatch.coreMessage || '' %></textarea>
+
+      <label>bio（人物説明）</label>
+      <textarea name="personPatch[bio]" rows="6"><%= draft.personPatch.bio || '' %></textarea>
+
+      <label>career（経歴）</label>
+      <textarea name="personPatch[career]" rows="7"><%= draft.personPatch.career || '' %></textarea>
+
+      <label>intro（短文）</label>
+      <textarea name="personPatch[intro]" rows="2"><%= draft.personPatch.intro || '' %></textarea>
+    </div>
+
+    <div class="admin-link-group">
+      <button type="submit" id="save-draft-button">人物情報を保存</button>
+      <a href="/admin/people/<%= person._id %>/generate/person">保存せず戻る</a>
+    </div>
+    <p id="save-loading" style="display:none; margin-top: 12px;">保存中です。しばらくお待ちください…</p>
+  </form>
+</section>
+
+<script>
+  (function () {
+    var form = document.getElementById('save-draft-form');
+    var button = document.getElementById('save-draft-button');
+    var loading = document.getElementById('save-loading');
+    if (!form || !button || !loading) {
+      return;
+    }
+
+    form.addEventListener('submit', function () {
+      button.disabled = true;
+      button.textContent = '保存中...';
+      loading.style.display = 'block';
+    });
+  })();
+</script>
+
+<%- include('../partials/footer') %>

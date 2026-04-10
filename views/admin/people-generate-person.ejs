@@ -1,0 +1,40 @@
+<%- include('../partials/header') %>
+
+<section class="card">
+  <h1>人物情報の下書き生成</h1>
+  <p class="section-description">coreMessage / bio / career / intro のみを生成します。本情報は生成しません。</p>
+
+  <% if (errorMessage) { %>
+    <p class="error-message"><%= errorMessage %></p>
+  <% } %>
+
+  <% if (generationNotice) { %>
+    <p><%= generationNotice %></p>
+  <% } %>
+
+  <form action="/admin/people/<%= person._id %>/generate/person" method="POST" id="generate-form">
+    <button type="submit" id="generate-button">人物情報を生成する</button>
+    <p id="generate-loading" style="display:none; margin-top: 12px;">生成中です。人物情報を収集中です…</p>
+  </form>
+
+  <p style="margin-top: 16px;"><a href="/admin/people/<%= person._id %>/generate">生成メニューに戻る</a></p>
+</section>
+
+<script>
+  (function () {
+    var form = document.getElementById('generate-form');
+    var button = document.getElementById('generate-button');
+    var loading = document.getElementById('generate-loading');
+    if (!form || !button || !loading) {
+      return;
+    }
+
+    form.addEventListener('submit', function () {
+      button.disabled = true;
+      button.textContent = '生成中...';
+      loading.style.display = 'block';
+    });
+  })();
+</script>
+
+<%- include('../partials/footer') %>
