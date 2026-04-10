@@ -2,51 +2,61 @@
 
 <section class="card narrow">
   <h1>本追加</h1>
+  <% const values = formValues || {}; %>
+  <% if (errorMessage) { %>
+    <p class="error-message"><%= errorMessage %></p>
+  <% } %>
   <form action="/admin/books" method="POST" data-book-form>
-    <div class="notice warning" data-duplicate-warning hidden>
+    <div class="notice warning" data-duplicate-warning <%= duplicateCandidates && duplicateCandidates.length > 0 ? '' : 'hidden' %>>
       <p><strong>同名または類似の本が既に存在します。</strong> 既存本を編集してください。</p>
-      <ul data-duplicate-list></ul>
+      <ul data-duplicate-list>
+        <% (duplicateCandidates || []).forEach((candidate) => { %>
+          <li>
+            <a href="/admin/books/<%= candidate.id %>/edit"><%= candidate.title %>（<%= candidate.author || '著者不明' %>）</a>
+          </li>
+        <% }) %>
+      </ul>
     </div>
 
     <label>Google Books 検索（タイトル or ISBN）</label>
     <div class="inline-field">
-      <input name="googleBooksQuery" data-google-books-query placeholder="例: 影響力の武器 / 9784799327511" />
+      <input name="googleBooksQuery" data-google-books-query placeholder="例: 影響力の武器 / 9784799327511" value="<%= values.googleBooksQuery || '' %>" />
       <button type="button" class="secondary" data-google-books-fetch>Google Books から取得</button>
     </div>
     <small class="text-muted" data-google-books-status></small>
 
     <label>タイトル *</label>
-    <input name="title" required data-book-title />
+    <input name="title" required data-book-title value="<%= values.title || '' %>" />
 
     <label>slug（URL用 / 未入力ならタイトルから生成）</label>
-    <input name="slug" />
+    <input name="slug" value="<%= values.slug || '' %>" />
 
     <label>著者</label>
-    <input name="author" data-book-author />
+    <input name="author" data-book-author value="<%= values.author || '' %>" />
 
     <label>ISBN</label>
-    <input name="isbn" />
+    <input name="isbn" value="<%= values.isbn || '' %>" />
 
     <label>Google Books ID</label>
-    <input name="googleBooksId" data-book-google-id />
+    <input name="googleBooksId" data-book-google-id value="<%= values.googleBooksId || '' %>" />
 
     <label>ISBN-10</label>
-    <input name="isbn10" data-book-isbn10 />
+    <input name="isbn10" data-book-isbn10 value="<%= values.isbn10 || '' %>" />
 
     <label>ISBN-13</label>
-    <input name="isbn13" data-book-isbn13 />
+    <input name="isbn13" data-book-isbn13 value="<%= values.isbn13 || '' %>" />
 
     <label>書影URL</label>
-    <input name="coverUrl" data-book-cover-url />
+    <input name="coverUrl" data-book-cover-url value="<%= values.coverUrl || '' %>" />
 
     <label>説明</label>
-    <textarea name="description" rows="4" data-book-description></textarea>
+    <textarea name="description" rows="4" data-book-description><%= values.description || '' %></textarea>
 
     <label>Amazon URL</label>
-    <input name="amazonUrl" />
+    <input name="amazonUrl" value="<%= values.amazonUrl || '' %>" />
 
     <label>楽天 URL</label>
-    <input name="rakutenUrl" />
+    <input name="rakutenUrl" value="<%= values.rakutenUrl || '' %>" />
 
     <button type="submit">登録する</button>
   </form>

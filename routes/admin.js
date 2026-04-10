@@ -3,7 +3,7 @@ const Book = require('../models/Book');
 const Influence = require('../models/Influence');
 const Person = require('../models/Person');
 const { searchGoogleBooks, buildBookAutofillPatch } = require('../lib/google-books');
-const { bookFieldsFromInput, findDuplicateBookMatches, buildFillBlankPatch } = require('../lib/book-dedup');
+const { bookFieldsFromInput, findDuplicateBookMatches } = require('../lib/book-dedup');
 const { resolveBookForInfluence, normalizeInput } = require('../lib/resolve-book-for-influence');
 const { previewBulkInfluences } = require('../lib/preview-bulk-influences');
 const { applyBulkInfluences } = require('../lib/apply-bulk-influences');
@@ -105,6 +105,114 @@ function normalizeDraftInfluence(rawInfluence = {}) {
     sourceType: String(rawInfluence.sourceType || '').trim(),
     featuredOrder: Number(rawInfluence.featuredOrder) || 0
   };
+}
+
+function normalizeBookFormValues(input = {}) {
+  return {
+    title: String(input.title || '').trim(),
+    slug: String(input.slug || '').trim(),
+    author: String(input.author || '').trim(),
+    isbn: String(input.isbn || '').trim(),
+    googleBooksId: String(input.googleBooksId || '').trim(),
+    isbn10: String(input.isbn10 || '').trim(),
+    isbn13: String(input.isbn13 || '').trim(),
+    coverUrl: String(input.coverUrl || '').trim(),
+    description: String(input.description || '').trim(),
+    amazonUrl: String(input.amazonUrl || '').trim(),
+    rakutenUrl: String(input.rakutenUrl || '').trim(),
+    googleBooksQuery: String(input.googleBooksQuery || '').trim()
+  };
+}
+
+function bookDuplicateMessageFromReason(reason) {
+  const messages = {
+    slug: '同じ slug の本が既に存在します。',
+    googleBooksId: '同じ Google Books ID の本が既に存在します。',
+    isbn13: '同じ ISBN-13 の本が既に存在します。',
+    isbn10: '同じ ISBN-10 の本が既に存在します。',
+    title_author: '同名または類似の本が既に存在します。'
+  };
+  return messages[reason] || '重複する本が既に存在します。';
+}
+
+function mapDuplicateKeyFieldName(rawFieldName = '') {
+  const field = String(rawFieldName || '');
+  if (field.includes('slug')) {
+    return 'slug';
+  }
+  if (field.includes('googleBooksId')) {
+    return 'googleBooksId';
+  }
+  if (field.includes('isbn13')) {
+    return 'isbn13';
+  }
+  if (field.includes('isbn10')) {
+    return 'isbn10';
+  }
+  if (field.includes('isbn')) {
+    return 'isbn';
+  }
+  return field;
+}
+
+function parseBookCreateError(error) {
+  if (!error) {
+    return null;
+  }
+
+  if (error.name === 'ValidationError') {
+    const missingFields = Object.entries(error.errors || {})
+      .filter(([, value]) => value && value.kind === 'required')
+      .map(([key]) => key);
+
+    if (missingFields.length > 0) {
+      return {
+        userMessage: `必須項目が不足しています: ${missingFields.join(', ')}`,
+        logReason: `validation error on ${missingFields.join(', ')}`,
+        statusCode: 400
+      };
+    }
+
+    return {
+      userMessage: `入力値に誤りがあります: ${error.message}`,
+      logReason: 'validation error',
+      statusCode: 400
+    };
+  }
+
+  if (error.code === 11000) {
+    const keyField = mapDuplicateKeyFieldName(Object.keys(error.keyPattern || {})[0] || Object.keys(error.keyValue || {})[0] || '');
+    const labelMap = {
+      slug: { userMessage: '同じ slug の本が既に存在します。', logReason: 'duplicate slug' },
+      googleBooksId: { userMessage: '同じ Google Books ID の本が既に存在します。', logReason: 'duplicate googleBooksId' },
+      isbn13: { userMessage: '同じ ISBN-13 の本が既に存在します。', logReason: 'duplicate isbn13' },
+      isbn10: { userMessage: '同じ ISBN-10 の本が既に存在します。', logReason: 'duplicate isbn10' },
+      isbn: { userMessage: '同じ ISBN の本が既に存在します。', logReason: 'duplicate isbn' }
+    };
+    const mapped = labelMap[keyField];
+    if (mapped) {
+      return { ...mapped, statusCode: 409 };
+    }
+    return {
+      userMessage: '重複する本が既に存在します。',
+      logReason: 'duplicate key',
+      statusCode: 409
+    };
+  }
+
+  return {
+    userMessage: `本の登録に失敗しました。時間をおいて再度お試しください。詳細: ${error.message}`,
+    logReason: `unexpected error (${error.name || 'Error'})`,
+    statusCode: 500
+  };
+}
+
+async function renderBookNewForm(res, data = {}) {
+  return res.render('admin/books-new', {
+    duplicateCandidates: data.duplicateCandidates || [],
+    errorMessage: data.errorMessage || '',
+    formValues: data.formValues || {}
+  });
 }
 
 function toArray(value) {
@@ -723,7 +831,11 @@ router.post('/people/:id/delete', async (req, res) => {
 });
 
 router.get('/books/new', (req, res) => {
-  res.render('admin/books-new', { duplicateCandidates: [] });
+  renderBookNewForm(res, {
+    duplicateCandidates: [],
+    errorMessage: '',
+    formValues: {}
+  });
 });
 
 router.get('/books/google-books', async (req, res) => {
@@ -746,8 +858,13 @@ router.get('/books/google-books', async (req, res) => {
 });
 
 router.post('/books', async (req, res) => {
+  const formValues = normalizeBookFormValues(req.body);
+
   try {
     const bookData = bookFieldsFromInput(req.body, slugify);
+    if (!bookData.slug && bookData.title) {
+      bookData.slug = slugify(bookData.title);
+    }
 
     try {
       const { patch } = await buildBookAutofillPatch(bookData, { respectExistingGoogleBooksId: true });
@@ -760,19 +877,35 @@ router.post('/books', async (req, res) => {
     const duplicate = duplicateMatches[0];
 
     if (duplicate) {
-      const patch = buildFillBlankPatch(duplicate.book.toObject(), bookData);
-      if (Object.keys(patch).length > 0) {
-        await Book.updateOne({ _id: duplicate.book._id }, { $set: patch });
-      }
-      return res.redirect(`/admin/books/${duplicate.book._id}/edit`);
+      const reason = duplicate.reason || 'title_author';
+      console.warn(`Failed to create book: duplicate ${reason}`);
+      res.status(409);
+      return renderBookNewForm(res, {
+        errorMessage: bookDuplicateMessageFromReason(reason),
+        formValues,
+        duplicateCandidates: duplicateMatches.slice(0, 5).map((match) => ({
+          id: match.book._id,
+          title: match.book.title,
+          slug: match.book.slug,
+          author: match.book.author,
+          reason: match.reason,
+          influenceCount: match.influenceCount
+        }))
+      });
     }
 
     await Book.create(bookData);
 
     res.redirect('/admin');
   } catch (error) {
-    console.error('Failed to create book:', error.message);
-    res.status(500).send('Failed to create book');
+    const parsed = parseBookCreateError(error);
+    console.error(`Failed to create book: ${parsed.logReason}`);
+    res.status(parsed.statusCode);
+    return renderBookNewForm(res, {
+      errorMessage: parsed.userMessage,
+      formValues,
+      duplicateCandidates: []
+    });
   }
 });
 
