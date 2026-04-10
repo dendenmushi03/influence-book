@@ -15,11 +15,14 @@ function parseCareerLine(line) {
   if (!normalized) {
     return '';
   }
-  if (/^近年[:：]\s*.+/.test(normalized)) {
-    return truncate(normalized.replace(/[:：]/, ': '), 70);
+  const recentMatch = normalized.match(/^近年(?:[:：]|\s+|は|に)?\s*(.+)$/);
+  if (recentMatch && recentMatch[1]) {
+    return truncate(`近年: ${recentMatch[1].trim()}`, 70);
   }
-  if (/^(18|19|20)\d{2}年[:：]\s*.+/.test(normalized)) {
-    return truncate(normalized.replace(/[:：]/, ': '), 70);
+
+  const yearMatch = normalized.match(/((18|19|20)\d{2})年(?:[:：]|\s+|に)?\s*(.+)$/);
+  if (yearMatch && yearMatch[3]) {
+    return truncate(`${yearMatch[1]}年: ${yearMatch[3].trim()}`, 70);
   }
   return '';
 }
@@ -36,6 +39,35 @@ function normalizeStructuredProfile(payload = {}, person) {
     intro,
     career: careerLines.join('\n')
   };
+}
+
+function summarizeStructuredProfileShape(payload = {}) {
+  const careerLines = Array.isArray(payload.careerLines) ? payload.careerLines : [];
+  return {
+    keys: safeListKeys(payload),
+    coreMessageLength: String(payload.coreMessage || '').trim().length,
+    bioLength: String(payload.bio || '').trim().length,
+    introLength: String(payload.intro || '').trim().length,
+    careerLinesCount: careerLines.length,
+    careerLineLengths: careerLines.slice(0, 10).map((line) => String(line || '').trim().length)
+  };
+}
+
+function detectMissingNormalizedFields(normalized) {
+  const missing = [];
+  if (!normalized.coreMessage) {
+    missing.push('coreMessage');
+  }
+  if (!normalized.bio) {
+    missing.push('bio');
+  }
+  if (!normalized.intro) {
+    missing.push('intro');
+  }
+  if (!normalized.career) {
+    missing.push('career');
+  }
+  return missing;
 }
 
 function buildProfilePrompt(person, wikipediaSummary) {
@@ -246,11 +278,27 @@ async function generateProfileWithResponsesAPI(person, wikipediaSummary) {
     error.code = 'openai_missing_structured_output';
     throw error;
   }
+  console.info('Responses API structured profile shape:', JSON.stringify(summarizeStructuredProfileShape(parsed)));
 
   const normalized = normalizeStructuredProfile(parsed, person);
-  if (!normalized.coreMessage || !normalized.bio || !normalized.intro || !normalized.career) {
+  const missingFields = detectMissingNormalizedFields(normalized);
+  if (missingFields.length > 0) {
+    console.warn(`Responses API normalized profile missing fields: ${missingFields.join(', ')}`);
+  }
+
+  if (missingFields.length === 1 && missingFields[0] === 'career') {
+    const fallbackCareer = buildCareerTimeline(person, wikipediaSummary);
+    if (fallbackCareer) {
+      normalized.career = fallbackCareer;
+      console.warn('Responses API career が空のため、career のみ fallback 生成を適用しました。');
+    }
+  }
+
+  const missingAfterCareerFallback = detectMissingNormalizedFields(normalized);
+  if (missingAfterCareerFallback.length > 0) {
     const error = new Error('Responses API の構造化出力に必要項目が不足しています。');
     error.code = 'openai_incomplete_output';
+    error.details = { missingFields: missingAfterCareerFallback };
     throw error;
   }
   return normalized;
