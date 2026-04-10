@@ -1,14 +1,22 @@
 const mongoose = require('mongoose');
 
+function emptyStringToUndefined(value) {
+  if (typeof value !== 'string') {
+    return value;
+  }
+  const trimmed = value.trim();
+  return trimmed === '' ? undefined : trimmed;
+}
+
 const bookSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
     slug: { type: String, required: true, unique: true },
     author: { type: String },
-    isbn: { type: String },
-    googleBooksId: { type: String },
-    isbn10: { type: String },
-    isbn13: { type: String },
+    isbn: { type: String, set: emptyStringToUndefined },
+    googleBooksId: { type: String, set: emptyStringToUndefined },
+    isbn10: { type: String, set: emptyStringToUndefined },
+    isbn13: { type: String, set: emptyStringToUndefined },
     coverUrl: { type: String },
     description: { type: String },
     amazonUrl: { type: String },
