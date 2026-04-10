@@ -992,7 +992,9 @@ router.post('/books', async (req, res) => {
   } catch (error) {
     const parsed = parseBookCreateError(error);
     const extra = parsed.duplicateField
-      ? ` (field=${parsed.duplicateField}, value=${parsed.duplicateValue || '-'})`
+      ? ` (field=${parsed.duplicateField}, value=${
+          parsed.duplicateValue !== undefined ? JSON.stringify(parsed.duplicateValue) : '-'
+        })`
       : '';
     console.error(`Failed to create book: ${parsed.logReason}${extra}`);
     res.status(parsed.statusCode);

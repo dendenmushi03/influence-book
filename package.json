@@ -9,6 +9,8 @@
     "seed": "echo \"Seed is protected. Run npm run seed:unsafe only when intended.\" && exit 1",
     "backfill:books": "node scripts/backfill-books.js",
     "duplicates:books": "node scripts/find-duplicate-books.js",
+    "find:empty:book-identifiers": "node scripts/find-empty-book-identifiers.js",
+    "cleanup:empty:book-identifiers": "node scripts/cleanup-empty-book-identifiers.js",
     "recover:jeff:invent": "node scripts/recover-jeff-invent-and-wander.js",
     "reclassify:jeff:books": "node scripts/reclassify-jeff-bezos-books.js",
     "update:jeff:occupation": "node scripts/update-jeff-occupation.js",
