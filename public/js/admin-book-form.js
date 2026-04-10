@@ -87,7 +87,8 @@
         const title = candidate.title || '(タイトル未設定)';
         const author = candidate.author || '著者未設定';
         const influenceBadge = candidate.influenceCount > 0 ? ` / Influence紐づき ${candidate.influenceCount}件` : '';
-        return `<li><a href=\"/admin/books/${candidate.id}/edit\">${title}（${author}）</a> - ${reasonLabel(candidate.reason)}${influenceBadge}</li>`;
+        const identifiers = ` / ISBN:${candidate.isbn || '-'} / ISBN-10:${candidate.isbn10 || '-'} / ISBN-13:${candidate.isbn13 || '-'} / Google Books ID:${candidate.googleBooksId || '-'}`;
+        return `<li><a href=\"/admin/books/${candidate.id}/edit\">${title}（${author}）</a> - ${reasonLabel(candidate.reason)}${influenceBadge}${identifiers}</li>`;
       })
       .join('');
     duplicateWarning.hidden = false;
