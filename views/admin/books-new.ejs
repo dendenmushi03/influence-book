@@ -13,6 +13,12 @@
         <% (duplicateCandidates || []).forEach((candidate) => { %>
           <li>
             <a href="/admin/books/<%= candidate.id %>/edit"><%= candidate.title %>（<%= candidate.author || '著者不明' %>）</a>
+            <small>
+              / ISBN: <%= candidate.isbn || '-' %>
+              / ISBN-10: <%= candidate.isbn10 || '-' %>
+              / ISBN-13: <%= candidate.isbn13 || '-' %>
+              / Google Books ID: <%= candidate.googleBooksId || '-' %>
+            </small>
           </li>
         <% }) %>
       </ul>

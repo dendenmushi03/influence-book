@@ -3,6 +3,19 @@
 <section class="page-section">
   <h1>本一覧（管理）</h1>
   <p class="section-description">登録済みの本データです。</p>
+  <% const search = searchValues || {}; %>
+  <form class="card" method="GET" action="/admin/books">
+    <label>ISBN（ISBN / ISBN-10 / ISBN-13）</label>
+    <input name="isbn" value="<%= search.isbn || '' %>" placeholder="例: 9780671664961" />
+
+    <label>Google Books ID</label>
+    <input name="googleBooksId" value="<%= search.googleBooksId || '' %>" placeholder="例: SQkU8EnJUtAC" />
+
+    <div class="inline-field">
+      <button type="submit">検索</button>
+      <a class="button-link secondary" href="/admin/books">条件クリア</a>
+    </div>
+  </form>
 </section>
 
 <section class="stack">
@@ -19,6 +32,9 @@
         <p><strong>スラッグ:</strong> <%= book.slug || '未設定' %></p>
         <p><strong>著者:</strong> <%= book.author || '未設定' %></p>
         <p><strong>ISBN:</strong> <%= book.isbn || '未設定' %></p>
+        <p><strong>ISBN-10:</strong> <%= book.isbn10 || '未設定' %></p>
+        <p><strong>ISBN-13:</strong> <%= book.isbn13 || '未設定' %></p>
+        <p><strong>Google Books ID:</strong> <%= book.googleBooksId || '未設定' %></p>
       </div>
       <div class="links">
         <% if (book.slug) { %>

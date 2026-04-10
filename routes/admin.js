@@ -155,6 +155,25 @@ function mapDuplicateKeyFieldName(rawFieldName = '') {
   return field;
 }
 
+function extractDuplicateKeyInfo(error) {
+  const keyPatternField = Object.keys(error && error.keyPattern ? error.keyPattern : {})[0] || '';
+  const keyValueField = Object.keys(error && error.keyValue ? error.keyValue : {})[0] || '';
+  const mappedField = mapDuplicateKeyFieldName(keyPatternField || keyValueField);
+  const mappedValue = mappedField && error && error.keyValue ? error.keyValue[mappedField] : undefined;
+
+  if (mappedField) {
+    return {
+      field: mappedField,
+      value: mappedValue
+    };
+  }
+
+  return {
+    field: '',
+    value: undefined
+  };
+}
+
 function parseBookCreateError(error) {
   if (!error) {
     return null;
@@ -181,7 +200,8 @@ function parseBookCreateError(error) {
   }
 
   if (error.code === 11000) {
-    const keyField = mapDuplicateKeyFieldName(Object.keys(error.keyPattern || {})[0] || Object.keys(error.keyValue || {})[0] || '');
+    const duplicateKey = extractDuplicateKeyInfo(error);
+    const keyField = duplicateKey.field;
     const labelMap = {
       slug: { userMessage: '同じ slug の本が既に存在します。', logReason: 'duplicate slug' },
       googleBooksId: { userMessage: '同じ Google Books ID の本が既に存在します。', logReason: 'duplicate googleBooksId' },
@@ -191,12 +211,14 @@ function parseBookCreateError(error) {
     };
     const mapped = labelMap[keyField];
     if (mapped) {
-      return { ...mapped, statusCode: 409 };
+      return { ...mapped, statusCode: 409, duplicateField: duplicateKey.field, duplicateValue: duplicateKey.value };
     }
     return {
       userMessage: '重複する本が既に存在します。',
       logReason: 'duplicate key',
-      statusCode: 409
+      statusCode: 409,
+      duplicateField: duplicateKey.field,
+      duplicateValue: duplicateKey.value
     };
   }
 
@@ -478,8 +500,28 @@ router.get('/people', async (req, res) => {
 
 router.get('/books', async (req, res) => {
   try {
-    const books = await Book.find({}).sort({ createdAt: -1 });
-    res.render('admin/books-list', { books });
+    const isbnQuery = String(req.query.isbn || '').trim();
+    const googleBooksIdQuery = String(req.query.googleBooksId || '').trim();
+    const filters = [];
+
+    if (isbnQuery) {
+      filters.push({
+        $or: [{ isbn: isbnQuery }, { isbn10: isbnQuery }, { isbn13: isbnQuery }]
+      });
+    }
+    if (googleBooksIdQuery) {
+      filters.push({ googleBooksId: googleBooksIdQuery });
+    }
+
+    const mongoFilter = filters.length > 0 ? { $and: filters } : {};
+    const books = await Book.find(mongoFilter).sort({ createdAt: -1 });
+    res.render('admin/books-list', {
+      books,
+      searchValues: {
+        isbn: isbnQuery,
+        googleBooksId: googleBooksIdQuery
+      }
+    });
   } catch (error) {
     console.error('Failed to load books list:', error.message);
     res.status(500).send('Failed to load books list');
@@ -878,7 +920,19 @@ router.post('/books', async (req, res) => {
 
     if (duplicate) {
       const reason = duplicate.reason || 'title_author';
-      console.warn(`Failed to create book: duplicate ${reason}`);
+      const reasonFieldMap = {
+        isbn: 'isbn',
+        isbn10: 'isbn10',
+        isbn13: 'isbn13',
+        googleBooksId: 'googleBooksId',
+        slug: 'slug'
+      };
+      const duplicateField = reasonFieldMap[reason] || reason;
+      const duplicateValue = duplicateField && bookData[duplicateField] ? bookData[duplicateField] : '';
+      const duplicateBook = duplicate.book || {};
+      console.warn(
+        `Failed to create book: duplicate ${reason} (field=${duplicateField || '-'}, value=${duplicateValue || '-'}, existingId=${duplicateBook._id || '-'}, existingSlug=${duplicateBook.slug || '-'})`
+      );
       res.status(409);
       return renderBookNewForm(res, {
         errorMessage: bookDuplicateMessageFromReason(reason),
@@ -888,6 +942,10 @@ router.post('/books', async (req, res) => {
           title: match.book.title,
           slug: match.book.slug,
           author: match.book.author,
+          googleBooksId: match.book.googleBooksId || '',
+          isbn: match.book.isbn || '',
+          isbn10: match.book.isbn10 || '',
+          isbn13: match.book.isbn13 || '',
           reason: match.reason,
           influenceCount: match.influenceCount
         }))
@@ -899,7 +957,10 @@ router.post('/books', async (req, res) => {
     res.redirect('/admin');
   } catch (error) {
     const parsed = parseBookCreateError(error);
-    console.error(`Failed to create book: ${parsed.logReason}`);
+    const extra = parsed.duplicateField
+      ? ` (field=${parsed.duplicateField}, value=${parsed.duplicateValue || '-'})`
+      : '';
+    console.error(`Failed to create book: ${parsed.logReason}${extra}`);
     res.status(parsed.statusCode);
     return renderBookNewForm(res, {
       errorMessage: parsed.userMessage,
@@ -920,6 +981,10 @@ router.get('/books/duplicate-candidates', async (req, res) => {
         title: match.book.title,
         slug: match.book.slug,
         author: match.book.author,
+        googleBooksId: match.book.googleBooksId || '',
+        isbn: match.book.isbn || '',
+        isbn10: match.book.isbn10 || '',
+        isbn13: match.book.isbn13 || '',
         reason: match.reason,
         influenceCount: match.influenceCount
       }))
