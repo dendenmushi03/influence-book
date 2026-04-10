@@ -1,0 +1,44 @@
+<%- include('../partials/header') %>
+
+<section class="page-section">
+  <h1><%= person.name %> の関連本管理</h1>
+  <p class="section-description">人物ページに表示する本を kind ごとに管理します。</p>
+  <div class="admin-link-group" style="margin-top: 12px;">
+    <a class="button secondary" href="/admin/influences">人物一覧へ戻る</a>
+    <a class="button" href="/admin/people/<%= person._id %>/influences/new">関連本を追加</a>
+    <a class="button secondary" href="/admin/influences/bulk">一括登録</a>
+  </div>
+</section>
+
+<section class="stack">
+  <% groupedInfluences.forEach((group) => { %>
+    <article class="card">
+      <h2><%= group.value %>（<%= group.label %>）</h2>
+      <% if (!group.items || group.items.length === 0) { %>
+        <p class="text-muted">この種類の関連本は未登録です。</p>
+        <a class="button secondary" href="/admin/people/<%= person._id %>/influences/new?kind=<%= group.value %>">この種類で追加</a>
+      <% } else { %>
+        <div class="stack" style="margin-top: 12px;">
+          <% group.items.forEach((influence) => { %>
+            <article class="card list-card">
+              <div>
+                <h3><%= influence.bookId ? influence.bookId.title : '本情報なし' %></h3>
+                <p><strong>impactSummary:</strong> <%= influence.impactSummary || '未設定' %></p>
+                <p><strong>featuredOrder:</strong> <%= influence.featuredOrder %></p>
+              </div>
+              <div class="admin-link-group">
+                <a href="/admin/influences/<%= influence._id %>/edit?returnTo=/admin/people/<%= person._id %>/influences">編集する</a>
+                <form action="/admin/influences/<%= influence._id %>/delete" method="POST" onsubmit="return confirm('この関連本を削除しますか？');">
+                  <input type="hidden" name="returnTo" value="/admin/people/<%= person._id %>/influences" />
+                  <button class="button secondary" type="submit">削除</button>
+                </form>
+              </div>
+            </article>
+          <% }) %>
+        </div>
+      <% } %>
+    </article>
+  <% }) %>
+</section>
+
+<%- include('../partials/footer') %>

@@ -2,6 +2,9 @@
 
 <section class="card narrow">
   <h1>人物編集</h1>
+  <div class="admin-link-group" style="margin-bottom: 12px;">
+    <a class="button secondary" href="/admin/people/<%= person._id %>/influences">関連本を管理</a>
+  </div>
   <% 
     const hasFormValue = (key) => formValues && Object.prototype.hasOwnProperty.call(formValues, key) && typeof formValues[key] !== 'undefined';
     const valueOf = (key, fallback = '') => hasFormValue(key) ? formValues[key] : (person && typeof person[key] !== 'undefined' ? person[key] : fallback);

@@ -28,6 +28,7 @@
       <div class="admin-link-group">
         <a href="/people/<%= person.slug %>">公開ページを見る</a>
         <a href="/admin/people/<%= person._id %>/edit">編集する</a>
+        <a href="/admin/people/<%= person._id %>/influences">関連本を管理</a>
         <a href="/admin/people/<%= person._id %>/generate">情報登録（下書き生成）</a>
         <form action="/admin/people/<%= person._id %>/delete" method="POST" onsubmit="return confirm('この人物を削除しますか？');">
           <button class="button secondary" type="submit">削除</button>
