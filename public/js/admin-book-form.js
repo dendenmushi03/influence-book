@@ -13,6 +13,7 @@
   const descriptionInput = form.querySelector('[data-book-description]');
   const coverUrlInput = form.querySelector('[data-book-cover-url]');
   const googleBooksIdInput = form.querySelector('[data-book-google-id]');
+  const isbnInput = form.querySelector('[data-book-isbn]');
   const isbn10Input = form.querySelector('[data-book-isbn10]');
   const isbn13Input = form.querySelector('[data-book-isbn13]');
   const duplicateWarning = form.querySelector('[data-duplicate-warning]');
@@ -63,6 +64,7 @@
   function reasonLabel(reason) {
     const labels = {
       googleBooksId: 'Google Books ID 一致',
+      isbn: 'ISBN 一致',
       isbn13: 'ISBN-13 一致',
       isbn10: 'ISBN-10 一致',
       slug: 'slug 一致',
@@ -87,8 +89,12 @@
         const title = candidate.title || '(タイトル未設定)';
         const author = candidate.author || '著者未設定';
         const influenceBadge = candidate.influenceCount > 0 ? ` / Influence紐づき ${candidate.influenceCount}件` : '';
-        const identifiers = ` / ISBN:${candidate.isbn || '-'} / ISBN-10:${candidate.isbn10 || '-'} / ISBN-13:${candidate.isbn13 || '-'} / Google Books ID:${candidate.googleBooksId || '-'}`;
-        return `<li><a href=\"/admin/books/${candidate.id}/edit\">${title}（${author}）</a> - ${reasonLabel(candidate.reason)}${influenceBadge}${identifiers}</li>`;
+        const matchedOn =
+          candidate.matchedOn && candidate.matchedOn.incomingField && candidate.matchedOn.existingField
+            ? ` / 判定: incoming.${candidate.matchedOn.incomingField} = existing.${candidate.matchedOn.existingField}`
+            : '';
+        const identifiers = ` / slug:${candidate.slug || '-'} / ISBN:${candidate.isbn || '-'} / ISBN-10:${candidate.isbn10 || '-'} / ISBN-13:${candidate.isbn13 || '-'} / Google Books ID:${candidate.googleBooksId || '-'}`;
+        return `<li><a href=\"/admin/books/${candidate.id}/edit\">${title}（${author}）</a> - ${reasonLabel(candidate.reason)}${matchedOn}${influenceBadge}${identifiers}</li>`;
       })
       .join('');
     duplicateWarning.hidden = false;
@@ -105,6 +111,7 @@
       title: titleInput ? titleInput.value : '',
       author: authorInput ? authorInput.value : '',
       googleBooksId: googleBooksIdInput ? googleBooksIdInput.value : '',
+      isbn: isbnInput ? isbnInput.value : '',
       isbn10: isbn10Input ? isbn10Input.value : '',
       isbn13: isbn13Input ? isbn13Input.value : ''
     });
@@ -176,7 +183,7 @@
     fetchButton.addEventListener('click', fetchGoogleBooksCandidate);
   }
 
-  [titleInput, authorInput, googleBooksIdInput, isbn10Input, isbn13Input].forEach((input) => {
+  [titleInput, authorInput, googleBooksIdInput, isbnInput, isbn10Input, isbn13Input].forEach((input) => {
     if (!input) {
       return;
     }
