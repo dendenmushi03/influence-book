@@ -8,12 +8,15 @@
   <% } %>
   <form action="/admin/books" method="POST" data-book-form>
     <div class="notice warning" data-duplicate-warning <%= duplicateCandidates && duplicateCandidates.length > 0 ? '' : 'hidden' %>>
-      <p><strong>同名または類似の本が既に存在します。</strong> 既存本を編集してください。</p>
+      <p><strong>重複候補が見つかりました。</strong> どのレコードに一致したか確認してから登録してください。</p>
       <ul data-duplicate-list>
         <% (duplicateCandidates || []).forEach((candidate) => { %>
           <li>
             <a href="/admin/books/<%= candidate.id %>/edit"><%= candidate.title %>（<%= candidate.author || '著者不明' %>）</a>
             <small>
+              / reason: <%= candidate.reasonLabel || candidate.reason || '-' %>
+              / 判定: <%= candidate.matchedOn && candidate.matchedOn.incomingField && candidate.matchedOn.existingField ? `incoming.${candidate.matchedOn.incomingField} = existing.${candidate.matchedOn.existingField}` : '-' %>
+              / slug: <%= candidate.slug || '-' %>
               / ISBN: <%= candidate.isbn || '-' %>
               / ISBN-10: <%= candidate.isbn10 || '-' %>
               / ISBN-13: <%= candidate.isbn13 || '-' %>
@@ -41,7 +44,7 @@
     <input name="author" data-book-author value="<%= values.author || '' %>" />
 
     <label>ISBN</label>
-    <input name="isbn" value="<%= values.isbn || '' %>" />
+    <input name="isbn" data-book-isbn value="<%= values.isbn || '' %>" />
 
     <label>Google Books ID</label>
     <input name="googleBooksId" data-book-google-id value="<%= values.googleBooksId || '' %>" />

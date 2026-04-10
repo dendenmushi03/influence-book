@@ -128,11 +128,59 @@ function bookDuplicateMessageFromReason(reason) {
   const messages = {
     slug: '同じ slug の本が既に存在します。',
     googleBooksId: '同じ Google Books ID の本が既に存在します。',
+    isbn: '同じ ISBN の本が既に存在します。',
     isbn13: '同じ ISBN-13 の本が既に存在します。',
     isbn10: '同じ ISBN-10 の本が既に存在します。',
     title_author: '同名または類似の本が既に存在します。'
   };
   return messages[reason] || '重複する本が既に存在します。';
+}
+
+function duplicateReasonLabel(reason) {
+  const labels = {
+    slug: 'slug 一致',
+    googleBooksId: 'Google Books ID 一致',
+    isbn: 'ISBN 一致',
+    isbn13: 'ISBN-13 一致',
+    isbn10: 'ISBN-10 一致',
+    title_author: 'タイトル・著者が近い'
+  };
+  return labels[reason] || '重複候補';
+}
+
+function buildDuplicateCandidatePayload(match) {
+  return {
+    id: match.book._id,
+    title: match.book.title,
+    slug: match.book.slug,
+    author: match.book.author,
+    googleBooksId: match.book.googleBooksId || '',
+    isbn: match.book.isbn || '',
+    isbn10: match.book.isbn10 || '',
+    isbn13: match.book.isbn13 || '',
+    reason: match.reason,
+    reasonLabel: duplicateReasonLabel(match.reason),
+    matchedOn: match.matchedOn || null,
+    influenceCount: match.influenceCount
+  };
+}
+
+function buildDuplicateDebugLog({ reason, duplicateBook, incomingBook, matchedOn }) {
+  return {
+    reason,
+    matchedOn: matchedOn || null,
+    existingId: duplicateBook._id || '',
+    existingTitle: duplicateBook.title || '',
+    existingSlug: duplicateBook.slug || '',
+    existingIsbn: duplicateBook.isbn || '',
+    existingIsbn10: duplicateBook.isbn10 || '',
+    existingIsbn13: duplicateBook.isbn13 || '',
+    existingGoogleBooksId: duplicateBook.googleBooksId || '',
+    incomingIsbn: incomingBook.isbn || '',
+    incomingIsbn10: incomingBook.isbn10 || '',
+    incomingIsbn13: incomingBook.isbn13 || '',
+    incomingGoogleBooksId: incomingBook.googleBooksId || ''
+  };
 }
 
 function mapDuplicateKeyFieldName(rawFieldName = '') {
@@ -920,35 +968,21 @@ router.post('/books', async (req, res) => {
 
     if (duplicate) {
       const reason = duplicate.reason || 'title_author';
-      const reasonFieldMap = {
-        isbn: 'isbn',
-        isbn10: 'isbn10',
-        isbn13: 'isbn13',
-        googleBooksId: 'googleBooksId',
-        slug: 'slug'
-      };
-      const duplicateField = reasonFieldMap[reason] || reason;
-      const duplicateValue = duplicateField && bookData[duplicateField] ? bookData[duplicateField] : '';
       const duplicateBook = duplicate.book || {};
+      const duplicateDebug = buildDuplicateDebugLog({
+        reason,
+        duplicateBook,
+        incomingBook: bookData,
+        matchedOn: duplicate.matchedOn || null
+      });
       console.warn(
-        `Failed to create book: duplicate ${reason} (field=${duplicateField || '-'}, value=${duplicateValue || '-'}, existingId=${duplicateBook._id || '-'}, existingSlug=${duplicateBook.slug || '-'})`
+        `Failed to create book: duplicate detected before save: ${JSON.stringify(duplicateDebug)}`
       );
       res.status(409);
       return renderBookNewForm(res, {
         errorMessage: bookDuplicateMessageFromReason(reason),
         formValues,
-        duplicateCandidates: duplicateMatches.slice(0, 5).map((match) => ({
-          id: match.book._id,
-          title: match.book.title,
-          slug: match.book.slug,
-          author: match.book.author,
-          googleBooksId: match.book.googleBooksId || '',
-          isbn: match.book.isbn || '',
-          isbn10: match.book.isbn10 || '',
-          isbn13: match.book.isbn13 || '',
-          reason: match.reason,
-          influenceCount: match.influenceCount
-        }))
+        duplicateCandidates: duplicateMatches.slice(0, 5).map(buildDuplicateCandidatePayload)
       });
     }
 
@@ -977,16 +1011,7 @@ router.get('/books/duplicate-candidates', async (req, res) => {
 
     return res.json({
       candidates: duplicateMatches.slice(0, 5).map((match) => ({
-        id: match.book._id,
-        title: match.book.title,
-        slug: match.book.slug,
-        author: match.book.author,
-        googleBooksId: match.book.googleBooksId || '',
-        isbn: match.book.isbn || '',
-        isbn10: match.book.isbn10 || '',
-        isbn13: match.book.isbn13 || '',
-        reason: match.reason,
-        influenceCount: match.influenceCount
+        ...buildDuplicateCandidatePayload(match)
       }))
     });
   } catch (error) {
