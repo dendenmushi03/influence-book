@@ -65,6 +65,99 @@ function buildProfilePrompt(person, wikipediaSummary) {
   ].join('\n');
 }
 
+function safeListKeys(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return [];
+  }
+  return Object.keys(value).slice(0, 12);
+}
+
+function summarizeResponsesPayload(payload) {
+  const outputItems = Array.isArray(payload && payload.output) ? payload.output : [];
+  return {
+    topLevelKeys: safeListKeys(payload),
+    hasOutputText: typeof (payload && payload.output_text) === 'string' && payload.output_text.trim().length > 0,
+    outputLength: outputItems.length,
+    outputTypes: outputItems.map((item) => item && item.type).filter(Boolean),
+    outputContentTypes: outputItems.map((item) =>
+      Array.isArray(item && item.content) ? item.content.map((contentItem) => contentItem && contentItem.type).filter(Boolean) : []
+    ),
+    textKeys: safeListKeys(payload && payload.text)
+  };
+}
+
+function isStructuredProfileCandidate(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+  const keys = Object.keys(value);
+  return ['coreMessage', 'bio', 'intro', 'careerLines'].every((key) => keys.includes(key));
+}
+
+function parseJsonString(value) {
+  if (typeof value !== 'string' || !value.trim()) {
+    return null;
+  }
+  try {
+    return JSON.parse(value);
+  } catch (error) {
+    return null;
+  }
+}
+
+function extractStructuredProfileFromPayload(payload) {
+  if (!payload || typeof payload !== 'object') {
+    return null;
+  }
+
+  const queue = [payload];
+  const visited = new Set();
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (!current || typeof current !== 'object') {
+      continue;
+    }
+    if (visited.has(current)) {
+      continue;
+    }
+    visited.add(current);
+
+    if (isStructuredProfileCandidate(current)) {
+      return current;
+    }
+
+    if (Array.isArray(current)) {
+      current.forEach((item) => {
+        if (item && typeof item === 'object') {
+          queue.push(item);
+        } else if (typeof item === 'string') {
+          const parsed = parseJsonString(item);
+          if (parsed && typeof parsed === 'object') {
+            queue.push(parsed);
+          }
+        }
+      });
+      continue;
+    }
+
+    Object.keys(current).forEach((key) => {
+      const value = current[key];
+      if (value && typeof value === 'object') {
+        queue.push(value);
+        return;
+      }
+      if (typeof value === 'string') {
+        const parsed = parseJsonString(value);
+        if (parsed && typeof parsed === 'object') {
+          queue.push(parsed);
+        }
+      }
+    });
+  }
+
+  return null;
+}
+
 async function generateProfileWithResponsesAPI(person, wikipediaSummary) {
   const runtimeFetch = getFetchOrThrow();
   const apiKey = String(process.env.OPENAI_API_KEY || '').trim();
@@ -129,20 +222,29 @@ async function generateProfileWithResponsesAPI(person, wikipediaSummary) {
   }
 
   const payload = await response.json();
-  const outputText = payload && payload.output_text ? payload.output_text : '';
-  if (!outputText) {
-    const error = new Error('Responses API の output_text が空です。');
-    error.code = 'openai_empty_output';
-    throw error;
-  }
+  console.info('Responses API payload summary:', JSON.stringify(summarizeResponsesPayload(payload)));
+
+  const outputText = typeof (payload && payload.output_text) === 'string' ? payload.output_text : '';
 
   let parsed = null;
-  try {
-    parsed = JSON.parse(outputText);
-  } catch (error) {
-    const parseError = new Error(`Responses API のJSONパースに失敗しました: ${error.message}`);
-    parseError.code = 'openai_invalid_json';
-    throw parseError;
+  if (outputText.trim()) {
+    try {
+      parsed = JSON.parse(outputText);
+    } catch (error) {
+      console.warn(`Responses API output_text JSON parse failed: ${error.message}`);
+    }
+  } else {
+    console.warn('Responses API の output_text が空です。payload.output から structured output を探索します。');
+  }
+
+  if (!parsed) {
+    parsed = extractStructuredProfileFromPayload(payload);
+  }
+
+  if (!parsed) {
+    const error = new Error('Responses API の structured output を取得できませんでした。');
+    error.code = 'openai_missing_structured_output';
+    throw error;
   }
 
   const normalized = normalizeStructuredProfile(parsed, person);
