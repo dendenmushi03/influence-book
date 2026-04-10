@@ -3,6 +3,7 @@
 <section class="card narrow">
   <h1>影響関係編集</h1>
   <form action="/admin/influences/<%= influence._id %>" method="POST">
+    <input type="hidden" name="returnTo" value="<%= returnTo || '' %>" />
     <label>人物 *</label>
     <select name="personId" required>
       <option value="">選択してください</option>
@@ -44,6 +45,9 @@
     <input type="number" name="featuredOrder" value="<%= influence.featuredOrder || 0 %>" />
 
     <button type="submit">更新する</button>
+    <% if (returnTo) { %>
+      <a href="<%= returnTo %>" style="margin-left: 12px;">戻る</a>
+    <% } %>
   </form>
 </section>
 

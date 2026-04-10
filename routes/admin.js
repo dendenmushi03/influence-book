@@ -224,11 +224,17 @@ async function renderInfluenceNewPage(res, data = {}) {
     Book.find({}).sort({ title: 1 })
   ]);
 
+  const formValues = data.formValues || {};
+  const selectedPersonId = formValues.personId ? String(formValues.personId) : '';
+  const selectedPerson = selectedPersonId ? people.find((person) => String(person._id) === selectedPersonId) : null;
+
   return res.render('admin/influences-new', {
     people,
     books,
     influenceKindOptions: INFLUENCE_KIND_OPTIONS,
-    formValues: data.formValues || {},
+    formValues,
+    selectedPerson: data.selectedPerson || selectedPerson || null,
+    returnTo: data.returnTo || '',
     resolvePreview: data.resolvePreview || null,
     errorMessage: data.errorMessage || ''
   });
@@ -374,17 +380,18 @@ router.get('/books', async (req, res) => {
 
 router.get('/influences', async (req, res) => {
   try {
-    const influences = await Influence.find({})
-      .sort({ featuredOrder: 1, createdAt: -1 })
-      .populate('personId')
-      .populate('bookId');
+    const [people, influenceCounts] = await Promise.all([
+      Person.find({}).sort({ name: 1 }),
+      Influence.aggregate([{ $group: { _id: '$personId', count: { $sum: 1 } } }])
+    ]);
 
-    const influencesWithKindLabel = influences.map((influence) => ({
-      ...influence.toObject(),
-      kindLabel: getInfluenceKindLabel(influence.kind)
+    const countMap = new Map(influenceCounts.map((item) => [String(item._id), item.count]));
+    const peopleWithInfluenceCount = people.map((person) => ({
+      ...person.toObject(),
+      influenceCount: countMap.get(String(person._id)) || 0
     }));
 
-    res.render('admin/influences-list', { influences: influencesWithKindLabel });
+    res.render('admin/influences-list', { people: peopleWithInfluenceCount });
   } catch (error) {
     console.error('Failed to load influences list:', error.message);
     res.status(500).send('Failed to load influences list');
@@ -847,6 +854,55 @@ router.get('/influences/new', async (req, res) => {
   }
 });
 
+router.get('/people/:id/influences', async (req, res) => {
+  try {
+    const person = await Person.findById(req.params.id);
+    if (!person) {
+      return res.status(404).send('Person not found');
+    }
+
+    const influences = await Influence.find({ personId: person._id })
+      .sort({ featuredOrder: 1, createdAt: -1 })
+      .populate('bookId');
+
+    const groupedInfluences = INFLUENCE_KIND_OPTIONS.map((option) => ({
+      ...option,
+      items: influences
+        .filter((influence) => influence.kind === option.value)
+        .map((influence) => ({
+          ...influence.toObject(),
+          kindLabel: getInfluenceKindLabel(influence.kind)
+        }))
+    }));
+
+    return res.render('admin/person-influences', { person, groupedInfluences });
+  } catch (error) {
+    console.error('Failed to load person influences page:', error.message);
+    return res.status(500).send('Failed to load person influences page');
+  }
+});
+
+router.get('/people/:id/influences/new', async (req, res) => {
+  try {
+    const person = await Person.findById(req.params.id);
+    if (!person) {
+      return res.status(404).send('Person not found');
+    }
+
+    await renderInfluenceNewPage(res, {
+      selectedPerson: person,
+      returnTo: `/admin/people/${person._id}/influences`,
+      formValues: {
+        personId: person._id,
+        kind: req.query.kind || 'influence'
+      }
+    });
+  } catch (error) {
+    console.error('Failed to load person influence form:', error.message);
+    return res.status(500).send('Failed to load person influence form');
+  }
+});
+
 router.get('/import/csv', async (req, res) => {
   try {
     await renderCsvImportPage(res);
@@ -1096,6 +1152,7 @@ router.post('/influences', async (req, res) => {
       if (!result.ok || !result.book || !result.book._id) {
         return renderInfluenceNewPage(res, {
           formValues: req.body,
+          returnTo: req.body.returnTo || '',
           errorMessage: result.message || 'Book を解決できなかったため、Influence を作成しませんでした。'
         });
       }
@@ -1103,7 +1160,7 @@ router.post('/influences', async (req, res) => {
       resolvedBookId = String(result.book._id);
     }
 
-    await Influence.create({
+    const createdInfluence = await Influence.create({
       personId: req.body.personId,
       bookId: resolvedBookId,
       kind: toInfluenceKind(req.body.kind),
@@ -1114,7 +1171,16 @@ router.post('/influences', async (req, res) => {
       featuredOrder: Number(req.body.featuredOrder) || 0
     });
 
-    res.redirect('/admin');
+    const returnTo = String(req.body.returnTo || '').trim();
+    if (returnTo && returnTo.startsWith('/admin/')) {
+      return res.redirect(returnTo);
+    }
+
+    if (createdInfluence && createdInfluence.personId) {
+      return res.redirect(`/admin/people/${createdInfluence.personId}/influences`);
+    }
+
+    return res.redirect('/admin/influences');
   } catch (error) {
     console.error('Failed to create influence:', error.message);
     res.status(500).send('Failed to create influence');
@@ -1133,7 +1199,8 @@ router.get('/influences/:id/edit', async (req, res) => {
       return res.status(404).send('Influence not found');
     }
 
-    return res.render('admin/influences-edit', { influence, people, books, influenceKindOptions: INFLUENCE_KIND_OPTIONS });
+    const returnTo = String(req.query.returnTo || '').trim();
+    return res.render('admin/influences-edit', { influence, people, books, returnTo, influenceKindOptions: INFLUENCE_KIND_OPTIONS });
   } catch (error) {
     console.error('Failed to load influence edit form:', error.message);
     return res.status(500).send('Failed to load influence edit form');
@@ -1153,6 +1220,11 @@ router.post('/influences/:id', async (req, res) => {
       featuredOrder: Number(req.body.featuredOrder) || 0
     });
 
+    const returnTo = String(req.body.returnTo || req.query.returnTo || '').trim();
+    if (returnTo && returnTo.startsWith('/admin/')) {
+      return res.redirect(returnTo);
+    }
+
     res.redirect('/admin/influences');
   } catch (error) {
     console.error('Failed to update influence:', error.message);
@@ -1162,8 +1234,19 @@ router.post('/influences/:id', async (req, res) => {
 
 router.post('/influences/:id/delete', async (req, res) => {
   try {
+    const influence = await Influence.findById(req.params.id);
     await Influence.findByIdAndDelete(req.params.id);
-    res.redirect('/admin/influences');
+
+    const returnTo = String(req.body.returnTo || req.query.returnTo || '').trim();
+    if (returnTo && returnTo.startsWith('/admin/')) {
+      return res.redirect(returnTo);
+    }
+
+    if (influence && influence.personId) {
+      return res.redirect(`/admin/people/${influence.personId}/influences`);
+    }
+
+    return res.redirect('/admin/influences');
   } catch (error) {
     console.error('Failed to delete influence:', error.message);
     res.status(500).send('Failed to delete influence');

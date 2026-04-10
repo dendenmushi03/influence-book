@@ -3,12 +3,19 @@
 <section class="card narrow">
   <h1>影響関係追加</h1>
   <% const values = formValues || {}; %>
+  <% const backToPersonPage = returnTo || (selectedPerson ? `/admin/people/${selectedPerson._id}/influences` : ''); %>
+  <% if (selectedPerson) { %>
+    <p class="section-description"><strong><%= selectedPerson.name %></strong> の関連本を追加します。</p>
+    <p><a href="<%= backToPersonPage %>">← 人物別管理画面に戻る</a></p>
+  <% } %>
   <form action="/admin/influences" method="POST">
     <% if (errorMessage) { %>
       <div class="notice warning">
         <p><strong>登録できませんでした。</strong> <%= errorMessage %></p>
       </div>
     <% } %>
+
+    <input type="hidden" name="returnTo" value="<%= returnTo || '' %>" />
 
     <label>人物 *</label>
     <select name="personId" required>
