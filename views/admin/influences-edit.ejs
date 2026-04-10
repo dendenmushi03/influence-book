@@ -12,7 +12,7 @@
       <% }) %>
     </select>
 
-    <label>本 *</label>
+    <label>紐づける本 *</label>
     <select name="bookId" required>
       <option value="">選択してください</option>
       <% books.forEach((book) => { %>
@@ -38,11 +38,8 @@
     <label>出典URL</label>
     <input name="sourceUrl" value="<%= influence.sourceUrl || '' %>" />
 
-    <label>出典タイプ</label>
-    <input name="sourceType" placeholder="interview / article" value="<%= influence.sourceType || '' %>" />
-
     <label>表示順</label>
-    <input type="number" name="featuredOrder" value="<%= influence.featuredOrder || 0 %>" />
+    <input type="number" name="featuredOrder" value="<%= influence.featuredOrder ?? '' %>" placeholder="未入力なら末尾に追加" />
 
     <button type="submit">更新する</button>
     <% if (returnTo) { %>

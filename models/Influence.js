@@ -10,7 +10,7 @@ const influenceSchema = new mongoose.Schema(
     sourceTitle: { type: String },
     sourceUrl: { type: String },
     sourceType: { type: String },
-    featuredOrder: { type: Number, default: 0 }
+    featuredOrder: { type: Number }
   },
   { timestamps: true }
 );

@@ -5,7 +5,6 @@
   }
 
   const queryInput = form.querySelector('[data-book-query]');
-  const authorInput = form.querySelector('[data-book-author]');
   const resolveButton = form.querySelector('[data-book-resolve]');
   const status = form.querySelector('[data-book-resolve-status]');
   const resolvedBookIdInput = form.querySelector('[data-resolved-book-id]');
@@ -34,8 +33,6 @@
 
   async function resolveBook() {
     const bookQuery = queryInput ? queryInput.value.trim() : '';
-    const bookAuthor = authorInput ? authorInput.value.trim() : '';
-
     if (!bookQuery) {
       setStatus('タイトルまたは ISBN を入力してください。', true);
       clearResolvedBookId();
@@ -47,8 +44,7 @@
 
     try {
       const params = new URLSearchParams({
-        bookQuery,
-        bookAuthor
+        bookQuery
       });
 
       const response = await fetch(`/admin/influences/resolve-book?${params.toString()}`);
@@ -100,7 +96,4 @@
     queryInput.addEventListener('input', clearResolvedBookId);
   }
 
-  if (authorInput) {
-    authorInput.addEventListener('input', clearResolvedBookId);
-  }
 })();

@@ -418,6 +418,24 @@ async function renderInfluenceNewPage(res, data = {}) {
   });
 }
 
+async function resolveFeaturedOrderValue(rawFeaturedOrder, personId, kind) {
+  const trimmed = String(rawFeaturedOrder || '').trim();
+  if (trimmed) {
+    const parsed = Number(trimmed);
+    if (Number.isFinite(parsed)) {
+      return parsed;
+    }
+  }
+
+  const match = await Influence.find({ personId, kind })
+    .sort({ featuredOrder: -1 })
+    .select('featuredOrder')
+    .limit(1);
+
+  const currentMax = match.length > 0 && Number.isFinite(Number(match[0].featuredOrder)) ? Number(match[0].featuredOrder) : -1;
+  return currentMax + 1;
+}
+
 function mapResolveReason(reason) {
   const labels = {
     googleBooksId: 'googleBooksId一致',
@@ -1357,6 +1375,23 @@ router.get('/influences/resolve-book', async (req, res) => {
 
 router.post('/influences', async (req, res) => {
   try {
+    const personId = String(req.body.personId || '').trim();
+    const kind = String(req.body.kind || '').trim();
+    if (!personId) {
+      return renderInfluenceNewPage(res, {
+        formValues: req.body,
+        returnTo: req.body.returnTo || '',
+        errorMessage: '人物は必須です。'
+      });
+    }
+    if (!kind) {
+      return renderInfluenceNewPage(res, {
+        formValues: req.body,
+        returnTo: req.body.returnTo || '',
+        errorMessage: '種類は必須です。'
+      });
+    }
+
     let resolvedBookId = req.body.bookId ? String(req.body.bookId).trim() : '';
 
     if (!resolvedBookId && req.body.resolvedBookId) {
@@ -1368,8 +1403,7 @@ router.post('/influences', async (req, res) => {
         Book,
         Influence,
         input: {
-          bookQuery: req.body.bookQuery,
-          author: req.body.bookAuthor
+          bookQuery: req.body.bookQuery
         },
         slugify
       });
@@ -1385,15 +1419,24 @@ router.post('/influences', async (req, res) => {
       resolvedBookId = String(result.book._id);
     }
 
+    if (!resolvedBookId) {
+      return renderInfluenceNewPage(res, {
+        formValues: req.body,
+        returnTo: req.body.returnTo || '',
+        errorMessage: '紐づける本は必須です。'
+      });
+    }
+
+    const featuredOrder = await resolveFeaturedOrderValue(req.body.featuredOrder, personId, toInfluenceKind(kind));
+
     const createdInfluence = await Influence.create({
-      personId: req.body.personId,
+      personId,
       bookId: resolvedBookId,
-      kind: toInfluenceKind(req.body.kind),
+      kind: toInfluenceKind(kind),
       impactSummary: req.body.impactSummary,
       sourceTitle: req.body.sourceTitle,
       sourceUrl: req.body.sourceUrl,
-      sourceType: req.body.sourceType,
-      featuredOrder: Number(req.body.featuredOrder) || 0
+      featuredOrder
     });
 
     const returnTo = String(req.body.returnTo || '').trim();
@@ -1434,15 +1477,36 @@ router.get('/influences/:id/edit', async (req, res) => {
 
 router.post('/influences/:id', async (req, res) => {
   try {
+    const personId = String(req.body.personId || '').trim();
+    const bookId = String(req.body.bookId || '').trim();
+    const kind = String(req.body.kind || '').trim();
+    if (!personId || !bookId || !kind) {
+      return res.status(400).send('personId, bookId and kind are required');
+    }
+
+    const influence = await Influence.findById(req.params.id);
+    if (!influence) {
+      return res.status(404).send('Influence not found');
+    }
+
+    const hasFeaturedOrderInput = String(req.body.featuredOrder || '').trim() !== '';
+    let featuredOrder;
+    if (hasFeaturedOrderInput) {
+      featuredOrder = Number(req.body.featuredOrder);
+    } else if (Number.isFinite(Number(influence.featuredOrder))) {
+      featuredOrder = Number(influence.featuredOrder);
+    } else {
+      featuredOrder = await resolveFeaturedOrderValue('', personId, toInfluenceKind(kind));
+    }
+
     await Influence.findByIdAndUpdate(req.params.id, {
-      personId: req.body.personId,
-      bookId: req.body.bookId,
-      kind: toInfluenceKind(req.body.kind),
+      personId,
+      bookId,
+      kind: toInfluenceKind(kind),
       impactSummary: req.body.impactSummary,
       sourceTitle: req.body.sourceTitle,
       sourceUrl: req.body.sourceUrl,
-      sourceType: req.body.sourceType,
-      featuredOrder: Number(req.body.featuredOrder) || 0
+      featuredOrder
     });
 
     const returnTo = String(req.body.returnTo || req.query.returnTo || '').trim();
