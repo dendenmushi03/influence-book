@@ -10,7 +10,8 @@ const { applyBulkInfluences } = require('../lib/apply-bulk-influences');
 const { INFLUENCE_KIND_OPTIONS, toInfluenceKind, getInfluenceKindLabel } = require('../lib/influence-kind');
 const { importPeopleCsv, importBooksCsv, importInfluencesCsv } = require('../lib/csv-import');
 const { validatePersonTemplate, toValidationMessage } = require('../lib/person-draft-validation');
-const { generatePersonDraft, slugify } = require('../services/person-draft-generator');
+const { generatePersonProfileDraft } = require('../services/person-profile-generator');
+const { generatePersonBooksDraft, slugify } = require('../services/person-book-generator');
 const { persistPersonDraft, buildNonEmptyPatch, normalizeKind } = require('../services/person-draft-persistence');
 const {
   PRIMARY_CATEGORY_OPTIONS,
@@ -461,8 +462,7 @@ router.get('/people/:id/generate', async (req, res) => {
     return res.render('admin/people-generate', {
       person,
       errorMessage: '',
-      generationNotice: '',
-      draft: null
+      generationNotice: ''
     });
   } catch (error) {
     console.error('Failed to load person generation page:', error.message);
@@ -470,7 +470,25 @@ router.get('/people/:id/generate', async (req, res) => {
   }
 });
 
-router.post('/people/:id/generate', async (req, res) => {
+router.get('/people/:id/generate/person', async (req, res) => {
+  try {
+    const person = await Person.findById(req.params.id);
+    if (!person) {
+      return res.status(404).send('Person not found');
+    }
+
+    return res.render('admin/people-generate-person', {
+      person,
+      errorMessage: '',
+      generationNotice: ''
+    });
+  } catch (error) {
+    console.error('Failed to load person profile generation page:', error.message);
+    return res.status(500).send('Failed to load person profile generation page');
+  }
+});
+
+router.post('/people/:id/generate/person', async (req, res) => {
   try {
     const person = await Person.findById(req.params.id);
     if (!person) {
@@ -478,46 +496,134 @@ router.post('/people/:id/generate', async (req, res) => {
     }
 
     if (!person.name || !String(person.name).trim()) {
-      return res.status(400).render('admin/people-generate', {
+      return res.status(400).render('admin/people-generate-person', {
         person,
-        errorMessage: '人物名が未入力のため下書きを生成できません。人物編集画面で名前を設定してください。',
-        generationNotice: '',
-        draft: null
+        errorMessage: '人物名が未入力のため人物情報を生成できません。人物編集画面で名前を設定してください。',
+        generationNotice: ''
       });
     }
 
-    const generatedDraft = await generatePersonDraft(person);
+    const generatedDraft = await generatePersonProfileDraft(person);
     const personPatch = buildNonEmptyPatch(generatedDraft.personPatch || {});
+
+    return res.render('admin/people-generate-preview-person', {
+      person,
+      errorMessage: '',
+      generationNotice: '人物情報の下書きを生成しました。内容を確認・編集してから保存してください。',
+      draft: {
+        personPatch
+      }
+    });
+  } catch (error) {
+    console.error('Failed to generate person profile draft:', error.message);
+
+    const person = await Person.findById(req.params.id);
+    return res.status(500).render('admin/people-generate-person', {
+      person,
+      errorMessage: `人物情報の下書き生成に失敗しました。時間をおいて再実行してください。詳細: ${error.message}`,
+      generationNotice: ''
+    });
+  }
+});
+
+router.post('/people/:id/generate/person/save', async (req, res) => {
+  try {
+    const personId = req.params.id;
+    const personPatch = buildNonEmptyPatch(req.body.personPatch || {});
+
+    const result = await persistPersonDraft({
+      Person,
+      Book,
+      Influence,
+      personId,
+      draft: {
+        personPatch,
+        books: [],
+        influences: []
+      }
+    });
+
+    if (req.session) {
+      req.session.personDraftSaveResult = result;
+    }
+
+    return res.redirect('/admin/people');
+  } catch (error) {
+    console.error('Failed to save generated person profile draft:', error.message);
+    const person = await Person.findById(req.params.id);
+
+    return res.status(500).render('admin/people-generate-preview-person', {
+      person,
+      errorMessage: `人物情報の下書き保存に失敗しました。詳細: ${error.message}`,
+      generationNotice: '',
+      draft: {
+        personPatch: buildNonEmptyPatch(req.body.personPatch || {})
+      }
+    });
+  }
+});
+
+router.get('/people/:id/generate/books', async (req, res) => {
+  try {
+    const person = await Person.findById(req.params.id);
+    if (!person) {
+      return res.status(404).send('Person not found');
+    }
+
+    return res.render('admin/people-generate-books', {
+      person,
+      errorMessage: '',
+      generationNotice: ''
+    });
+  } catch (error) {
+    console.error('Failed to load person books generation page:', error.message);
+    return res.status(500).send('Failed to load person books generation page');
+  }
+});
+
+router.post('/people/:id/generate/books', async (req, res) => {
+  try {
+    const person = await Person.findById(req.params.id);
+    if (!person) {
+      return res.status(404).send('Person not found');
+    }
+
+    if (!person.name || !String(person.name).trim()) {
+      return res.status(400).render('admin/people-generate-books', {
+        person,
+        errorMessage: '人物名が未入力のため本情報を生成できません。人物編集画面で名前を設定してください。',
+        generationNotice: ''
+      });
+    }
+
+    const generatedDraft = await generatePersonBooksDraft(person);
     const { books } = await classifyGeneratedBooks(generatedDraft.books || []);
     const influences = mergeInfluencesWithBooks(generatedDraft.influences || [], books);
 
-    return res.render('admin/people-generate-preview', {
+    return res.render('admin/people-generate-preview-books', {
       person,
       errorMessage: '',
-      generationNotice: '下書きを生成しました。内容を確認・編集してから保存してください。',
+      generationNotice: '本情報の下書きを生成しました。内容を確認・編集してから保存してください。',
       draft: {
-        personPatch,
         books,
         influences
       }
     });
   } catch (error) {
-    console.error('Failed to generate person draft:', error.message);
+    console.error('Failed to generate person books draft:', error.message);
 
     const person = await Person.findById(req.params.id);
-    return res.status(500).render('admin/people-generate', {
+    return res.status(500).render('admin/people-generate-books', {
       person,
-      errorMessage: `下書き生成に失敗しました。時間をおいて再実行してください。詳細: ${error.message}`,
-      generationNotice: '',
-      draft: null
+      errorMessage: `本情報の下書き生成に失敗しました。時間をおいて再実行してください。詳細: ${error.message}`,
+      generationNotice: ''
     });
   }
 });
 
-router.post('/people/:id/generate/save', async (req, res) => {
+router.post('/people/:id/generate/books/save', async (req, res) => {
   try {
     const personId = req.params.id;
-    const personPatch = buildNonEmptyPatch(req.body.personPatch || {});
     const books = toArray(req.body.books).map(normalizeDraftBook).filter((book) => book.title && book.slug);
     const influences = toArray(req.body.influences).map(normalizeDraftInfluence).filter((influence) => influence.bookSlug);
 
@@ -527,7 +633,7 @@ router.post('/people/:id/generate/save', async (req, res) => {
       Influence,
       personId,
       draft: {
-        personPatch,
+        personPatch: {},
         books,
         influences
       }
@@ -539,7 +645,7 @@ router.post('/people/:id/generate/save', async (req, res) => {
 
     return res.redirect('/admin/people');
   } catch (error) {
-    console.error('Failed to save generated draft:', error.message);
+    console.error('Failed to save generated books draft:', error.message);
     const person = await Person.findById(req.params.id);
     const { books } = await classifyGeneratedBooks(toArray(req.body.books).map(normalizeDraftBook));
     const influences = mergeInfluencesWithBooksForPreview(
@@ -556,12 +662,11 @@ router.post('/people/:id/generate/save', async (req, res) => {
       books
     );
 
-    return res.status(500).render('admin/people-generate-preview', {
+    return res.status(500).render('admin/people-generate-preview-books', {
       person,
-      errorMessage: `下書き保存に失敗しました。詳細: ${error.message}`,
+      errorMessage: `本情報の下書き保存に失敗しました。詳細: ${error.message}`,
       generationNotice: '',
       draft: {
-        personPatch: buildNonEmptyPatch(req.body.personPatch || {}),
         books,
         influences
       }

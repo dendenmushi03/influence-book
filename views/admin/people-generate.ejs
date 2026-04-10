@@ -1,8 +1,8 @@
 <%- include('../partials/header') %>
 
 <section class="card">
-  <h1>人物情報の下書き生成</h1>
-  <p class="section-description">人物詳細ページ相当の下書き（Person/Book/Influence）を生成します。生成結果は即保存されません。</p>
+  <h1>下書き生成メニュー</h1>
+  <p class="section-description">人物情報と本情報の生成導線を分離しました。必要な方だけ生成・保存できます。</p>
 
   <% if (errorMessage) { %>
     <p class="error-message"><%= errorMessage %></p>
@@ -17,44 +17,30 @@
     <p><strong>名前:</strong> <%= person.name || '未設定' %></p>
     <p><strong>slug:</strong> <%= person.slug || '未設定' %></p>
     <p><strong>肩書き:</strong> <%= person.occupationJa || person.occupation || '未設定' %></p>
-    <p><strong>カテゴリ:</strong> <%= person.category || '未設定' %></p>
-    <p><strong>画像URL:</strong> <%= person.imageUrl || '未設定' %></p>
   </div>
 
   <div class="card-subsection">
-    <h2>生成対象</h2>
+    <h2>A. 人物情報を自動生成</h2>
     <ul>
-      <li>コアメッセージ（coreMessage）</li>
-      <li>人物説明（bio）</li>
-      <li>経歴（career）</li>
-      <li>本候補（Book）</li>
-      <li>Influence候補（kind: influence/about/authored）</li>
+      <li>coreMessage</li>
+      <li>bio</li>
+      <li>career</li>
+      <li>intro</li>
     </ul>
+    <a class="button" href="/admin/people/<%= person._id %>/generate/person">人物情報生成へ進む</a>
   </div>
 
-  <form action="/admin/people/<%= person._id %>/generate" method="POST" id="generate-form">
-    <button type="submit" id="generate-button">下書きを生成する</button>
-    <p id="generate-loading" style="display:none; margin-top: 12px;">生成中です。候補データを収集中です…</p>
-  </form>
+  <div class="card-subsection">
+    <h2>B. 本情報を自動生成</h2>
+    <ul>
+      <li>Book 候補</li>
+      <li>Influence 候補</li>
+      <li>kind / impactSummary / source 情報</li>
+    </ul>
+    <a class="button" href="/admin/people/<%= person._id %>/generate/books">本情報生成へ進む</a>
+  </div>
 
   <p style="margin-top: 16px;"><a href="/admin/people">人物一覧に戻る</a></p>
 </section>
-
-<script>
-  (function () {
-    var form = document.getElementById('generate-form');
-    var button = document.getElementById('generate-button');
-    var loading = document.getElementById('generate-loading');
-    if (!form || !button || !loading) {
-      return;
-    }
-
-    form.addEventListener('submit', function () {
-      button.disabled = true;
-      button.textContent = '生成中...';
-      loading.style.display = 'block';
-    });
-  })();
-</script>
 
 <%- include('../partials/footer') %>
