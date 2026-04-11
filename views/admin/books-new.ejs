@@ -8,7 +8,7 @@
   <% } %>
   <form action="/admin/books" method="POST" data-book-form>
     <div class="notice warning" data-duplicate-warning <%= duplicateCandidates && duplicateCandidates.length > 0 ? '' : 'hidden' %>>
-      <p><strong>重複候補が見つかりました。</strong> どのレコードに一致したか確認してから登録してください。</p>
+      <p data-duplicate-warning-message><%= duplicateWarningMessage || '重複候補が見つかりました。どのレコードに一致したか確認してから登録してください。' %></p>
       <ul data-duplicate-list>
         <% (duplicateCandidates || []).forEach((candidate) => { %>
           <li>
