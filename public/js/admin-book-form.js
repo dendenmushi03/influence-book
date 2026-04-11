@@ -17,6 +17,7 @@
   const isbn10Input = form.querySelector('[data-book-isbn10]');
   const isbn13Input = form.querySelector('[data-book-isbn13]');
   const duplicateWarning = form.querySelector('[data-duplicate-warning]');
+  const duplicateWarningMessage = form.querySelector('[data-duplicate-warning-message]');
   const duplicateList = form.querySelector('[data-duplicate-list]');
 
   function updateStatus(message, isError) {
@@ -80,8 +81,20 @@
 
     if (!Array.isArray(candidates) || candidates.length === 0) {
       duplicateWarning.hidden = true;
+      if (duplicateWarningMessage) {
+        duplicateWarningMessage.textContent = '';
+      }
       duplicateList.innerHTML = '';
       return;
+    }
+
+    const hasHardDuplicate = candidates.some((candidate) =>
+      ['googleBooksId', 'isbn', 'isbn13', 'isbn10', 'slug'].includes(String(candidate.reason || ''))
+    );
+    if (duplicateWarningMessage) {
+      duplicateWarningMessage.textContent = hasHardDuplicate
+        ? '重複候補が見つかりました。どのレコードに一致したか確認してから登録してください。'
+        : '類似候補があります。別本ならそのまま登録できます。';
     }
 
     duplicateList.innerHTML = candidates

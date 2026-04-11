@@ -136,6 +136,20 @@ function bookDuplicateMessageFromReason(reason) {
   return messages[reason] || '重複する本が既に存在します。';
 }
 
+function isHardDuplicateReason(reason) {
+  return ['slug', 'googleBooksId', 'isbn', 'isbn10', 'isbn13'].includes(String(reason || ''));
+}
+
+function duplicateWarningMessageFromCandidates(candidates = []) {
+  if (!Array.isArray(candidates) || candidates.length === 0) {
+    return '';
+  }
+  if (candidates.some((candidate) => isHardDuplicateReason(candidate.reason))) {
+    return '重複候補が見つかりました。どのレコードに一致したか確認してから登録してください。';
+  }
+  return '類似候補があります。別本ならそのまま登録できます。';
+}
+
 function duplicateReasonLabel(reason) {
   const labels = {
     slug: 'slug 一致',
@@ -278,8 +292,11 @@ function parseBookCreateError(error) {
 }
 
 async function renderBookNewForm(res, data = {}) {
+  const duplicateCandidates = data.duplicateCandidates || [];
   return res.render('admin/books-new', {
-    duplicateCandidates: data.duplicateCandidates || [],
+    duplicateCandidates,
+    duplicateWarningMessage:
+      data.duplicateWarningMessage || duplicateWarningMessageFromCandidates(duplicateCandidates),
     errorMessage: data.errorMessage || '',
     formValues: data.formValues || {}
   });
@@ -982,7 +999,7 @@ router.post('/books', async (req, res) => {
     }
 
     const duplicateMatches = await findDuplicateBookMatches(Book, bookData, { Influence });
-    const duplicate = duplicateMatches[0];
+    const duplicate = duplicateMatches.find((match) => isHardDuplicateReason(match.reason));
 
     if (duplicate) {
       const reason = duplicate.reason || 'title_author';
@@ -997,10 +1014,12 @@ router.post('/books', async (req, res) => {
         `Failed to create book: duplicate detected before save: ${JSON.stringify(duplicateDebug)}`
       );
       res.status(409);
+      const duplicateCandidates = duplicateMatches.slice(0, 5).map(buildDuplicateCandidatePayload);
       return renderBookNewForm(res, {
         errorMessage: bookDuplicateMessageFromReason(reason),
         formValues,
-        duplicateCandidates: duplicateMatches.slice(0, 5).map(buildDuplicateCandidatePayload)
+        duplicateCandidates,
+        duplicateWarningMessage: duplicateWarningMessageFromCandidates(duplicateCandidates)
       });
     }
 
@@ -1015,11 +1034,24 @@ router.post('/books', async (req, res) => {
         })`
       : '';
     console.error(`Failed to create book: ${parsed.logReason}${extra}`);
+
+    let duplicateCandidates = [];
+    if (parsed.statusCode === 409) {
+      try {
+        const candidateBookData = bookFieldsFromInput(req.body, slugify);
+        const duplicateMatches = await findDuplicateBookMatches(Book, candidateBookData, { Influence });
+        duplicateCandidates = duplicateMatches.slice(0, 5).map(buildDuplicateCandidatePayload);
+      } catch (duplicateCheckError) {
+        console.warn('Failed to rebuild duplicate candidates after create error:', duplicateCheckError.message);
+      }
+    }
+
     res.status(parsed.statusCode);
     return renderBookNewForm(res, {
       errorMessage: parsed.userMessage,
       formValues,
-      duplicateCandidates: []
+      duplicateCandidates,
+      duplicateWarningMessage: duplicateWarningMessageFromCandidates(duplicateCandidates)
     });
   }
 });
