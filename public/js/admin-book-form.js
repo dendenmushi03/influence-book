@@ -182,7 +182,13 @@
       }
 
       applyBookCandidate(payload.book);
-      updateStatus('候補をフォームに反映しました。必要に応じて修正して保存してください。', false);
+      if (payload.coverSource === 'none') {
+        updateStatus('書影を取得できませんでしたが、本情報は登録できます。必要に応じて手動で入力してください。', false);
+      } else if (payload.coverSource === 'openbd') {
+        updateStatus('候補をフォームに反映しました。書影は OpenBD から補完しています。必要に応じて修正して保存してください。', false);
+      } else {
+        updateStatus('候補をフォームに反映しました。必要に応じて修正して保存してください。', false);
+      }
       scheduleDuplicateCheck();
     } catch (error) {
       console.error('Failed to fetch Google Books candidate:', error);
