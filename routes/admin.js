@@ -3,6 +3,7 @@ const Book = require('../models/Book');
 const Influence = require('../models/Influence');
 const Person = require('../models/Person');
 const { searchGoogleBooks, buildBookAutofillPatch } = require('../lib/google-books');
+const { findOpenBdCoverForBook } = require('../lib/openbd');
 const { bookFieldsFromInput, findDuplicateBookMatches } = require('../lib/book-dedup');
 const { resolveBookForInfluence, normalizeInput } = require('../lib/resolve-book-for-influence');
 const { previewBulkInfluences } = require('../lib/preview-bulk-influences');
@@ -975,7 +976,23 @@ router.get('/books/google-books', async (req, res) => {
       return res.status(404).json({ error: 'not found' });
     }
 
-    return res.json({ book: bookCandidate });
+    let coverSource = 'google_books';
+    if (!bookCandidate.coverUrl) {
+      try {
+        const openBdCoverUrl = await findOpenBdCoverForBook(bookCandidate);
+        if (openBdCoverUrl) {
+          bookCandidate.coverUrl = openBdCoverUrl;
+          coverSource = 'openbd';
+        } else {
+          coverSource = 'none';
+        }
+      } catch (openBdError) {
+        console.warn('OpenBD cover fallback skipped:', openBdError.message);
+        coverSource = 'none';
+      }
+    }
+
+    return res.json({ book: bookCandidate, coverSource });
   } catch (error) {
     console.error('Failed to fetch Google Books candidate:', error.message);
     return res.status(500).json({ error: 'google_books_fetch_failed' });
